@@ -1,0 +1,18 @@
+# Ignore all
+*
+
+# Unignore all with extensions
+!*.*
+
+# Unignore all dirs
+!*/
+
+# Unignore makefiles
+!Makefile
+
+# Ingore C++ object files
+*.o
+
+# Ingore cgal auxiliary files
+CMake*
+cmake*
