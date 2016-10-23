@@ -3,6 +3,8 @@
 #ifndef GEOMETRIC_HELPERS_HH
 #define GEOMETRIC_HELPERS_HH
 
+#include <stdio.h>
+
 typedef long long int LL;
 
 // Macro for calculating cross product.

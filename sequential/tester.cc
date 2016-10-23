@@ -1,6 +1,7 @@
 #include <vector>
 #include "geometric_helpers.hh"
 #include "convex_hull_graham.hh"
+#include <stdio.h>
 
 int main() {
 	// Number of points.

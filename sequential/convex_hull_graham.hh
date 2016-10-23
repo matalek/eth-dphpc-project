@@ -3,6 +3,9 @@
 
 #include <vector>
 #include "geometric_helpers.hh"
+#include <stdio.h>
+#include <cmath>
+#include <algorithm>
 
 using namespace std;
 
