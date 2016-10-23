@@ -16,3 +16,6 @@
 # Ingore cgal auxiliary files
 CMake*
 cmake*
+
+# Ignore runnable basic test
+test
