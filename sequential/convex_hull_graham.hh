@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "geometric_helpers.hh"
-#include <stdio.h>
+#include <cstdio>
 #include <cmath>
 #include <algorithm>
 
@@ -26,8 +26,8 @@ struct AngleComparator {
 	bool operator()(const POINT* a, const POINT* b) {
 		LL det = Det((*point), (*a), (*b));
 		if (det == 0) {
-			return abs(point->x - a->x) + abs(point->y - a->y) <
-					abs(point->x - b->x) + abs(point->y - b->y);
+			return abs_int(point->x - a->x) + abs_int(point->y - a->y) <
+					abs_int(point->x - b->x) + abs_int(point->y - b->y);
 		}
 		return det > 0;
 	}

@@ -11,7 +11,7 @@ typedef long long int LL;
 #define Det(a, b, c) (LL(b.x - a.x) * LL(c.y - a.y) \
 		- LL(b.y - a.y) * LL(c.x - a.x))
 
-#define abs(x) (x > 0 ? x : -x)
+#define abs_int(x) (x > 0 ? x : -x)
 
 // Struct representing point with integer coordinates.
 struct POINT {
