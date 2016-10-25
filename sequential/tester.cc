@@ -1,6 +1,13 @@
 #include <vector>
 #include "geometric_helpers.hh"
-#include "convex_hull_graham.hh"
+
+// Including appropriate library according to defined
+// ALGORITHM variable.
+#define QUOTE(x) #x
+#define INCLUDE_FILE(x) QUOTE(x.hh)
+
+#include INCLUDE_FILE(ALGORITHM)
+
 #include <stdio.h>
 
 int main() {

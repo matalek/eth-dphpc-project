@@ -1,20 +1,20 @@
-# Declaration of variables
-CC = g++
-CC_FLAGS = -std=c++11 -Wall
+CXX = g++
+CXXFLAGS = -std=c++11 -Wall
+
+# Passing strategy to be tested - implemented in %.hh file.
+STRATEGY ?= "convex_hull_graham"
+CPPFLAGS = -D ALGORITHM=$(ALGORITHM)
  
-# File names
 EXEC = tester
 SOURCES = $(wildcard *.cc)
+LIBRARIES = $(wildcard *.hh)
 OBJECTS = $(SOURCES:.cc=.o)
- 
-# Main target
-$(EXEC): $(OBJECTS)
-	$(CC) $(OBJECTS) -o $(EXEC)
- 
-# To obtain object files
-%.o: %.cc
-	$(CC) -c $(CC_FLAGS) $< -o $@
- 
-# To remove generated files
+
+all: tester
+
+tester.o: tester.cc $(LIBRARIES)
+tester: tester.o
+	$(CXX) $^ -o $(EXEC)
+
 clean:
 	rm -f $(EXEC) $(OBJECTS)
