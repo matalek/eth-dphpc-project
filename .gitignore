@@ -10,6 +10,9 @@
 # Unignore makefiles
 !Makefile
 
+# Ignore CGAL makefile
+cgal/Makefile
+
 # Ignore C++ object files
 *.o
 
@@ -19,6 +22,9 @@
 # Ingore cgal auxiliary files
 CMake*
 cmake*
+
+# Unignore file to build cgal
+!CMakeLists.txt
 
 # Ignore runnable basic test
 test

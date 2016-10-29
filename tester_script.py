@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 def compare_function(cgal , alg):
     # create array with points (remove last char which is \n)
     alg_points = alg[:-1].split('\n')[2:]
-    cgal_points = cgal[:-1].split('\n')
+    cgal_points = cgal[:-1].split('\n')[2:]
 
     for point in cgal_points:
         if point not in alg_points:
