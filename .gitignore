@@ -10,8 +10,11 @@
 # Unignore makefiles
 !Makefile
 
-# Ingore C++ object files
+# Ignore C++ object files
 *.o
+
+# Ignore output files
+*.out
 
 # Ingore cgal auxiliary files
 CMake*
