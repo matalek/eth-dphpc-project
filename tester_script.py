@@ -55,6 +55,8 @@ algorithm = sys.argv[2]
 subprocess.call('make ALGORITHM=' + algorithm, shell=True)
 subprocess.call('make -C generator/', shell=True)
 subprocess.call('mkdir -p log_files', shell=True)
+subprocess.call('cmake cgal', shell=True)
+subprocess.call('(cd cgal && make)', shell=True)
 
 exec_time = []
 result = True
