@@ -19,3 +19,8 @@ cmake*
 
 # Ignore runnable basic test
 test
+tester
+
+# Ignore logfiles
+logs
+log*
