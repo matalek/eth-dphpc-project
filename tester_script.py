@@ -39,11 +39,12 @@ algorithm = sys.argv[2]
 #build executables
 subprocess.call('make ALGORITHM=' + algorithm, shell=True)
 subprocess.call('make -C generator/', shell=True)
+subprocess.call('mkdir -p log_files', shell=True)
 
 exec_time = []
 
 #create and open a csv file to store results
-ofile  = open('log_results_' + algorithm.replace('/', '_') + '.csv', "wb")
+ofile  = open('log_files/log_results_' + algorithm.replace('/', '_') + '.csv', "wb")
 writer = csv.writer(ofile, delimiter='	', quotechar='"', quoting=csv.QUOTE_ALL)
 writer.writerow(['#Points','Exec_Time [us]'])
 
