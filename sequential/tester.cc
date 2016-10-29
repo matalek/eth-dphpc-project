@@ -9,8 +9,15 @@
 #include INCLUDE_FILE(ALGORITHM)
 
 #include <stdio.h>
+#include <chrono>
+#include <string>
 
 int main() {
+	
+	using namespace std;
+
+	using namespace std::chrono;
+
 	// Number of points.
 	int n;
 	scanf("%d", &n);
@@ -23,8 +30,15 @@ int main() {
 		points[i] = POINT(x, y);
 	}
 
+	//computing exec time (could find better way)
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	auto convex_hull_points = convex_hull(points);
-	printf("%lu\n", convex_hull_points.size());
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+
+	printf("TIME: ");
+    	printf("%lu", duration_cast<microseconds>( t2 - t1 ).count());
+
+	printf("\n%lu\n", convex_hull_points.size());
 	for (POINT* point : convex_hull_points) {
 		point->print();
 	}

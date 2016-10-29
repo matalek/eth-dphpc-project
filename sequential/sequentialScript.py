@@ -31,7 +31,7 @@ comb_number = int(sys.argv[6])
 cpp_file_path = sys.argv[2]
 generator_path = sys.argv[4]
 
-subprocess.call('g++ -std=c++11 ' + cpp_file_path + ' -o test', shell=True)
+subprocess.call('make ALGORITH=convex_hull_graham', shell=True)
 subprocess.call('g++ -std=c++11 ' + generator_path + ' -o generator', shell=True)
 subprocess.call('mkdir -p logs', shell=True)
 
@@ -47,7 +47,10 @@ for comb in range(0 , comb_number):
     for take in range (0 , rep_number):
         num_of_points = starting_value + step_width*comb
         result = subprocess.check_output('./generator -p ' + str(num_of_points) +
-                                         ' | ./test | tee logs/log' + str(comb+1) + 'take' + str(take+1) + '.log', shell=True)
+                                         ' | ./tester | tee logs/log' + str(comb+1) + 'take' + str(take+1) + '.log', shell=True)
+
+        #CGAL_result = subprocess.check_output(??)
+        #evaluate correctness
         curr_time = int(result.split('\n')[0].split(' ')[1])
         time_accumulator += curr_time
     avg_time = time_accumulator/rep_number
