@@ -5,6 +5,21 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+def compare_function(cgal , alg):
+    # create array with points (remove last char which is \n)
+    alg_points = alg[:-1].split('\n')[2:]
+    cgal_points = cgal[:-1].split('\n')
+
+    for point in cgal_points:
+        if point not in alg_points:
+            return False
+    for point in alg_points:
+        if point not in cgal_points:
+            return False
+    return True
+
+
 # Usage ./tester_script.py -a <algorithm path> 
 # -c <number of different combinations of number of points> 
 # -w <width of steps> -s <starting number of points>
@@ -42,6 +57,7 @@ subprocess.call('make -C generator/', shell=True)
 subprocess.call('mkdir -p log_files', shell=True)
 
 exec_time = []
+result = True
 
 #create and open a csv file to store results
 ofile  = open('log_files/log_results_' + algorithm.replace('/', '_') + '.csv', "wb")
@@ -55,14 +71,30 @@ for comb in range(0 , comb_number):
     #repeat test the require number of times to get correct avg
     for take in range (0 , rep_number):
         num_of_points = starting_value + step_width*comb
-        result = subprocess.check_output(
-                'echo "' + str(num_of_points) + ' ' + str(coordinates_range) 
-                + '" | ./generator/generator | ./tester', shell=True)
 
-        #CGAL_result = subprocess.check_output(??)
-        #evaluate correctness TODO
 
-        curr_time = int(result.split('\n')[0].split(' ')[1])
+        #generate points
+        generated_points = subprocess.check_output(
+            'echo "' + str(num_of_points) + ' ' + str(coordinates_range)
+            + '" | ./generator/generator > tmp.log', shell=True)
+
+        # Apply given algorithm
+        alg_result = subprocess.check_output(
+            'cat tmp.log | ./tester', shell=True)
+
+        # Apply CGAL_algorithm to compare our result to
+        cgal_result = subprocess.check_output(
+            'cat tmp.log | ./cgal/cgal_graham_andrew', shell=True)
+
+
+        #evaluate correctness on points array
+        if not compare_function(cgal_result , alg_result):
+            print 'ERROR, ALGORITHM INCORRECT'
+            print 'AGLORITHM:\n' + alg_result
+            print 'CGAL:\n' + cgal_result
+            sys.exit()
+
+        curr_time = int(alg_result.split('\n')[0].split(' ')[1])
         time_accumulator += curr_time
 
     #compute avg of different takes to get a valid result
@@ -72,6 +104,7 @@ for comb in range(0 , comb_number):
     #write a line in the csv file
     writer.writerow([num_of_points,avg_time])
 
+subprocess.call('rm tmp.log', shell=True)
 ofile.close()
 
 #plot results

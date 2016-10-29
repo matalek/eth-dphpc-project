@@ -3,6 +3,8 @@
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef K::Point_2 Point_2;
 int main() {
+	int n;
+	scanf("%d", &n);
 	CGAL::set_ascii_mode(std::cin);
 	CGAL::set_ascii_mode(std::cout);
 	std::istream_iterator< Point_2 >  in_start( std::cin );
