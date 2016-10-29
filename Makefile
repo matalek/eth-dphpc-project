@@ -7,7 +7,7 @@ CPPFLAGS = -D ALGORITHM=$(ALGORITHM)
  
 EXEC = tester
 SOURCES = $(wildcard *.cc)
-LIBRARIES = $(wildcard *.hh)
+LIBRARIES = $(shell find . -type f -name '*.hh')
 OBJECTS = $(SOURCES:.cc=.o)
 
 all: tester

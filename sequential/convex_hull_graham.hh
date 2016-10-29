@@ -2,7 +2,7 @@
 #define CONVEX_HULL_GRAHAM
 
 #include <vector>
-#include "geometric_helpers.hh"
+#include "../geometric_helpers.hh"
 #include <cstdio>
 #include <cmath>
 #include <algorithm>

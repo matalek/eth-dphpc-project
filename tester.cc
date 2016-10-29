@@ -36,7 +36,7 @@ int main() {
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
 	printf("TIME: ");
-    	printf("%lu", duration_cast<microseconds>( t2 - t1 ).count());
+    	printf("%lld", duration_cast<microseconds>( t2 - t1 ).count());
 
 	printf("\n%lu\n", convex_hull_points.size());
 	for (POINT* point : convex_hull_points) {

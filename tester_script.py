@@ -5,43 +5,45 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Usage ./sequentialScript.py -f <path to c++ program> -g <path to points generator program> -c
-# <Number of different combinations of number of points> -w <width of steps> -s <starting number of points>
-# -r <number of repetition for each number of points>
+# Usage ./tester_script.py -a <algorithm path> 
+# -c <number of different combinations of number of points> 
+# -w <width of steps> -s <starting number of points>
+# -r <range of points coordinates>
+# -R <number of repetition for each number of points>
 
 if int(sys.argv[12]) <= 0:
-    print 'ERROR in usage, provide int number of repetition for each value (ex. -r 20)'
+    print 'ERROR in usage, provide int number of repetition for each value (ex. -R 20)'
     exit
 if int(sys.argv[10]) <= 0:
+    print 'ERROR in usage, provide int range of points coordinates (ex. -r 20)'
+    exit   
+if int(sys.argv[8]) <= 0:
     print 'ERROR in usage, provide int starting number of points (ex. -s 100)'
     exit
-if int(sys.argv[8]) <= 0:
+if int(sys.argv[6]) <= 0:
     print 'ERROR in usage, provide int width in steps (ex. -w 50)'
     exit
-if int(sys.argv[6]) <= 0:
+if int(sys.argv[4]) <= 0:
     print 'ERROR in usage, provide int number of different combinations (ex. -c 20)'
     exit
 
 
 rep_number = int(sys.argv[12])
-starting_value = int(sys.argv[10])
-step_width = int(sys.argv[8])
-comb_number = int(sys.argv[6])
+coordinates_range = int(sys.argv[10])
+starting_value = int(sys.argv[8])
+step_width = int(sys.argv[6])
+comb_number = int(sys.argv[4])
 
-cpp_file_path = sys.argv[2]
-generator_path = sys.argv[4]
-
-#gets the algorithm to use
-algorithm = 'convex_hull_graham'
+algorithm = sys.argv[2]
 
 #build executables
 subprocess.call('make ALGORITHM=' + algorithm, shell=True)
-subprocess.call('g++ -std=c++11 ' + generator_path + ' -o generator', shell=True)
+subprocess.call('make -C generator/', shell=True)
 
 exec_time = []
 
 #create and open a csv file to store results
-ofile  = open('log_results_' + algorithm + '.csv', "wb")
+ofile  = open('log_results_' + algorithm.replace('/', '_') + '.csv', "wb")
 writer = csv.writer(ofile, delimiter='	', quotechar='"', quoting=csv.QUOTE_ALL)
 writer.writerow(['#Points','Exec_Time [us]'])
 
@@ -52,8 +54,9 @@ for comb in range(0 , comb_number):
     #repeat test the require number of times to get correct avg
     for take in range (0 , rep_number):
         num_of_points = starting_value + step_width*comb
-        result = subprocess.check_output('./generator -p ' + str(num_of_points) +
-                                         ' | ./tester', shell=True)
+        result = subprocess.check_output(
+                'echo "' + str(num_of_points) + ' ' + str(coordinates_range) 
+                + '" | ./generator/generator | ./tester', shell=True)
 
         #CGAL_result = subprocess.check_output(??)
         #evaluate correctness TODO

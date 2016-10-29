@@ -1,17 +1,31 @@
-# dphpc-project
-
-Convex hull
+# Parallel convex hull
 
 
-How to run simple script:
+## Tester script
 
-execute from prompt command "chmod u+x sequentialScript.py"
-and then "./sequentialScript.py -f "Path to c++ program" -g "Path to points generator program"
--c "Number of different combinations of number of points" -w "Width of steps" -s "Starting number of points"
--r "Number of repetition for each number of points""
+Execute from prompt command:
+```sh
+$ chmod u+x tester_script.py
+```
+and then 
+```sh
+$ ./tester_script.py -a <Algorithm name, including directory>
+-c <Number of different combinations of number of points> 
+-w <Width of steps> -s <Starting number of points>
+-r <Range for points coordinates>
+-R <Number of repetition for each number of points>
+```
+For example:
+```sh
+$ ./tester_script.py -a sequential/convex_hull_graham -c 10 -w 10000 -s 100000 -r 1000000000 -R 2
+```
 
-How to build using Makefile (currently for sequential version)
+## Building algorithm implementation using Makefile
 
-execute from prompt command "make ALGORITHM=algorithm_name", where
-algorithm_name is the name of the header file with the implementation
-of convex_hull function (without .hh extension).
+Execute from prompt command:
+```sh
+$ make ALGORITHM=algorithm_name
+```
+where algorithm_name is the name of the header file with the implementation
+of convex_hull function (including directory, without .hh extension,
+e.g. sequential/convex_hull_graham).

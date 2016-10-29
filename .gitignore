@@ -27,3 +27,6 @@ tester
 # Ignore logfiles
 logs
 log*
+
+# Ignore Mac OS files
+.DS_Store

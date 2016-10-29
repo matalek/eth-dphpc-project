@@ -2,7 +2,7 @@
 #define CONVEX_HULL_GRAHAM_COORDINATE_SORT
 
 #include <vector>
-#include "geometric_helpers.hh"
+#include "../geometric_helpers.hh"
 #include <stdio.h>
 #include <algorithm>
 

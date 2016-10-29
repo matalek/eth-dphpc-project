@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <set>
-#include "../sequential/geometric_helpers.hh"
+#include "../geometric_helpers.hh"
 
 using namespace std;
 
@@ -35,6 +35,7 @@ int main() {
 		 points.insert(POINT(rand_coordinate(range), rand_coordinate(range)));
 	}
 
+	printf("%d\n", n);
 	for (POINT point : points) {
 		point.print();
 	}
