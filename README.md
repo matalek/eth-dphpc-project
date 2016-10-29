@@ -29,3 +29,13 @@ $ make ALGORITHM=algorithm_name
 where algorithm_name is the name of the header file with the implementation
 of convex_hull function (including directory, without .hh extension,
 e.g. sequential/convex_hull_graham).
+
+## CGAL implementation
+In order to compile CGAL version of the algorithm in `cgal` directory execute:
+```sh
+$ cmake .
+$ make
+```
+It should produce executable file `cgal_graham_andrew`.
+
+CGAL algorithm implementation takes only points as an input (without number of points) and as an output it writes only points (without number of points).
