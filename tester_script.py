@@ -98,6 +98,9 @@ for comb in range(0 , comb_number):
         curr_time = int(alg_result.split('\n')[0].split(' ')[1])
         time_accumulator += curr_time
 
+    #print info about situation
+    print('Step number: ' + str(comb))
+
     #compute avg of different takes to get a valid result
     avg_time = time_accumulator/rep_number
     exec_time.append(avg_time)
