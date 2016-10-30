@@ -55,7 +55,7 @@ algorithm = sys.argv[2]
 subprocess.call('make ALGORITHM=' + algorithm, shell=True)
 subprocess.call('make -C generator/', shell=True)
 subprocess.call('mkdir -p log_files', shell=True)
-subprocess.call('cmake cgal', shell=True)
+subprocess.call('(cd cgal && cmake .)', shell=True)
 subprocess.call('(cd cgal && make)', shell=True)
 
 exec_time = []
@@ -73,7 +73,6 @@ for comb in range(0 , comb_number):
     #repeat test the require number of times to get correct avg
     for take in range (0 , rep_number):
         num_of_points = starting_value + step_width*comb
-
 
         #generate points
         generated_points = subprocess.check_output(
