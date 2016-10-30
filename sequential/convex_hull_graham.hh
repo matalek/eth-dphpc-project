@@ -50,6 +50,8 @@ vector<POINT*> convex_hull(vector<POINT>& points) {
 		}
 	}
 
+	result_points.push_back(left_bottom);
+
 	// Sort points in increasing order with regards to coordinates.
 	sort(working_points.begin(), working_points.end(), AngleComparator(left_bottom));
 
@@ -58,6 +60,9 @@ vector<POINT*> convex_hull(vector<POINT>& points) {
 	for (POINT* point : working_points) {
 		add_point_to_convex_hull(result_points, point, size_lower_limit);
 	}
+
+	// Last point is equal to left_bottom point, so we need to remove it.
+	result_points.pop_back();
 
 	return result_points;
 }

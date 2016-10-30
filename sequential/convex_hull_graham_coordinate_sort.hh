@@ -30,9 +30,6 @@ vector<POINT*> convex_hull(vector<POINT>& points) {
 		working_points.push_back(&points[i]);
 	}
 
-	// Sort points in increasing order with regards to coordinates.
-	sort(working_points.begin(), working_points.end(), OrderXY);
-
 	// Calculate first lower part of convex hull, connecting most left-bottom
 	// point with most right-top point.
 	int size_lower_limit = 1;
