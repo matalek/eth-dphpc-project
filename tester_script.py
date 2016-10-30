@@ -75,7 +75,7 @@ for comb in range(0 , comb_number):
         num_of_points = starting_value + step_width*comb
 
         #generate points
-        generated_points = subprocess.check_output(
+        subprocess.call(
             'echo "' + str(num_of_points) + ' ' + str(coordinates_range)
             + '" | ./generator/generator > tmp.log', shell=True)
 
