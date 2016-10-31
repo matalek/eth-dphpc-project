@@ -20,6 +20,7 @@ def compare_function(cgal , alg):
     return True
 
 
+
 # Usage ./tester_script.py -a <algorithm path> 
 # -c <number of different combinations of number of points> 
 # -w <width of steps> -s <starting number of points>
