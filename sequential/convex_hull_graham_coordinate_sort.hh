@@ -9,7 +9,7 @@
 using namespace std;
 
 void add_point_to_convex_hull(vector<POINT*>& result_points, POINT* point,
-		int size_lower_limit) {
+		unsigned int size_lower_limit) {
 	while (result_points.size() > size_lower_limit 
 			&& Det((*result_points[result_points.size() - 2]),
 					(*result_points[result_points.size() - 1]), 
@@ -20,19 +20,19 @@ void add_point_to_convex_hull(vector<POINT*>& result_points, POINT* point,
 }
 
 // Function which calculates a convex hull of given points set.
-vector<POINT*> convex_hull(vector<POINT>& points) {
+vector<POINT*> convex_hull_sequential(vector<POINT*>& points) {
 	// Vector of pointer to points to be sorted.
 	vector<POINT*> working_points;
 	vector<POINT*> result_points;
 
 	// Fill up the working_points vector with pointers to points.
 	for (size_t i = 0; i < points.size(); i++) {
-		working_points.push_back(&points[i]);
+		working_points.push_back(points[i]);
 	}
 
 	// Calculate first lower part of convex hull, connecting most left-bottom
 	// point with most right-top point.
-	int size_lower_limit = 1;
+	unsigned int size_lower_limit = 1;
 	for (POINT* point : working_points) {
 		add_point_to_convex_hull(result_points, point, size_lower_limit);
 	}
