@@ -1,5 +1,6 @@
 #include <vector>
 #include "geometric_helpers.hh"
+#include "merge_hull.hh"
 
 // Including appropriate library according to defined
 // ALGORITHM variable.
@@ -13,7 +14,7 @@
 #include <string>
 
 int main() {
-	
+
 	using namespace std;
 
 	using namespace std::chrono;
@@ -23,23 +24,40 @@ int main() {
 	scanf("%d", &n);
 
 	// Reading from standard input points.
-	vector<POINT> points(n);
+	vector<POINT> pointsA(n);
 	for (int i = 0; i < n; i++) {
 		int x, y;
 		scanf("%d%d", &x, &y);
-		points[i] = POINT(x, y);
+		pointsA[i] = POINT(x, y);
+	}
+
+	scanf("%d", &n);
+
+	// Reading from standard input points.
+	vector<POINT> pointsB(n);
+	for (int i = 0; i < n; i++) {
+		int x, y;
+		scanf("%d%d", &x, &y);
+		pointsB[i] = POINT(x, y);
 	}
 
 	//computing exec time (could find better way)
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	auto convex_hull_points = convex_hull(points);
-	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+	auto convex_hull_pointsA = convex_hull(pointsA);
+	auto convex_hull_pointsB = convex_hull(pointsB);
 
-	printf("TIME: ");
-    	printf("%lld", duration_cast<microseconds>( t2 - t1 ).count());
+	printf("\n%lu\n", convex_hull_pointsA.size());
+	for (POINT* point : convex_hull_pointsA) {
+		point->print();
+	}
 
-	printf("\n%lu\n", convex_hull_points.size());
-	for (POINT* point : convex_hull_points) {
+	printf("\n%lu\n", convex_hull_pointsB.size());
+	for (POINT* point : convex_hull_pointsB) {
+		point->print();
+	}
+
+	auto convex_hull_pointsAB = mergeHulls(convex_hull_pointsA, convex_hull_pointsB);
+	printf("\n%lu\n", convex_hull_pointsAB.size());
+	for (POINT* point : convex_hull_pointsAB) {
 		point->print();
 	}
 
