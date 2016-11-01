@@ -44,16 +44,9 @@ int main() {
 	//computing exec time (could find better way)
 	auto convex_hull_pointsA = convex_hull(pointsA);
 	auto convex_hull_pointsB = convex_hull(pointsB);
-
-	printf("\n%lu\n", convex_hull_pointsA.size());
-	for (POINT* point : convex_hull_pointsA) {
-		point->print();
-	}
-
-	printf("\n%lu\n", convex_hull_pointsB.size());
-	for (POINT* point : convex_hull_pointsB) {
-		point->print();
-	}
+    
+	printf("TIME: ");
+	printf("%lld", duration_cast<microseconds>( t2 - t1 ).count());
 
 	auto convex_hull_pointsAB = mergeHulls(convex_hull_pointsA, convex_hull_pointsB);
 	printf("\n%lu\n", convex_hull_pointsAB.size());

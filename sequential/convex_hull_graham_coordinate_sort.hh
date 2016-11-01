@@ -26,7 +26,7 @@ vector<POINT*> convex_hull(vector<POINT>& points) {
 	vector<POINT*> result_points;
 
 	// Fill up the working_points vector with pointers to points.
-	for (int i = 0; i < points.size(); i++) {
+	for (size_t i = 0; i < points.size(); i++) {
 		working_points.push_back(&points[i]);
 	}
 
