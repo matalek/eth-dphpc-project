@@ -20,7 +20,7 @@ int main() {
 	printf("\n%lu\n", result.size());
 
 	for (Point_2 point : result) {
-		cout << point << "\n";
+        cout << (long long int) point.x() << " " << (long long int) point.y() << "\n";
 	}
 	return 0;
 }
