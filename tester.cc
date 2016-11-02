@@ -40,7 +40,7 @@ int main() {
     int n;
 	scanf("%d", &n);
 	// Reading from standard input points.
-/*    int partIndex = 0;
+    int partIndex = 0;
     vector<POINT> pointsA(getPartLenght(n,m,partIndex));
     readPoints(pointsA, getPartLenght(n,m,partIndex++));
 	vector<POINT> pointsB(getPartLenght(n,m,partIndex));
@@ -60,26 +60,5 @@ int main() {
 		point->print();
 	}
 
-	return 0;*/
-    // Reading from standard input points.
-    vector<POINT> points(n);
-    for (int i = 0; i < n; i++) {
-        int x, y;
-        scanf("%d%d", &x, &y);
-        points[i] = POINT(x, y);
-    }
-    //computing exec time (could find better way)
-    high_resolution_clock::time_point t1 = high_resolution_clock::now();
-    auto convex_hull_points = convex_hull(points);
-    high_resolution_clock::time_point t2 = high_resolution_clock::now();
-
-    printf("TIME: ");
-    printf("%lld", duration_cast<microseconds>( t2 - t1 ).count());
-
-    printf("\n%lu\n", convex_hull_points.size());
-    for (POINT* point : convex_hull_points) {
-        point->print();
-    }
-
-    return 0;
+	return 0;
 }
