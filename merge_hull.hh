@@ -6,6 +6,8 @@
 
 using namespace std;
 
+//TODO handle more poinst with the same x coordinates
+
 //TODO: use same method with different comparator
 int findRightmostPoint(vector <POINT*> &hull) {
     int index = 0;
@@ -28,11 +30,11 @@ int findLeftmostPoint(vector <POINT*> &hull) {
 }
 
 int turnRight(POINT a, POINT b, POINT c) {
-    return Det(a,b,c) < 0;
+    return Det(a,b,c) <= 0;
 }
 
 int turnLeft(POINT a, POINT b, POINT c) {
-    return Det(a,b,c) > 0;
+    return Det(a,b,c) >= 0;
 }
 
 int goCounterClockwise(int index, vector <POINT*> &hull) {
@@ -40,7 +42,7 @@ int goCounterClockwise(int index, vector <POINT*> &hull) {
 }
 
 int goClockwise(int index, vector <POINT*> &hull) {
-    return index - 1 >= 0 ? index - 1 : hull.size()-1;
+    return index > 0 ? index - 1 : hull.size()-1;
 }
 
 int lowerTangentA(vector <POINT*> &hullA, vector <POINT*> &hullB, int aIndex, int bIndex) {
@@ -109,11 +111,7 @@ int findUpperTangentB(vector<POINT*>& hullA, vector <POINT*> &hullB, int aIndex,
 pair<int,int> findLowerT(vector<POINT*>& hullA, vector <POINT*> &hullB) {
     pair<char, double> returnValues;
     int aIndex = findRightmostPoint(hullA);
-    printf("most right point of left hull");
-    hullA[aIndex]->print();
     int bIndex = findLeftmostPoint(hullB);
-    printf("most left point of right hull");
-    hullB[bIndex]->print();
     while (!(lowerTangentA(hullA, hullB, aIndex, bIndex) && lowerTangentB(hullA, hullB, aIndex, bIndex))) {
         aIndex = findLowerTangentA(hullA, hullB, aIndex, bIndex);
         bIndex = findLowerTangentB(hullA, hullB, aIndex, bIndex);
@@ -147,48 +145,19 @@ vector<POINT*>  mergeVectors(vector<POINT*>& hullA, vector <POINT*> &hullB){
 }
 
 void removeInnerPointsCounterClockwise(vector <POINT*> &hull, int from, int to) {
-    printf("from %d to %d\n", from, to);
-    if(to - from > 2) {
-        hull.erase(hull.begin() + from + 1, hull.begin() + to - 1);
+    if(to - from > 1) {
+        hull.erase(hull.begin() + from + 1, hull.begin() + to);
     }
     else if (from > to) {
-        hull.erase(hull.begin() + from + 1, hull.end());
+        hull.resize(from+1);
         hull.erase(hull.begin(), hull.begin() + to);
     }
 }
 
 vector<POINT*> mergeHulls(vector<POINT*>& hullA, vector <POINT*> &hullB) {
-    pair<int, int> lowT = findLowerT(hullA, hullB);
-/*    printf( "lowerT:");
-    hullA[lowT.first]->print();
-    hullB[lowT.second]->print();*/
+    pair <int, int> lowT = findLowerT(hullA, hullB);
     pair <int,int> upperT = findUpperT(hullA, hullB);
-/*    printf( "\nupperT:");
-    hullA[upperT.first]->print();
-    hullB[upperT.second]->print();*/
-    printf("\nwe should remove points between:");
-    hullA[lowT.first]->print();
-    hullA[upperT.first]->print();
-    printf("\nwe should remove points between:");
-    hullB[upperT.second]->print();
-    hullB[lowT.second]->print();
-    printf("%d\n", hullA.size());
-    for (POINT* point : hullA) {
-        point->print();
-    }
     removeInnerPointsCounterClockwise(hullA, lowT.first, upperT.first);
-    printf("%d\n", hullA.size());
-    for (POINT* point : hullA) {
-        point->print();
-    }
-    printf("%d\n", hullB.size());
-    for (POINT* point : hullB) {
-        point->print();
-    }
     removeInnerPointsCounterClockwise(hullB, upperT.second, lowT.second);
-    printf("%d\n", hullB.size());
-    for (POINT* point : hullB) {
-        point->print();
-    }
     return mergeVectors(hullA, hullB);
 }

@@ -13,46 +13,73 @@
 #include <chrono>
 #include <string>
 
+//how to split N things into M parts:  lenght of i part = (N*i+N)/M - (N*i)/M
+int getPartLenght(int n, int m, int i){
+    return (n*i+n)/m - (n*i)/m;
+}
+
+void readPoints(vector<POINT>& points, int partLenght) {
+    for (int i = 0; i < partLenght; i++) {
+        int x, y;
+        scanf("%d%d", &x, &y);
+        points[i] = POINT(x, y);
+    }
+}
+
+
+
+
 int main() {
 
 	using namespace std;
 
 	using namespace std::chrono;
 
+    int m = 2;
 	// Number of points.
-	int n;
+    int n;
 	scanf("%d", &n);
-
 	// Reading from standard input points.
-	vector<POINT> pointsA(n);
-	for (int i = 0; i < n; i++) {
-		int x, y;
-		scanf("%d%d", &x, &y);
-		pointsA[i] = POINT(x, y);
-	}
+/*    int partIndex = 0;
+    vector<POINT> pointsA(getPartLenght(n,m,partIndex));
+    readPoints(pointsA, getPartLenght(n,m,partIndex++));
+	vector<POINT> pointsB(getPartLenght(n,m,partIndex));
+    readPoints(pointsB, getPartLenght(n,m,partIndex++));
 
-	scanf("%d", &n);
-
-	// Reading from standard input points.
-	vector<POINT> pointsB(n);
-	for (int i = 0; i < n; i++) {
-		int x, y;
-		scanf("%d%d", &x, &y);
-		pointsB[i] = POINT(x, y);
-	}
-
+    high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	//computing exec time (could find better way)
 	auto convex_hull_pointsA = convex_hull(pointsA);
 	auto convex_hull_pointsB = convex_hull(pointsB);
-    
-	printf("TIME: ");
+    auto convex_hull_pointsAB = mergeHulls(convex_hull_pointsA, convex_hull_pointsB);
+    high_resolution_clock::time_point t2 = high_resolution_clock::now();
+    printf("TIME: ");
 	printf("%lld", duration_cast<microseconds>( t2 - t1 ).count());
 
-	auto convex_hull_pointsAB = mergeHulls(convex_hull_pointsA, convex_hull_pointsB);
 	printf("\n%lu\n", convex_hull_pointsAB.size());
 	for (POINT* point : convex_hull_pointsAB) {
 		point->print();
 	}
 
-	return 0;
+	return 0;*/
+    // Reading from standard input points.
+    vector<POINT> points(n);
+    for (int i = 0; i < n; i++) {
+        int x, y;
+        scanf("%d%d", &x, &y);
+        points[i] = POINT(x, y);
+    }
+    //computing exec time (could find better way)
+    high_resolution_clock::time_point t1 = high_resolution_clock::now();
+    auto convex_hull_points = convex_hull(points);
+    high_resolution_clock::time_point t2 = high_resolution_clock::now();
+
+    printf("TIME: ");
+    printf("%lld", duration_cast<microseconds>( t2 - t1 ).count());
+
+    printf("\n%lu\n", convex_hull_points.size());
+    for (POINT* point : convex_hull_points) {
+        point->print();
+    }
+
+    return 0;
 }
