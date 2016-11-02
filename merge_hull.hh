@@ -145,7 +145,12 @@ vector<POINT*>  mergeVectors(vector<POINT*>& hullA, vector <POINT*> &hullB){
 }
 
 void removeInnerPointsCounterClockwise(vector <POINT*> &hull, int from, int to) {
-    if(to - from > 1) {
+    if(to == from) {
+        POINT * preservePoint = hull[from];
+        hull.resize(1);
+        hull[0] = preservePoint;
+    }
+    else if(to - from > 1) {
         hull.erase(hull.begin() + from + 1, hull.begin() + to);
     }
     else if (from > to) {
