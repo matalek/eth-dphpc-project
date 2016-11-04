@@ -1,5 +1,6 @@
 #include <vector>
 #include "geometric_helpers.hh"
+#include "merge_hull.hh"
 
 // Including appropriate library according to defined
 // ALGORITHM variable.
@@ -12,8 +13,12 @@
 #include <chrono>
 #include <string>
 
+
+
+
+
 int main() {
-	
+
 	using namespace std;
 
 	using namespace std::chrono;
