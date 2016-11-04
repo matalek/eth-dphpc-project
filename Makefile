@@ -13,7 +13,8 @@ LINKFLAGS = -fopenmp
 # Passing strategy to be tested - implemented in %.hh file.
 ALGORITHM ?= sequential/convex_hull_graham
 SEQUENTIAL ?= 1
-CPPFLAGS = -D ALGORITHM=$(ALGORITHM) -D SEQUENTIAL=${SEQUENTIAL}
+THREADS ?= 1
+CPPFLAGS = -D ALGORITHM=$(ALGORITHM) -D SEQUENTIAL=${SEQUENTIAL} -D THREADS=${THREADS}
 
 EXEC = tester
 SOURCES = $(wildcard *.cc)

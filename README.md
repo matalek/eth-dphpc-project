@@ -24,12 +24,15 @@ $ ./tester_script.py -a sequential/convex_hull_graham -c 10 -w 10000 -s 100000 -
 
 Execute from prompt command:
 ```sh
-$ make ALGORITHM=algorithm_name SEQEUNTIAL=is_sequential
+$ make ALGORITHM=algorithm_name SEQEUNTIAL=is_sequential THREADS=threads_count
 ```
-where algorithm_name is the name of the header file with the implementation
+where:
+- `algorithm_name` is the name of the header file with the implementation
 of convex_hull function (including directory, without .hh extension,
-e.g. sequential/convex_hull_graham) and is_sequential is 0 or 1, which means
-that we are testing parallel or sequential version respectively.
+e.g. sequential/convex_hull_graham),
+- `is_sequential` is 0 or 1, which means
+that we are testing parallel or sequential version respectively,
+- `threads_count` is the number of threads in case of parallel version/
 
 ## CGAL implementation
 In order to compile CGAL version of the algorithm in `cgal` directory execute:

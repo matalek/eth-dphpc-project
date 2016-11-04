@@ -4,13 +4,17 @@
 #include <vector>
 #include "../geometric_helpers.hh"
 #include "../sequential/convex_hull_graham_coordinate_sort.hh"
+#include "../merge_hull.hh"
 #include <stdio.h>
 #include <algorithm>
 #include <omp.h>
 
+#include <iostream>
+#include <string>
+
 using namespace std;
 
-#define THREADS_COUNT 8
+#define THREADS_COUNT THREADS
 
 pair<int, int> get_range(int n, int id) {
 	int batch_size = n / THREADS_COUNT;
@@ -24,10 +28,6 @@ pair<int, int> get_range(int n, int id) {
 	}
 
 	return make_pair(start, end);
-}
-
-vector<POINT*> merge_convex_hulls(vector<POINT*>& points_1, vector<POINT*>& points_2) {
-	return points_1;
 }
 
 // Function which calculates a convex hull of given points set.
@@ -55,7 +55,7 @@ vector<POINT*> convex_hull(vector<POINT*>& points) {
 			// Merging threads from level * 2.
 			int id = omp_get_thread_num();
 			int pos = level + id; // Position in results tree.
-			partial_results[level + id] = merge_convex_hulls(partial_results[pos << 1], partial_results[(pos << 1) + 1]);
+			partial_results[level + id] = mergeHulls(partial_results[pos << 1], partial_results[(pos << 1) + 1]);
 		}
 		level >>= 1;
 	}
