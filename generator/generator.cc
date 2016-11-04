@@ -13,7 +13,7 @@ using namespace std;
 
 struct points_compare {
 	bool operator() (const POINT a, const POINT b) {
-		return a.x == b.x ? a.y < b.y : a.x < b.x;
+		return a.x == b.x ? 0 : a.x < b.x;
 	}
 };
 

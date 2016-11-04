@@ -1,3 +1,6 @@
+#ifndef MERGE_HULL
+#define MERGE_HULL
+
 #include <vector>
 #include "geometric_helpers.hh"
 #include <stdio.h>
@@ -135,34 +138,27 @@ pair<int,int> findUpperT(vector <POINT*> &hullA, vector <POINT*> &hullB) {
     return returnValues;
 }
 
-
-vector<POINT*>  mergeVectors(vector<POINT*>& hullA, vector <POINT*> &hullB){
-    vector<POINT*> AB;
-    AB.reserve( hullA.size() + hullA.size() ); // preallocate memory
-    AB.insert( AB.end(), hullA.begin(), hullA.end() );
-    AB.insert( AB.end(), hullB.begin(), hullB.end() );
-    return AB;
-}
-
-void removeInnerPointsCounterClockwise(vector <POINT*> &hull, int from, int to) {
-    if(to == from) {
-        POINT * preservePoint = hull[from];
-        hull.resize(1);
-        hull[0] = preservePoint;
-    }
-    else if(to - from > 1) {
-        hull.erase(hull.begin() + from + 1, hull.begin() + to);
-    }
-    else if (from > to) {
-        hull.resize(from+1);
-        hull.erase(hull.begin(), hull.begin() + to);
-    }
+vector<POINT*>  mergeVectors(vector<POINT*>& hullA, vector <POINT*>& hullB, pair <int, int> lowT, pair <int, int> upperT){
+    vector<POINT*> mergedVector;
+    int hullIndex = upperT.first;
+    while (1) {
+        mergedVector.push_back(hullA[hullIndex]);
+        if(hullIndex == lowT.first) break;
+        hullIndex = goCounterClockwise(hullIndex,hullA);
+    };
+    hullIndex = lowT.second;
+    while (1) {
+        mergedVector.push_back(hullB[hullIndex]);
+        if(hullIndex == upperT.second) break;
+        hullIndex = goCounterClockwise(hullIndex, hullB);
+    };
+    return mergedVector;
 }
 
 vector<POINT*> mergeHulls(vector<POINT*>& hullA, vector <POINT*> &hullB) {
     pair <int, int> lowT = findLowerT(hullA, hullB);
     pair <int,int> upperT = findUpperT(hullA, hullB);
-    removeInnerPointsCounterClockwise(hullA, lowT.first, upperT.first);
-    removeInnerPointsCounterClockwise(hullB, upperT.second, lowT.second);
-    return mergeVectors(hullA, hullB);
+    return mergeVectors(hullA, hullB, lowT, upperT);
 }
+
+#endif // MERGE_HULL
