@@ -1,5 +1,41 @@
 # Parallel convex hull
 
+## Comparator script
+
+Execute from prompt command:
+```sh
+$ chmod u+x algorithm_comparator.py
+```
+and then 
+```sh
+$ ./algorithm_comparator.py
+# -c <number of different combinations of number of points> 
+# -w <width of steps>
+# -s <starting number of points>
+# -r <range of points coordinates>
+# -R <number of repetition for each number of points>
+# -a <algorithms to compare in the format <algo1:num_of_threads algo2:num_of_threads algo3:num_of_threads ...>>
+```
+For example:
+```sh
+./algorithm_comparator.py -c 100 -w 100 -s 1000 -r 1000 -R 2 -a simple_parallel/simple_parallel:4 simple_parallel/simple_parallel:8 ...
+```
+
+## Plotter script
+
+Execute from prompt command:
+```sh
+$ chmod u+x tester_script.py
+```
+and then 
+
+```sh
+$ ./plotter.py
+# -c <number of different combination in number of points>
+# -w <step width>
+# -s <starting value>
+# -a <algorithms to compare in the format <algo1:num_of_threads algo2:num_of_threads algo3:num_of_threads ...>>
+```
 
 ## Tester script
 
