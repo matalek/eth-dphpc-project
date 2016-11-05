@@ -20,7 +20,8 @@ def compare_function(cgal , alg):
     return True
 
 
-# Usage ./tester_script.py -a <algorithm path> 
+# Usage ./file_logger.py
+# -a <algorithm path>
 # -c <number of different combinations of number of points> 
 # -w <width of steps> -s <starting number of points>
 # -r <range of points coordinates>
@@ -30,7 +31,7 @@ def compare_function(cgal , alg):
 threads_count = ''
 is_sequential = ''
 
-if len(sys.argv) <= 13:
+if len(sys.argv) < 14:
     threads_count = '1'
     is_sequential = '1'
 else:
@@ -40,19 +41,19 @@ else:
     is_sequential = '0'
     threads_count = sys.argv[14]
 
-if int(sys.argv[12]) <= 0 or len(sys.argv) <= 13:
+if int(sys.argv[12]) <= 0 or len(sys.argv) < 13:
     print 'ERROR in usage, provide int number of repetition for each value (ex. -R 20)'
     exit
-if int(sys.argv[10]) <= 0 or len(sys.argv) <= 11:
+if int(sys.argv[10]) <= 0 or len(sys.argv) < 11:
     print 'ERROR in usage, provide int range of points coordinates (ex. -r 20)'
     exit   
-if int(sys.argv[8]) <= 0 or len(sys.argv) <= 9:
+if int(sys.argv[8]) <= 0 or len(sys.argv) < 9:
     print 'ERROR in usage, provide int starting number of points (ex. -s 100)'
     exit
-if int(sys.argv[6]) <= 0 or len(sys.argv) <= 7:
+if int(sys.argv[6]) <= 0 or len(sys.argv) < 7:
     print 'ERROR in usage, provide int width in steps (ex. -w 50)'
     exit
-if int(sys.argv[4]) <= 0 or len(sys.argv) <= 5:
+if int(sys.argv[4]) <= 0 or len(sys.argv) < 5:
     print 'ERROR in usage, provide int number of different combinations (ex. -c 20)'
     exit
 
@@ -67,7 +68,7 @@ algorithm = sys.argv[2]
 
 #build executables
 subprocess.call('make ALGORITHM=' + algorithm + ' SEQUENTIAL=' + is_sequential +
-                ' THREADS+' + threads_count, shell=True)
+                ' THREADS=' + threads_count, shell=True)
 subprocess.call('make -C generator/', shell=True)
 subprocess.call('mkdir -p log_files', shell=True)
 subprocess.call('(cd cgal && cmake .)', shell=True)

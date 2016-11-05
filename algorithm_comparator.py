@@ -37,11 +37,11 @@ starting_value = int(sys.argv[6])
 step_width = int(sys.argv[4])
 comb_number = int(sys.argv[2])
 
-subprocess.call('./file_logger.py -a sequential/convex_hull_graham ' + args, shell=True)
+subprocess.call('./csv_logger.py -a sequential/convex_hull_graham ' + args, shell=True)
 
 for value in range(0,len(sys.argv) - 12):
     algorithm = sys.argv[12 + value].split(":")
-    subprocess.call('./file_logger.py -a ' + algorithm[0] + ' ' + args + ' -t '
+    subprocess.call('./csv_logger.py -a ' + algorithm[0] + ' ' + args + ' -t '
                     + algorithm[1], shell=True)
 
 subprocess.call('./plotter.py -c ' + str(comb_number) + ' -w ' + str(step_width) + ' -s ' + str(starting_value) +
