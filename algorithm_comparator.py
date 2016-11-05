@@ -37,7 +37,7 @@ starting_value = int(sys.argv[6])
 step_width = int(sys.argv[4])
 comb_number = int(sys.argv[2])
 
-subprocess.call('./csv_logger.py -a sequential/convex_hull_graham ' + args, shell=True)
+subprocess.call('./csv_logger.py -a sequential/convex_hull_graham_coordinate_sort ' + args, shell=True)
 
 for value in range(0,len(sys.argv) - 12):
     algorithm = sys.argv[12 + value].split(":")
@@ -45,4 +45,4 @@ for value in range(0,len(sys.argv) - 12):
                     + algorithm[1], shell=True)
 
 subprocess.call('./plotter.py -c ' + str(comb_number) + ' -w ' + str(step_width) + ' -s ' + str(starting_value) +
-                ' -a ' + (" ".join(sys.argv[12:])) + ' sequential/convex_hull_graham', shell=True)
+                ' -a ' + (" ".join(sys.argv[12:])) + ' sequential/convex_hull_graham_coordinate_sort', shell=True)

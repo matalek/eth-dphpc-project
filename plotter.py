@@ -48,10 +48,12 @@ for index in range(8 , len(sys.argv)):
 
     y = np.array(rt)
     my_label = (algorithm.split("/")[1]).replace("_", " ").replace(":"," ")  + ' ' + appendix
-    plt.plot(x, y, colors[count] + '-', linewidth = 2.0, label = my_label)
+    plt.plot(x, y, colors[count] + '-', label = my_label)
     count += 1
 
 plt.legend(loc=2)
 
+
+plt.savefig('./plots/' + ("&".join(sys.argv[8:])).replace("/", "_") + '.png')
 plt.show()
 
