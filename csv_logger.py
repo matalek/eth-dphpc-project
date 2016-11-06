@@ -67,6 +67,7 @@ comb_number = int(sys.argv[4])
 algorithm = sys.argv[2]
 
 #build executables
+subprocess.call('make clean', shell=True)
 subprocess.call('make ALGORITHM=' + algorithm + ' SEQUENTIAL=' + is_sequential +
                 ' THREADS=' + threads_count, shell=True)
 subprocess.call('make -C generator/', shell=True)
@@ -85,7 +86,7 @@ if threads_count != '1':
 #create and open a csv file to store results
 ofile  = open('log_files/log_results_' + algorithm.replace('/', '_') + threads_num + '.csv', "wb")
 writer = csv.writer(ofile, delimiter='	', quotechar='"', quoting=csv.QUOTE_ALL)
-writer.writerow(['#Points','Exec_Time [us]'])
+writer.writerow(['#Input Points','Exec_Time [us]'])
 
 #execute tests with different takes for each number of points
 for comb in range(0 , comb_number):

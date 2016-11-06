@@ -18,12 +18,14 @@ comb_number = int(sys.argv[2])
 colors = ['b','r','g','k']
 count = 0
 
-plt.title("Performance comparison")
-plt.ylabel('Response Time [us]')
+plt.title("SPEEDUP")
+plt.ylabel('Speedup')
 plt.xlabel('Number of points')
 plt.grid(True)
 
 x = np.arange(starting_value, comb_number*step_width + starting_value, step_width)
+
+num = []
 
 for index in range(8 , len(sys.argv)):
     algorithm = sys.argv[index]
@@ -43,16 +45,26 @@ for index in range(8 , len(sys.argv)):
                 flag += 1
                 continue
 
-            rt.append(int((row[0].split('\t'))[1].replace('"', '')))
+            time = float((row[0].split('\t'))[1].replace('"', ''))
 
-    y = np.array(rt)
-    my_label = (algorithm.split("/")[1]).replace("_", " ").replace(":"," ")  + ' ' + appendix
-    plt.plot(x, y, colors[count] + '-', label = my_label)
-    count += 1
+            if algorithm.split("/")[0] == 'sequential':
+                num.append(time)
+                print ('anal seq time = ' + str(time))
+            else:
+                rt.append(time)
+                print ('anal par time = ' + str(time))
+
+    if algorithm.split("/")[0] != 'sequential':
+        denum = []
+        for i in range(0, len(rt)):
+            denum.append(num[i]/rt[i])
+        y = np.array(denum)
+        my_label = (algorithm.split("/")[1]).replace("_", " ").replace(":"," ")  + ' ' + appendix
+        plt.plot(x, y, colors[count] + '-', label = my_label)
+        count += 1
 
 plt.legend(loc=2)
 
 
-plt.savefig('./plots/' + ("&".join(sys.argv[8:])).replace("/", "_") + '.png')
+#plt.savefig('./plots/' + ("&".join(sys.argv[8:])).replace("/", "_") + '.png')
 plt.show()
-
