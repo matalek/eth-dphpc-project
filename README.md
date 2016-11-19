@@ -79,7 +79,7 @@ table below.
 |---|---|---|
 | Sequential | Sequential | [AndrewAlgorithm](sequential/andrew_algorithm.hh) |
 | SequentialGraham | Sequential | [GrahamAlgorithm](sequential/graham_algorithm.hh) |
-| SimpleParallel | Parallel | [SimpleParallelAlgorithm](simple_parallel/simple_parallel.hh) |
+| SimpleParallel | Parallel | [SimpleParallelAlgorithm](simple_parallel/simple_parallel_algorithm.hh) |
 
 ## CGAL implementation
 In order to compile CGAL version of the algorithm in `cgal` directory execute:
