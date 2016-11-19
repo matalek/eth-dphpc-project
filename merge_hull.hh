@@ -33,11 +33,11 @@ int findLeftmostPoint(vector <POINT*> &hull) {
 }
 
 int turnRight(POINT a, POINT b, POINT c) {
-    return Det(a,b,c) <= 0;
+    return Det(a,b,c) < 0;
 }
 
 int turnLeft(POINT a, POINT b, POINT c) {
-    return Det(a,b,c) >= 0;
+    return Det(a,b,c) > 0;
 }
 
 int goCounterClockwise(int index, vector <POINT*> &hull) {
@@ -152,12 +152,15 @@ vector<POINT*>  mergeVectors(vector<POINT*>& hullA, vector <POINT*>& hullB, pair
         if(hullIndex == upperT.second) break;
         hullIndex = goCounterClockwise(hullIndex, hullB);
     };
+    printf("returning merged vector with size %d\n", mergedVector.size());
     return mergedVector;
 }
 
 vector<POINT*> mergeHulls(vector<POINT*>& hullA, vector <POINT*> &hullB) {
     pair <int, int> lowT = findLowerT(hullA, hullB);
     pair <int,int> upperT = findUpperT(hullA, hullB);
+    vector<POINT*> ret = mergeVectors(hullA, hullB, lowT, upperT);
+    printf("\n%size:\n", ret.size()); //SEGFAULT
     return mergeVectors(hullA, hullB, lowT, upperT);
 }
 
