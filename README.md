@@ -76,7 +76,7 @@ table below.
 
 ### Available algorithms
 | Algorithm name | Type | Implementation |
-|-|-|-|
+|---|---|---|
 | Sequential | Sequential | [AndrewAlgorithm](sequential/andrew_algorithm.hh) |
 | SequentialGraham | Sequential | [GrahamAlgorithm](sequential/graham_algorithm.hh) |
 | SimpleParallel | Parallel | [SimpleParallelAlgorithm](simple_parallel/simple_parallel.hh) |
