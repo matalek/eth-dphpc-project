@@ -152,15 +152,12 @@ vector<POINT*>  mergeVectors(vector<POINT*>& hullA, vector <POINT*>& hullB, pair
         if(hullIndex == upperT.second) break;
         hullIndex = goCounterClockwise(hullIndex, hullB);
     };
-    printf("returning merged vector with size %d\n", mergedVector.size());
     return mergedVector;
 }
 
 vector<POINT*> mergeHulls(vector<POINT*>& hullA, vector <POINT*> &hullB) {
     pair <int, int> lowT = findLowerT(hullA, hullB);
     pair <int,int> upperT = findUpperT(hullA, hullB);
-    vector<POINT*> ret = mergeVectors(hullA, hullB, lowT, upperT);
-    printf("\n%size:\n", ret.size()); //SEGFAULT
     return mergeVectors(hullA, hullB, lowT, upperT);
 }
 
