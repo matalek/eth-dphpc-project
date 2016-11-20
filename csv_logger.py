@@ -20,26 +20,40 @@ def compare_function(cgal , alg):
     return True
 
 
-
-# Usage ./tester_script.py -a <algorithm path> 
+# Usage ./file_logger.py
+# -a <algorithm path>
 # -c <number of different combinations of number of points> 
 # -w <width of steps> -s <starting number of points>
 # -r <range of points coordinates>
 # -R <number of repetition for each number of points>
+# -t <number of threads>
 
-if int(sys.argv[12]) <= 0:
+threads_count = ''
+is_sequential = ''
+
+if len(sys.argv) < 14:
+    threads_count = '1'
+    is_sequential = '1'
+else:
+    if int(sys.argv[14]) <= 0:
+        print 'ERROR in usage, provide int number of threads for each value (ex. -t 3)'
+        exit
+    is_sequential = '0'
+    threads_count = sys.argv[14]
+
+if int(sys.argv[12]) <= 0 or len(sys.argv) < 13:
     print 'ERROR in usage, provide int number of repetition for each value (ex. -R 20)'
     exit
-if int(sys.argv[10]) <= 0:
+if int(sys.argv[10]) <= 0 or len(sys.argv) < 11:
     print 'ERROR in usage, provide int range of points coordinates (ex. -r 20)'
     exit   
-if int(sys.argv[8]) <= 0:
+if int(sys.argv[8]) <= 0 or len(sys.argv) < 9:
     print 'ERROR in usage, provide int starting number of points (ex. -s 100)'
     exit
-if int(sys.argv[6]) <= 0:
+if int(sys.argv[6]) <= 0 or len(sys.argv) < 7:
     print 'ERROR in usage, provide int width in steps (ex. -w 50)'
     exit
-if int(sys.argv[4]) <= 0:
+if int(sys.argv[4]) <= 0 or len(sys.argv) < 5:
     print 'ERROR in usage, provide int number of different combinations (ex. -c 20)'
     exit
 
@@ -53,7 +67,9 @@ comb_number = int(sys.argv[4])
 algorithm = sys.argv[2]
 
 #build executables
-subprocess.call('make ALGORITHM=' + algorithm, shell=True)
+subprocess.call('make clean', shell=True)
+subprocess.call('make ALGORITHM=' + algorithm + ' SEQUENTIAL=' + is_sequential +
+                ' THREADS=' + threads_count, shell=True)
 subprocess.call('make -C generator/', shell=True)
 subprocess.call('mkdir -p log_files', shell=True)
 subprocess.call('(cd cgal && cmake .)', shell=True)
@@ -62,19 +78,28 @@ subprocess.call('(cd cgal && make)', shell=True)
 exec_time = []
 result = True
 
+threads_num = ''
+if threads_count != '1':
+    threads_num = '_t_' + str(threads_count)
+
+
 #create and open a csv file to store results
-ofile  = open('log_files/log_results_' + algorithm.replace('/', '_') + '.csv', "wb")
+ofile  = open('log_files/log_results_' + algorithm.replace('/', '_') + threads_num + '.csv', "wb")
 writer = csv.writer(ofile, delimiter='	', quotechar='"', quoting=csv.QUOTE_ALL)
-writer.writerow(['#Points','Exec_Time [us]'])
+writer.writerow(['#Input Points','Exec_Time [us]'])
 
 #execute tests with different takes for each number of points
 for comb in range(0 , comb_number):
     time_accumulator = 0
+    num_of_points = starting_value + step_width * comb
+
+    print('-------------------------------\nSTARTING Step number: ' + str(comb + 1) +
+          ', number of points = ' + str(num_of_points))
 
     #repeat test the require number of times to get correct avg
     for take in range (0 , rep_number):
-        num_of_points = starting_value + step_width*comb
 
+        print('Take ' + str(take + 1))
         #generate points
         subprocess.call(
             'echo "' + str(num_of_points) + ' ' + str(coordinates_range)
@@ -100,7 +125,7 @@ for comb in range(0 , comb_number):
         time_accumulator += curr_time
 
     #print info about situation
-    print('Step number: ' + str(comb))
+    print('DONE Step number: ' + str(comb + 1))
 
     #compute avg of different takes to get a valid result
     avg_time = time_accumulator/rep_number
@@ -111,14 +136,3 @@ for comb in range(0 , comb_number):
 
 subprocess.call('rm tmp.log', shell=True)
 ofile.close()
-
-#plot results
-x = np.arange(starting_value, (starting_value + step_width*comb_number) , step_width)
-y = np.array(exec_time)
-
-plt.title("Number of input points")
-plt.plot(x, y, 'b-', linewidth = 2.0)
-plt.ylabel('Execution time [us]')
-plt.xlabel('Number of input points')
-plt.grid(True)
-plt.show()

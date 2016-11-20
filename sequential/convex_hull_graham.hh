@@ -26,7 +26,7 @@ struct AngleComparator {
 	bool operator()(const POINT* a, const POINT* b) {
 		LL det = Det((*point), (*a), (*b));
 		if (det == 0) {
-			return abs_int(point->x - a->x) + abs_int(point->y - a->y) <
+			return abs_int(point->x - a->x) + abs_int(point->y - a->y) >
 					abs_int(point->x - b->x) + abs_int(point->y - b->y);
 		}
 		return det > 0;
@@ -36,17 +36,22 @@ struct AngleComparator {
 };
 
 // Function which calculates a convex hull of given points set.
-vector<POINT*> convex_hull(vector<POINT>& points) {
+vector<POINT*> convex_hull_sequential(vector<POINT*>& points) {
 	// Vector of pointer to points to be sorted.
 	vector<POINT*> working_points;
 	vector<POINT*> result_points;
 
 	// Fill up the working_points vector with pointers to points.
 	POINT* left_bottom = nullptr;
-	for (int i = 0; i < points.size(); i++) {
-		working_points.push_back(&points[i]);
-		if (left_bottom == nullptr || OrderXY(&points[i], left_bottom)) {
-			left_bottom = &points[i];
+	for (size_t i = 0; i < points.size(); i++) {
+		if (left_bottom == nullptr || OrderXY(points[i], left_bottom)) {
+			left_bottom = points[i];
+		}
+	}
+
+	for (size_t i = 0; i < points.size(); i++) {
+		if (left_bottom != points[i]) {
+			working_points.push_back(points[i]);
 		}
 	}
 
@@ -60,9 +65,6 @@ vector<POINT*> convex_hull(vector<POINT>& points) {
 	for (POINT* point : working_points) {
 		add_point_to_convex_hull(result_points, point, size_lower_limit);
 	}
-
-	// Last point is equal to left_bottom point, so we need to remove it.
-	result_points.pop_back();
 
 	return result_points;
 }
