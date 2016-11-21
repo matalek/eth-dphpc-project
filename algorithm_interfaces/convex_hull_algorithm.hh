@@ -2,7 +2,7 @@
 #define CONVEX_HULL_ALGORITHM
 
 #include <vector>
-#include "geometric_helpers.hh"
+#include "../geometric_helpers.hh"
 
 using namespace std;
 

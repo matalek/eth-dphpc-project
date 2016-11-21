@@ -2,7 +2,7 @@
 #define CONVEX_HULL_PARALLEL_ALGORITHM
 
 #include <vector>
-#include "geometric_helpers.hh"
+#include "../geometric_helpers.hh"
 #include "convex_hull_algorithm.hh"
 #include "convex_hull_sequential_algorithm.hh"
 

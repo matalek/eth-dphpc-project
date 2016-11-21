@@ -6,7 +6,7 @@
 #include <algorithm>
 
 #include "../geometric_helpers.hh"
-#include "../convex_hull_sequential_algorithm.hh"
+#include "../algorithm_interfaces/convex_hull_sequential_algorithm.hh"
 
 using namespace std;
 

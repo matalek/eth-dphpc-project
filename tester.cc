@@ -8,13 +8,16 @@
 #include "geometric_helpers.hh"
 #include "merge_hull.hh"
 
-#include "convex_hull_sequential_algorithm.hh"
-#include "convex_hull_parallel_algorithm.hh"
+#include "algorithm_interfaces/convex_hull_sequential_algorithm.hh"
+#include "algorithm_interfaces/convex_hull_parallel_algorithm.hh"
+#include "data_structures/convex_hull_representation.hh"
+#include "data_structures/vector_convex_hull_representation.hh"
 
 #include "sequential/graham_algorithm.hh"
 #include "sequential/andrew_algorithm.hh"
 
 #include "simple_parallel/simple_parallel_algorithm.hh"
+#include "algorithm_interfaces/convex_hull_parallel_tree_algorithm.hh"
 
 using namespace std;
 using namespace std::chrono;
@@ -35,7 +38,7 @@ ConvexHullAlgorithm* load_algorithm(char* argv[]) {
 	} else if (name == "SequentialGraham") {
 		algorithm = new GrahamAlgorithm();
 	}  else if (name == "SimpleParallel") {
-		algorithm = new SimpleParallelAlgorithm(atoi(argv[2]), new AndrewAlgorithm());
+		algorithm = new SimpleParallelAlgorithm(atoi(argv[2]));
 	} else {
 		assert(false && "No algorithm found with this name");
 	}
