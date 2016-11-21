@@ -17,10 +17,10 @@ public:
 	~AndrewAlgorithm() override { }
 
 	// Function which calculates a convex hull of given points set.
-	vector<POINT*> convex_hull(vector<POINT*>& points) override {
+	shared_ptr<vector<POINT*> > convex_hull(vector<POINT*>& points) override {
 		// Vector of pointer to points to be sorted.
 		vector<POINT*> working_points;
-		vector<POINT*> result_points;
+		shared_ptr<vector<POINT*> > result_points = shared_ptr<vector<POINT*> >(new vector<POINT*>());
 
 		// Fill up the working_points vector with pointers to points.
 		for (size_t i = 0; i < points.size(); i++) {
@@ -35,28 +35,28 @@ public:
 		}
 
 		// We do not want already added points to be removed.
-		size_lower_limit = result_points.size();
+		size_lower_limit = result_points->size();
 		for (int i = working_points.size() - 2; i >= 0; --i) {
 			add_point_to_convex_hull(result_points, working_points[i],
 					size_lower_limit);
 		}
 
 		// Last point has been added two times, so we have to remove it once.
-		result_points.pop_back();
+		result_points->pop_back();
 		return result_points;
 	}
 
 private:
 
-	void add_point_to_convex_hull(vector<POINT*>& result_points, POINT* point,
+	void add_point_to_convex_hull(shared_ptr<vector<POINT*> > result_points, POINT* point,
 			unsigned int size_lower_limit) {
-		while (result_points.size() > size_lower_limit 
-				&& Det((*result_points[result_points.size() - 2]),
-						(*result_points[result_points.size() - 1]), 
+		while (result_points->size() > size_lower_limit 
+				&& Det((*(*result_points)[result_points->size() - 2]),
+						(*(*result_points)[result_points->size() - 1]), 
 						(*point)) <= 0) {
-			result_points.pop_back();
+			result_points->pop_back();
 		}
-		result_points.push_back(point);
+		result_points->push_back(point);
 	}
 };
 

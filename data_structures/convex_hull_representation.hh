@@ -10,8 +10,8 @@
 using namespace std;
 
 // Represents abstract convex hull representation.
-// Possible subclasses have to implement also constructor which takes vector of points.
-// TODO(matalek): change that it will take shared_ptr to vector of points.
+// Possible subclasses have to implement also constructor which takes 
+// a shared pointer of vector of points.
 class ConvexHullRepresentation {
 
 public:
@@ -19,8 +19,7 @@ public:
 
 	virtual shared_ptr<ConvexHullRepresentation> merge(shared_ptr<ConvexHullRepresentation>) = 0;
 
-	// TODO(matalek): change to return shared_ptr.
-	virtual vector<POINT*> get_points() = 0;
+	virtual shared_ptr<vector<POINT*> > get_points() = 0;
 
 	int get_max_parallelism() {
 		return max_parallelism;

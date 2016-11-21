@@ -65,14 +65,14 @@ int main(int argc, char* argv[]) {
 
 	//computing exec time (could find better way)
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	vector<POINT*> convex_hull_points = algorithm->convex_hull(points_pointers);
+	shared_ptr<vector<POINT*> > convex_hull_points = algorithm->convex_hull(points_pointers);
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
 	printf("TIME: ");
 	printf("%lld", duration_cast<microseconds>( t2 - t1 ).count());
 
-	printf("\n%lu\n", convex_hull_points.size());
-	for (POINT* point : convex_hull_points) {
+	printf("\n%lu\n", convex_hull_points->size());
+	for (POINT* point : (*convex_hull_points)) {
 		point->print();
 	}
 

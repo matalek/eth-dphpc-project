@@ -18,7 +18,7 @@ public:
 	~GrahamAlgorithm() override { }
 
 	// Function which calculates a convex hull of given points set.
-	vector<POINT*> convex_hull(vector<POINT*>& points) override {
+	shared_ptr<vector<POINT*> > convex_hull(vector<POINT*>& points) override {
 		// Vector of pointer to points to be sorted.
 		vector<POINT*> working_points;
 		vector<POINT*> result_points;
@@ -48,7 +48,9 @@ public:
 			add_point_to_convex_hull(result_points, point, size_lower_limit);
 		}
 
-		return result_points;
+		// Whole algorithm is not very effective, so we can allow creating return pointer
+		// by coping the vector.
+		return shared_ptr<vector<POINT*> >(new vector<POINT*>(result_points));
 	}
 
 private:
