@@ -13,8 +13,8 @@ template <class R>
 class ConvexHullParallelTreeAlgorithm : public ConvexHullParallelAlgorithm {
 
 public:
-	ConvexHullParallelTreeAlgorithm(int threads, ConvexHullSequentialAlgorithm* sequential_algorithm) 
-		: ConvexHullParallelAlgorithm(threads, sequential_algorithm) { }
+	ConvexHullParallelTreeAlgorithm(int threads) 
+		: ConvexHullParallelAlgorithm(threads) { }
 
 	// Function which calculates a convex hull of a given points set.
 	shared_ptr<vector<POINT*> > convex_hull(vector<POINT*>& points) override {

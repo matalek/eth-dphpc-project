@@ -18,7 +18,7 @@ class SimpleParallelAlgorithm : public ConvexHullParallelTreeAlgorithm<VectorCon
 
 public:
 	SimpleParallelAlgorithm(int threads) 
-			: ConvexHullParallelTreeAlgorithm(threads, new AndrewAlgorithm()) { }
+			: ConvexHullParallelTreeAlgorithm(threads) { }
 };
 
 #endif // SIMPLE_PARALLEL

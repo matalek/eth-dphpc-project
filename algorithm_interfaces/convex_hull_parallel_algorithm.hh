@@ -5,14 +5,15 @@
 #include "../geometric_helpers.hh"
 #include "convex_hull_algorithm.hh"
 #include "convex_hull_sequential_algorithm.hh"
+#include "../sequential/andrew_algorithm.hh"
 
 using namespace std;
 
 class ConvexHullParallelAlgorithm : public ConvexHullAlgorithm {
 
 public:
-	ConvexHullParallelAlgorithm(int threads, ConvexHullSequentialAlgorithm* sequential_algorithm)
-			: threads(threads), sequential_algorithm(sequential_algorithm) { }
+	ConvexHullParallelAlgorithm(int threads)
+			: threads(threads), sequential_algorithm(new AndrewAlgorithm()) { }
 
 	virtual ~ConvexHullParallelAlgorithm() {
 		delete(sequential_algorithm);
@@ -20,7 +21,7 @@ public:
 
 protected:
 	int threads;
-	ConvexHullSequentialAlgorithm* sequential_algorithm;
+	AndrewAlgorithm* sequential_algorithm;
 
 };
 
