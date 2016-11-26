@@ -15,10 +15,10 @@ starting_value = int(sys.argv[6])
 step_width = int(sys.argv[4])
 comb_number = int(sys.argv[2])
 
-colors = ['b','r','g','k']
+colors = ['r','g','k']
 count = 0
 
-plt.title("SPEEDUP")
+plt.title("Speedup")
 plt.ylabel('Speedup')
 plt.xlabel('Number of points')
 plt.grid(True)
@@ -65,6 +65,6 @@ for index in range(8 , len(sys.argv)):
 
 plt.legend(loc=2)
 
-
-#plt.savefig('./plots/' + ("&".join(sys.argv[8:])).replace("/", "_") + '.png')
+plt.ylim([0,5])
+plt.savefig('./logs_plots/speedup_' + ("&".join(sys.argv[8:])).replace("/", "_") + '.png')
 plt.show()

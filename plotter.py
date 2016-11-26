@@ -19,8 +19,8 @@ colors = ['b','r','g','k']
 count = 0
 
 plt.title("Performance comparison")
-plt.ylabel('Response Time [us]')
-plt.xlabel('Number of points')
+plt.ylabel('Response Time [s]')
+plt.xlabel('Number of input points')
 plt.grid(True)
 
 x = np.arange(starting_value, comb_number*step_width + starting_value, step_width)
@@ -43,16 +43,15 @@ for index in range(8 , len(sys.argv)):
                 flag += 1
                 continue
 
-            rt.append(int((row[0].split('\t'))[1].replace('"', '')))
+            rt.append(float(row[1])/(1000000))
 
     y = np.array(rt)
-    my_label = (algorithm.split("/")[1]).replace("_", " ").replace(":"," ")  + ' ' + appendix
+    my_label = algorithm.replace("_", " ").replace(":"," ")  + ' ' + appendix
     plt.plot(x, y, colors[count] + '-', label = my_label)
     count += 1
 
 plt.legend(loc=2)
 
 
-plt.savefig('./plots/' + ("&".join(sys.argv[8:])).replace("/", "_") + '.png')
+plt.savefig('./logs_plots/' + ("&".join(sys.argv[8:])).replace("/", "_") + '.png')
 plt.show()
-
