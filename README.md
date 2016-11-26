@@ -2,6 +2,9 @@
 
 ## Comparator script
 
+The comparator script it's used to execute different algorithms for different inputs and evaluate the results in terms of time and correctness.
+The resulting csv files are stored in the log_files folder
+
 Execute from prompt command:
 ```sh
 $ chmod u+x algorithm_comparator.py
