@@ -18,8 +18,9 @@ $ ./algorithm_comparator.py
 ```
 For example:
 ```sh
-./algorithm_comparator.py -c 100 -w 100 -s 1000 -r 1000 -R 2 -a simple_parallel/simple_parallel:4 simple_parallel/simple_parallel:8 ...
+./algorithm_comparator.py -c 10 -w 100000 -s 100000 -r 1000000 -R 2 -a SimpleParallel:4 SimpleParallel:8 SequentialGraham:1 ...
 ```
+REMEMBER to also provide a sequential version when needed, with 1 as num_of_threads
 
 ## Plotter script
 
@@ -35,25 +36,6 @@ $ ./plotter.py
 # -w <step width>
 # -s <starting value>
 # -a <algorithms to compare in the format <algo1:num_of_threads algo2:num_of_threads algo3:num_of_threads ...>>
-```
-
-## Tester script
-
-Execute from prompt command:
-```sh
-$ chmod u+x tester_script.py
-```
-and then 
-```sh
-$ ./tester_script.py -a <Algorithm name, including directory>
--c <Number of different combinations of number of points> 
--w <Width of steps> -s <Starting number of points>
--r <Range for points coordinates>
--R <Number of repetition for each number of points>
-```
-For example:
-```sh
-$ ./tester_script.py -a sequential/convex_hull_graham -c 10 -w 10000 -s 100000 -r 1000000000 -R 2
 ```
 
 ## Building tester program
