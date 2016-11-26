@@ -81,7 +81,7 @@ for num_of_points in range(
            )
 
     for repetition in range(0, CONST_REP_NUMBER):
-        print ''
+        print '\nGenerationg points for TAKE ' + str(repetition) + '...\n'
 
         subprocess.call(
             'echo "' + str(num_of_points) + ' ' + str(CONST_COORDINATE_RANGE)
@@ -118,7 +118,9 @@ for num_of_points in range(
         writer.writerow([num_of_points, key_value[value]/CONST_REP_NUMBER])
         ofile.close()
 
-
+print('\n--------------------------------------\n| ----------------------------------- |\n'
+      '| |COMPARISON COMPLETED SUCCESSFULLY| |'
+      '\n| ----------------------------------- |\n--------------------------------------\n')
 # subprocess.call('./plotter.py -c ' + str(CONST_COMB_NUMBER) + ' -w ' + str(CONST_STEP_WIDTH) + ' -s ' + str(CONST_STARTING_VALUE) +
 #                 ' -a ' + (" ".join(sys.argv[12:])) + ' sequential/convex_hull_graham_coordinate_sort', shell=True)
 subprocess.call('./plotter.py -c ' + str(CONST_COMB_NUMBER) + ' -w ' + str(CONST_STEP_WIDTH) + ' -s ' + str(CONST_STARTING_VALUE) +
