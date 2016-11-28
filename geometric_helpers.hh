@@ -4,6 +4,7 @@
 #define GEOMETRIC_HELPERS_HH
 
 #include <stdio.h>
+#include <vector>
 
 typedef long long int LL;
 
@@ -30,6 +31,8 @@ struct POINT {
 		printf("%d %d\n", x, y);
 	}
 };
+
+typedef std::vector<POINT*> POINTS;
 
 // Function designating order with regards to coordinates of
 // pointers to points set.
