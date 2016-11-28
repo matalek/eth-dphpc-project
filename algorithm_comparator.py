@@ -62,6 +62,7 @@ subprocess.call('make clean', shell=True)
 subprocess.call('make', shell=True)
 subprocess.call('make -C generator/', shell=True)
 subprocess.call('mkdir -p log_files', shell=True)
+subprocess.call('mkdir -p logs_plots', shell=True)
 subprocess.call('(cd cgal && cmake .)', shell=True)
 subprocess.call('(cd cgal && make)', shell=True)
 
