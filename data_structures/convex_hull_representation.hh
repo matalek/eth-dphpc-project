@@ -33,11 +33,13 @@ public:
 
 	/*methods for commont tangent alg*/
 
-	virtual int find_rightmost_point() = 0;
-	virtual int find_leftmost_point() = 0;
-	virtual POINT* get_point(int index) = 0;
-	virtual int go_counter_clockwise(int index) = 0;
-	virtual int go_clockwise(int index) = 0;
+	virtual int find_rightmost_point(bool upper) = 0;
+	virtual int find_leftmost_point(bool upper) = 0;
+	virtual POINT* get_point(int index, bool upper) = 0;
+	virtual int go_counter_clockwise(int index, bool upper) = 0;
+	virtual int go_clockwise(int index, bool upper) = 0;
+	//virtual void merge_lower_hull(ConvexHullRepresentation &other_hull) = 0;
+	//virtual void merge_upper_hull(ConvexHullRepresentation &other_hull) = 0;
 
 protected:
 	int max_parallelism;

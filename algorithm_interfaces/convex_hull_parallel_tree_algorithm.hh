@@ -31,8 +31,9 @@ public:
 				working_points.push_back(points[i]);
 			}
 			// Calculating convex hull of the appropriate part of points.
-			shared_ptr<vector<POINT*> > convex_hull_points = sequential_algorithm->convex_hull(working_points);
-			partial_results[threads + id] = shared_ptr<ConvexHullRepresentation>(new R(convex_hull_points));
+			shared_ptr<vector<POINT*> > lower_hull_points = sequential_algorithm->lower_convex_hull(working_points);
+            shared_ptr<vector<POINT*> > upper_hull_points = sequential_algorithm->upper_convex_hull(working_points);
+			partial_results[threads + id] = shared_ptr<ConvexHullRepresentation>(new R(lower_hull_points,upper_hull_points));
 		}
 
 		int level = threads >> 1;
