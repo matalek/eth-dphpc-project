@@ -4,6 +4,7 @@
 #include <vector>
 #include <cassert>
 #include <memory>
+#include <omp.h>
 
 #include "../geometric_helpers.hh"
 #include "../merge_hull.hh"
@@ -74,18 +75,21 @@ public:
         return !tree;
     }
 
-protected:
-    const int max_parallelism = 1;
-
-private:
-
-public:
     pair<shared_ptr<HullTreeConvexHullRepresentation>, shared_ptr<HullTreeConvexHullRepresentation> > split(LL x0) {
         auto split_nodes = tree->split(x0);
         pair<shared_ptr<HullTreeConvexHullRepresentation>, shared_ptr<HullTreeConvexHullRepresentation> > res;
         return make_pair(shared_ptr<HullTreeConvexHullRepresentation>(new HullTreeConvexHullRepresentation(split_nodes.first)),
                 shared_ptr<HullTreeConvexHullRepresentation>(new HullTreeConvexHullRepresentation(split_nodes.second)));
     }
+
+    static shared_ptr<HullTreeConvexHullRepresentation> merge_non_empty_hulls(vector<shared_ptr<HullTreeConvexHullRepresentation> >& hulls) {
+        omp_set_nested(1);
+        return shared_ptr<HullTreeConvexHullRepresentation>(
+                new HullTreeConvexHullRepresentation(HullTreeNode::merge_non_empty_hulls(hulls, 0, hulls.size() - 1)));
+    }
+
+protected:
+    const int max_parallelism = 1;
 
 private:
 
@@ -95,6 +99,8 @@ private:
     // ----- Auxiliary class for node representation ----
     class HullTreeNode : public std::enable_shared_from_this<HullTreeNode> {
     public:
+        HullTreeNode() { }
+
         HullTreeNode(shared_ptr<vector<POINT*> > points, int start, int end) {
             int n = end - start + 1;
 
@@ -103,8 +109,8 @@ private:
                 point = points->at(start);
                 d = 1;
             } else {
-                int l = 1;
                 // Finding approximately half of the points number.
+                int l = 1;
                 while (l << 1 < n) {
                     l <<= 1;
                 }
@@ -132,6 +138,46 @@ private:
 
         HullTreeNode(const HullTreeNode& tree) : d(tree.d), point(tree.point), left(tree.left), right(tree.right),
                 most_left(tree.most_left), most_right(tree.most_right), prev(tree.prev), succ(tree.succ) { }
+
+        static shared_ptr<HullTreeNode> merge_non_empty_hulls(const vector<shared_ptr<HullTreeConvexHullRepresentation> >& hulls, 
+                int start, int end) {
+            int n = end - start + 1;
+
+            printf("merge %d %d\n", start, end);
+
+            if (n == 1) {
+                return hulls[start]->tree;
+            }
+
+            // Finding approximately half of the hulls number.
+            int l = 1;
+            while (l << 1 < n) {
+                l <<= 1;
+            }
+
+            shared_ptr<HullTreeNode> res = shared_ptr<HullTreeNode>(new HullTreeNode());
+            printf("before\n");
+            #pragma omp parallel num_threads(2)
+            {
+            // for (int id = 0; id < 2; id++) {
+                int id = omp_get_thread_num();
+                printf("%d %d\n", start, id);
+                if (id) {
+                    res->left = merge_non_empty_hulls(hulls, start, start + l - 1);
+                } else {
+                    res->right = merge_non_empty_hulls(hulls, start + l, end);
+                }
+
+            }
+
+            printf("out merge %d %d\n", start, end);
+
+            res->update_values();
+            res->left->most_right->succ = res->right->most_left;
+            res->right->most_left->prev = res->left->most_right;
+            printf("out out merge %d %d\n", start, end);
+            return res;
+        }
 
         // We call this method resursively, going alond the path looking for x0.
         // Returns original and copy of the node on the path.
@@ -185,18 +231,18 @@ private:
                     copy->right = rec.second;
                     copy->left = nullptr;
                 }
-                // print();         
-                if (empty()) {
-                    me = nullptr;
-                } else {
-                    update_values();
-                }
+            }
 
-                if (copy->empty()) {
-                    copy = nullptr;
-                } else {
-                    copy->update_values();
-                }
+            if (empty()) {
+                me = nullptr;
+            } else {
+                update_values();
+            }
+
+            if (copy->empty()) {
+                copy = nullptr;
+            } else {
+                copy->update_values();
             }
 
             return make_pair(me, copy);
@@ -234,7 +280,7 @@ private:
     private:
         // Updates values for node based on its children.
         void update_values() {
-            if (!left || !right) {
+            if (!left && !right) {
                 return;
             }
             most_left = left ? left->most_left : right->most_left;
