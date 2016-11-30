@@ -77,9 +77,7 @@ public:
 		}
 		numbers[n - 1] = sum_all;
 
-		// printf("%d\n", cur);
-
-		// v.push_back(sum_all);
+		delete[] v;
 	}
 };
 

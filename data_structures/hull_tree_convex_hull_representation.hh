@@ -7,6 +7,7 @@
 #include <omp.h>
 
 #include "../geometric_helpers.hh"
+#include "../parallel_helper.hh"
 #include "../merge_hull.hh"
 #include "convex_hull_representation.hh"
 
@@ -82,10 +83,45 @@ public:
                 shared_ptr<HullTreeConvexHullRepresentation>(new HullTreeConvexHullRepresentation(split_nodes.second)));
     }
 
-    static shared_ptr<HullTreeConvexHullRepresentation> merge_non_empty_hulls(vector<shared_ptr<HullTreeConvexHullRepresentation> >& hulls) {
+    // Merges hull trees, some of which might be empty. This method does not remove
+    // any points - it only creates a simple union of points.
+    static shared_ptr<HullTreeConvexHullRepresentation> merge_hulls(shared_ptr<HullTreeConvexHullRepresentation>* hulls, int n) {
+        int* sum = new int[n];
+        #pragma omp parallel num_threads(n)
+        {
+            int id = omp_get_thread_num();
+            sum[id] = !(hulls[id]->empty());
+        }
+
+        ParallelHelper::prefix_sum(sum, n);
+        int non_empty_cnt = sum[n - 1];
+
+        shared_ptr<HullTreeConvexHullRepresentation>* non_empty =
+                new shared_ptr<HullTreeConvexHullRepresentation>[non_empty_cnt];
+
+        #pragma omp parallel num_threads(n)
+        {
+            int id = omp_get_thread_num();
+            if (!hulls[id]->empty()) {
+                non_empty[sum[id] - 1] = hulls[id];
+            }
+        }
+
+
+        shared_ptr<HullTreeConvexHullRepresentation> res = merge_non_empty_hulls(non_empty, non_empty_cnt);
+
+        delete [] sum;
+        delete [] non_empty;
+
+        return res;
+    }
+
+    // Merges hulls, which are non-empty. As above - it only creates union, without
+    // executing tangent lines algorithm.
+    static shared_ptr<HullTreeConvexHullRepresentation> merge_non_empty_hulls(shared_ptr<HullTreeConvexHullRepresentation>* hulls, int n) {
         omp_set_nested(1);
         return shared_ptr<HullTreeConvexHullRepresentation>(
-                new HullTreeConvexHullRepresentation(HullTreeNode::merge_non_empty_hulls(hulls, 0, hulls.size() - 1)));
+                new HullTreeConvexHullRepresentation(HullTreeNode::merge_non_empty_hulls(hulls, 0, n - 1)));
     }
 
 protected:
@@ -139,11 +175,9 @@ private:
         HullTreeNode(const HullTreeNode& tree) : d(tree.d), point(tree.point), left(tree.left), right(tree.right),
                 most_left(tree.most_left), most_right(tree.most_right), prev(tree.prev), succ(tree.succ) { }
 
-        static shared_ptr<HullTreeNode> merge_non_empty_hulls(const vector<shared_ptr<HullTreeConvexHullRepresentation> >& hulls, 
+        static shared_ptr<HullTreeNode> merge_non_empty_hulls(shared_ptr<HullTreeConvexHullRepresentation>* hulls,
                 int start, int end) {
             int n = end - start + 1;
-
-            printf("merge %d %d\n", start, end);
 
             if (n == 1) {
                 return hulls[start]->tree;
@@ -156,26 +190,19 @@ private:
             }
 
             shared_ptr<HullTreeNode> res = shared_ptr<HullTreeNode>(new HullTreeNode());
-            printf("before\n");
             #pragma omp parallel num_threads(2)
             {
-            // for (int id = 0; id < 2; id++) {
                 int id = omp_get_thread_num();
-                printf("%d %d\n", start, id);
                 if (id) {
                     res->left = merge_non_empty_hulls(hulls, start, start + l - 1);
                 } else {
                     res->right = merge_non_empty_hulls(hulls, start + l, end);
                 }
-
             }
-
-            printf("out merge %d %d\n", start, end);
 
             res->update_values();
             res->left->most_right->succ = res->right->most_left;
             res->right->most_left->prev = res->left->most_right;
-            printf("out out merge %d %d\n", start, end);
             return res;
         }
 
@@ -190,7 +217,7 @@ private:
                     // Should only happen when all the points in the tree have x-coordintae greater
                     // than x0. Then we are first point.
                     me = nullptr;
-                } else {        
+                } else {
                     if (succ != nullptr) {
                         succ->prev = nullptr;
                     }
@@ -201,14 +228,14 @@ private:
             } else if (!left) {
                 // Going only right.
                 auto rec = right->split(x0);
-                
+
                 right = rec.first;
 
                 copy->right = rec.second;
             } else if (!right) {
                 // Going only left.
                 auto rec = left->split(x0);
-                
+
                 left = rec.first;
 
                 copy->left = rec.second;
@@ -293,11 +320,11 @@ private:
         }
 
         int d;
-        POINT* point; // Not null only for leafs;
+        POINT* point = nullptr; // Not null only for leafs;
         shared_ptr<HullTreeNode> left, right;
         // most_left corresponds to m from the data structure description. We keep
         // also most_right to enable calculating prev and succ efficiently.
-        shared_ptr<HullTreeNode> most_left, most_right; 
+        shared_ptr<HullTreeNode> most_left, most_right;
         // Not null only for leafs.
         shared_ptr<HullTreeNode> prev, succ;
     };
