@@ -16,8 +16,11 @@
 #include "sequential/graham_algorithm.hh"
 #include "sequential/andrew_algorithm.hh"
 
-#include "simple_parallel/simple_parallel_algorithm.hh"
+#include "naive_parallel/naive_parallel_algorithm.hh"
 #include "algorithm_interfaces/convex_hull_parallel_tree_algorithm.hh"
+
+#include "simple_parallel/simple_parallel_algorithm.hh"
+#include "algorithm_interfaces/convex_hull_parallel_simple_algorithm.hh"
 
 using namespace std;
 using namespace std::chrono;
@@ -37,7 +40,9 @@ ConvexHullAlgorithm* load_algorithm(char* argv[]) {
 		algorithm = new AndrewAlgorithm();
 	} else if (name == "SequentialGraham") {
 		algorithm = new GrahamAlgorithm();
-	}  else if (name == "SimpleParallel") {
+	} else if (name == "NaiveParallel") {
+		algorithm = new NaiveParallelAlgorithm(atoi(argv[2]));
+	} else if (name == "SimpleParallel") {
 		algorithm = new SimpleParallelAlgorithm(atoi(argv[2]));
 	} else {
 		assert(false && "No algorithm found with this name");
@@ -69,7 +74,7 @@ int main(int argc, char* argv[]) {
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
 	printf("TIME: ");
-	printf("%lld", duration_cast<microseconds>( t2 - t1 ).count());
+	printf("%ld", duration_cast<microseconds>( t2 - t1 ).count());
 
 	printf("\n%lu\n", convex_hull_points->size());
 	for (POINT* point : (*convex_hull_points)) {
