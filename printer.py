@@ -5,10 +5,10 @@ import sys
 import time
 import subprocess
 
-my_alg = sys.argv[1] + ' ' + sys.argv[2]
+my_alg = sys.argv[1]
 
 alg = []
-alg.append(subprocess.check_output('cat tmp.log | ./tester ' + my_alg, shell=True))
+alg.append(subprocess.check_output('cat tmp.log | ./tester ' + (' ').join(my_alg.split(':')), shell=True))
 alg.append(subprocess.check_output('cat tmp.log | ./cgal/cgal_graham_andrew', shell=True))
 
 
