@@ -123,20 +123,62 @@ public:
 					left_n_right[id].second = rightmost;
 				}
 			}
+			#pragma omp barrier
+			//Check not single point under line		
+			if(leftmost == rightmost){
+
+				POINT* curr_point = partial_results[id] -> get_point(leftmost);
+				for(int i = 0; i < id; i++){
+					for(int j = id+1; j < threads; j++){
+						POINT* left_sider = partial_results[i] -> get_point(left_n_right[i].second);
+						POINT* right_sider = partial_results[j] -> get_point(left_n_right[j].first);
+
+						double y_diff = (right_sider->y - left_sider->y);
+						double x_diff = (right_sider->x - left_sider->x);
+						double m = y_diff/x_diff;
+						//build line and check wether point stands under it
+						double curr_x = (curr_point->x - right_sider->x);
+						double line_y = (m)*(curr_x) + right_sider->y;
+
+						if(isUpper){
+
+							if((long)line_y >= curr_point->y){
+								position_array[id] = 0;
+
+							}
+						}
+						else{
+//if(id==4){
+//printf("\nLEFTNRIGHT id: %d\n", id);
+//left_sider->print();
+//right_sider->print();
+//curr_point->print();
+//printf("Y=%f",line_y);
+//printf("COND%d\n", (long)line_y <= curr_point->y);
+//}
+
+							if((long)line_y <= curr_point->y){
+//if(id==4){
+//printf("KILLER=%f",line_y);
+//}
+								position_array[id] = 0;
+							}
+						}
+					}
+				}
+			}
 		}
 
 		//Build the final position array result
 		int accumulator = 0;
-		final_position_array[0] = 0;
 
 		for(int i = 0; i < threads; i++){
+			final_position_array[i] = accumulator;
 			accumulator += position_array[i];
-			final_position_array[i+1] = accumulator;
 		}
 
 		//Declare points array for final result
 		shared_ptr<vector<POINT*> > result_points = shared_ptr<vector<POINT*> >(new vector<POINT*>(accumulator));
-		//vector<POINT*> final_result(accumulator);
 
 		#pragma omp parallel num_threads(threads)
 		{
@@ -146,14 +188,18 @@ public:
 			int start_index = final_position_array[id];
 			//start writing from leftmost point
 			int leftmost = left_n_right[id].first;
+			//Check if single point not under line
 
+//printf("\nid: %d, POINTS:\n",id);
 			if(isUpper){
 				for(int i = 0; i < position_array[id]; i++){
+
 					result_points -> at(i + start_index) = partial_results[id] -> get_point(leftmost - i);
 				}
 			}
 			else{
 				for(int i = 0; i < position_array[id]; i++){
+//(partial_results[id] -> get_point(leftmost + i))->print();
 					result_points -> at(i + start_index) = partial_results[id] -> get_point(leftmost + i);
 				}
 			}
