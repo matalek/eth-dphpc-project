@@ -6,14 +6,13 @@
 #include <string>
 
 #include "geometric_helpers.hh"
-#include "merge_hull.hh"
 
 #include "algorithm_interfaces/convex_hull_sequential_algorithm.hh"
 #include "algorithm_interfaces/convex_hull_parallel_algorithm.hh"
 #include "data_structures/convex_hull_representation.hh"
 #include "data_structures/vector_convex_hull_representation.hh"
+#include "data_structures/hull_wrapper.hh"
 
-#include "sequential/graham_algorithm.hh"
 #include "sequential/andrew_algorithm.hh"
 
 #include "simple_parallel/simple_parallel_algorithm.hh"
@@ -35,8 +34,6 @@ ConvexHullAlgorithm* load_algorithm(char* argv[]) {
 	string name = (string) argv[1];
 	if (name == "Sequential") {
 		algorithm = new AndrewAlgorithm();
-	} else if (name == "SequentialGraham") {
-		algorithm = new GrahamAlgorithm();
 	}  else if (name == "SimpleParallel") {
 		algorithm = new SimpleParallelAlgorithm(atoi(argv[2]));
 	} else {
@@ -46,7 +43,7 @@ ConvexHullAlgorithm* load_algorithm(char* argv[]) {
 }
 
 int main(int argc, char* argv[]) {
-	// Number of points.
+    // Number of points.
 	int n;
 	scanf("%d", &n);
 
@@ -59,20 +56,19 @@ int main(int argc, char* argv[]) {
 		points[i] = POINT(x, y);
 		points_pointers[i] = &points[i];
 	}
-
 	ConvexHullAlgorithm* algorithm;
 	algorithm = load_algorithm(argv);
-
 	//computing exec time (could find better way)
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	shared_ptr<vector<POINT*> > convex_hull_points = algorithm->convex_hull(points_pointers);
+	shared_ptr<HullWrapper> convex_hull_points = shared_ptr<HullWrapper>(algorithm->convex_hull(points_pointers));
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
 	printf("TIME: ");
 	printf("%lld", duration_cast<microseconds>( t2 - t1 ).count());
 
-	printf("\n%lu\n", convex_hull_points->size());
-	for (POINT* point : (*convex_hull_points)) {
+	shared_ptr<vector<POINT*>> result = convex_hull_points->get_points();
+	printf("\n%lu\n", result->size());
+	for (POINT* point : (*result)) {
 		point->print();
 	}
 
