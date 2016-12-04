@@ -10,15 +10,15 @@
 #include "../geometric_helpers.hh"
 #include "../merge_hull.hh"
 #include "../sequential/andrew_algorithm.hh"
-#include "../algorithm_interfaces/convex_hull_parallel_tree_algorithm.hh"
+#include "../algorithm_interfaces/convex_hull_parallel_simple_algorithm.hh"
 
 using namespace std;
 
-class SimpleParallelAlgorithm : public ConvexHullParallelTreeAlgorithm<VectorConvexHullRepresentation> {
+class SimpleParallelAlgorithm : public ConvexHullParallelSimpleAlgorithm<VectorConvexHullRepresentation> {
 
 public:
 	SimpleParallelAlgorithm(int threads) 
-			: ConvexHullParallelTreeAlgorithm(threads) { }
+			: ConvexHullParallelSimpleAlgorithm(threads) { }
 };
 
 #endif // SIMPLE_PARALLEL
