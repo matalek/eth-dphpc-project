@@ -17,16 +17,17 @@ public:
 		: ConvexHullParallelAlgorithm(threads) { }
 
 	// Function which calculates a convex hull of a given points set.
-	shared_ptr<vector<POINT*> > convex_hull(vector<POINT*>& points) override {
-		
-		
+	shared_ptr<HullWrapper> convex_hull(vector<POINT*>& points) override {
+
 		shared_ptr<vector<POINT*> > upper_points = convex_points(points,1);
 		shared_ptr<vector<POINT*> > lower_points = convex_points(points,0);
-		for(unsigned int i = (lower_points.get() -> size()) - 2; i > 0 ; i--){
-			upper_points.get() -> push_back(lower_points -> at(i));
-		}
-		
-		return upper_points;
+//		for(unsigned int i = (lower_points.get() -> size()) - 2; i > 0 ; i--){
+//			upper_points.get() -> push_back(lower_points -> at(i));
+//		}
+		shared_ptr<VectorConvexHullRepresentation> lower_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(lower_points,false));
+		shared_ptr<VectorConvexHullRepresentation> upper_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(upper_points,true));
+		shared_ptr<HullWrapper> ret = shared_ptr<HullWrapper>(new HullWrapper(upper_hull, lower_hull));
+		return ret;
 	}
 
 
@@ -55,7 +56,7 @@ public:
 			else{
 				convex_hull_points = sequential_algorithm->lower_convex_hull(working_points);
 			}
-			partial_results[id] = shared_ptr<ConvexHullRepresentation>(new R(convex_hull_points));
+			partial_results[id] = shared_ptr<ConvexHullRepresentation>(new R(convex_hull_points, isUpper));
 
 			int leftmost = partial_results[id] -> find_leftmost_point();
 			int rightmost = partial_results[id] -> find_rightmost_point();
