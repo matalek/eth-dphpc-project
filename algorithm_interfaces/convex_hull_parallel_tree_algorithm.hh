@@ -17,10 +17,10 @@ public:
 		: ConvexHullParallelAlgorithm(threads) { }
 
 	// Function which calculates a convex hull of a given points set.
-	shared_ptr<vector<POINT*> > convex_hull(vector<POINT*>& points) override {
+	shared_ptr<HullWrapper> convex_hull(vector<POINT*>& points) override {
 		int n = points.size();
 
-		shared_ptr<ConvexHullRepresentation> partial_results[2 * threads];
+		shared_ptr<HullWrapper> partial_results[2 * threads];
 		#pragma omp parallel num_threads(threads)
 		{
 			int id = omp_get_thread_num();
@@ -31,8 +31,11 @@ public:
 				working_points.push_back(points[i]);
 			}
 			// Calculating convex hull of the appropriate part of points.
-			shared_ptr<vector<POINT*> > convex_hull_points = sequential_algorithm->convex_hull(working_points);
-			partial_results[threads + id] = shared_ptr<ConvexHullRepresentation>(new R(convex_hull_points));
+			//shared_ptr<vector<POINT*> > lower_hull_points = sequential_algorithm->lower_convex_hull(working_points);
+            //shared_ptr<vector<POINT*> > upper_hull_points = sequential_algorithm->upper_convex_hull(working_points);
+            //partial_results[threads + id] = shared_ptr<HullWrapper>(sequential_algorithm->convex_hull(working_points));
+			//shared_ptr<HullWrapper> hull_points = sequential_algorithm->convex_hull(working_points);
+            partial_results[threads + id] =  sequential_algorithm->convex_hull(working_points);
 		}
 
 		int level = threads >> 1;
@@ -42,12 +45,12 @@ public:
 				// Merging threads from level * 2.
 				int id = omp_get_thread_num();
 				int pos = level + id; // Position in results tree.
-				partial_results[level + id] = partial_results[pos << 1]->merge(partial_results[(pos << 1) + 1]);
+				partial_results[pos << 1]->merge(partial_results[(pos << 1) + 1]);
+				partial_results[level + id] = partial_results[pos << 1];
 			}
 			level >>= 1;
 		}
-
-		return partial_results[1]->get_points();
+		return partial_results[1];
 	}
 
 private:

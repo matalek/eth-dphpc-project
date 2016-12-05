@@ -13,10 +13,10 @@
 #include "data_structures/convex_hull_representation.hh"
 #include "data_structures/vector_convex_hull_representation.hh"
 
-#include "sequential/graham_algorithm.hh"
 #include "sequential/andrew_algorithm.hh"
 
 #include "simple_parallel/simple_parallel_algorithm.hh"
+#include "naive_parallel/naive_parallel_algorithm.hh"
 #include "algorithm_interfaces/convex_hull_parallel_tree_algorithm.hh"
 
 using namespace std;
@@ -35,9 +35,9 @@ ConvexHullAlgorithm* load_algorithm(char* argv[]) {
 	string name = (string) argv[1];
 	if (name == "Sequential") {
 		algorithm = new AndrewAlgorithm();
-	} else if (name == "SequentialGraham") {
-		algorithm = new GrahamAlgorithm();
-	}  else if (name == "SimpleParallel") {
+	} else if (name == "NaiveParallel") {
+		algorithm = new NaiveParallelAlgorithm(atoi(argv[2]));
+	} else if (name == "SimpleParallel") {
 		algorithm = new SimpleParallelAlgorithm(atoi(argv[2]));
 	} else {
 		assert(false && "No algorithm found with this name");
@@ -65,17 +65,16 @@ int main(int argc, char* argv[]) {
 
 	//computing exec time (could find better way)
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	shared_ptr<vector<POINT*> > convex_hull_points = algorithm->convex_hull(points_pointers);
+    shared_ptr<HullWrapper> convex_hull_points = shared_ptr<HullWrapper>(algorithm->convex_hull(points_pointers));
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
 	printf("TIME: ");
-	printf("%lld", duration_cast<microseconds>( t2 - t1 ).count());
-
-	printf("\n%lu\n", convex_hull_points->size());
-	for (POINT* point : (*convex_hull_points)) {
-		point->print();
-	}
-
+	printf("%ld", duration_cast<microseconds>( t2 - t1 ).count());
+    shared_ptr<vector<POINT*>> result = convex_hull_points->get_points();
+    printf("\n%lu\n", result->size());
+    for (POINT* point : (*result)) {
+        point->print();
+    }
 	delete(algorithm);
 
 	return 0;

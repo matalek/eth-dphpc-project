@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include "../geometric_helpers.hh"
+#include "../data_structures/hull_wrapper.hh"
 
 using namespace std;
 
@@ -12,7 +13,7 @@ class ConvexHullAlgorithm {
 public:
 	virtual ~ConvexHullAlgorithm() { };
 
-	virtual shared_ptr<vector<POINT*> > convex_hull(vector<POINT*>&) = 0;
+	virtual shared_ptr<HullWrapper> convex_hull(vector<POINT*>&) = 0;
 
 };
 
