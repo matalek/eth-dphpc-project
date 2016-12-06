@@ -18,11 +18,9 @@ public:
 
 	// Function which calculates a convex hull of a given points set.
 	shared_ptr<HullWrapper> convex_hull(vector<POINT*>& points) override {
-		shared_ptr<vector<POINT*> > upper_points = convex_points(points,1);
-		shared_ptr<vector<POINT*> > lower_points = convex_points(points,0);
 
-		shared_ptr<VectorConvexHullRepresentation> lower_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(lower_points,false));
-		shared_ptr<VectorConvexHullRepresentation> upper_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(upper_points,true));
+		shared_ptr<VectorConvexHullRepresentation> lower_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(convex_points(points,0),false));
+		shared_ptr<VectorConvexHullRepresentation> upper_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(convex_points(points,1),true));
 		shared_ptr<HullWrapper> ret = shared_ptr<HullWrapper>(new HullWrapper(upper_hull, lower_hull));
 		return ret;
 	}
@@ -42,7 +40,6 @@ public:
 		{	
 			// Computing the separate convex hulls
 			int id = omp_get_thread_num();
-			// Calculating part of points for the given thread.
 			pair<int, int> range = get_range(n, id);
 			vector<POINT*> working_points;
 			for (int i = range.first; i < range.second; i++) {
@@ -58,6 +55,8 @@ public:
 			}
 
 			partial_results[id] = shared_ptr<ConvexHullRepresentation>(new R(convex_hull_points, isUpper));
+
+			// Partial convex hulls built
 
 			int leftmost = partial_results[id] -> find_leftmost_point();
 			int rightmost = partial_results[id] -> find_rightmost_point();
@@ -79,9 +78,7 @@ public:
 
 					//Current element is at right of the alanyzed ch
 						tangent = findUpperT(*partial_results[i], *partial_results[id]);
-						POINT* first = partial_results[i] -> get_point(tangent.first);
-						POINT* second = partial_results[id] -> get_point(tangent.second);
-						double m = ((double)(first->y - second->y ))/ (double)(first->x - second->x);
+						double m = angular_coefficient(tangent, *partial_results[i], *partial_results[id]);
 						//hulls rep counterclockwise
 						if(tangent.second < leftmost){
 							leftmost = tangent.second;
@@ -95,9 +92,7 @@ public:
 
 					//Current element is at left of the alanyzed ch
 						tangent = findUpperT(*partial_results[id], *partial_results[i]);
-						POINT* first = partial_results[id] -> get_point(tangent.first);
-						POINT* second = partial_results[i] -> get_point(tangent.second);
-						double m = ((double)(first->y - second->y ))/ (double)(first->x - second->x);
+						double m = angular_coefficient(tangent, *partial_results[id], *partial_results[i]);
 						if(tangent.first > rightmost){
 							rightmost = tangent.first;
 							steepest_right = m;
@@ -112,9 +107,7 @@ public:
 					if(i < id){
 					//Current element is at right
 						tangent = findLowerT(*partial_results[i], *partial_results[id]);
-						POINT* first = partial_results[i] -> get_point(tangent.first);
-						POINT* second = partial_results[id] -> get_point(tangent.second);
-						double m = ((long double)(first->y - second->y ))/ (long double)(first->x - second->x);
+						double m = angular_coefficient(tangent, *partial_results[i], *partial_results[id]);
 						//hulls rep counterclockwise
 						if(tangent.second > leftmost){
 							leftmost = tangent.second;
@@ -126,9 +119,7 @@ public:
 					}
 					if(id < i){
 						tangent = findLowerT(*partial_results[id], *partial_results[i]);
-						POINT* first = partial_results[id] -> get_point(tangent.first);
-						POINT* second = partial_results[i] -> get_point(tangent.second);
-						double m = ((long double)(first->y - second->y ))/ (long double)(first->x - second->x);
+						double m = angular_coefficient(tangent, *partial_results[id], *partial_results[i]);
 						if(tangent.first < rightmost){
 							rightmost = tangent.first;
 							steepest_right_down = m;
@@ -163,15 +154,12 @@ public:
 					left_n_right[id].second = rightmost;
 				}
 			}
-			#pragma omp barrier
 			//Check not single point under line		
 			if(leftmost == rightmost){
-//printf("id: %d, %lld, %lld\n", id, line_y, curr_point->y);
 				// Check if steepest lines form angle < 180'
 				if(isUpper){
 					if(steepest_left <= steepest_right){
 						position_array[id] = 0;
-//printf("X");
 					}
 				}
 				else{
@@ -216,7 +204,13 @@ public:
 
 		return result_points;
 	}
-
+private:
+	double angular_coefficient(pair<int,int> tangent, ConvexHullRepresentation &hullA, ConvexHullRepresentation &hullB){
+		POINT* first = hullA.get_point(tangent.first);
+		POINT* second = hullB.get_point(tangent.second);
+		double m = ((long double)(first->y - second->y )) / (long double)(first->x - second->x);
+		return m;
+}
 private:
 	pair<int, int> get_range(int n, int id) {
 		int batch_size = n / threads;
