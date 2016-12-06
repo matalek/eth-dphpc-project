@@ -15,11 +15,9 @@ using namespace std;
 class ConvexHullRepresentation {
 
 public:
+
+	ConvexHullRepresentation(bool upper) : upper(upper) { };
 	virtual ~ConvexHullRepresentation() { };
-
-	//virtual shared_ptr<ConvexHullRepresentation> merge(shared_ptr<ConvexHullRepresentation>) = 0;
-
-	virtual shared_ptr<vector<POINT*> > get_hull() = 0;
 
 	int get_max_parallelism() {
 		return max_parallelism;
@@ -31,6 +29,11 @@ public:
 		this->parallelism = parallelism;
 	}
 
+	bool is_upper() {
+		return upper;
+	}
+
+	virtual void merge(shared_ptr<ConvexHullRepresentation> hull) = 0;
 	/*methods for commont tangent alg*/
 
 	virtual int find_rightmost_point() = 0;
@@ -38,12 +41,13 @@ public:
 	virtual POINT* get_point(int index) = 0;
 	virtual int go_counter_clockwise(int index) = 0;
 	virtual int go_clockwise(int index) = 0;
-	//virtual void merge_lower_hull(ConvexHullRepresentation &other_hull) = 0;
-	//virtual void merge_upper_hull(ConvexHullRepresentation &other_hull) = 0;
+	virtual	shared_ptr<vector<POINT*>> get_hull() = 0;
+
 
 protected:
 	int max_parallelism;
 	int parallelism = 1;
+	bool upper;
 };
 
 #endif // CONVEX_HULL_REPRESENTATION

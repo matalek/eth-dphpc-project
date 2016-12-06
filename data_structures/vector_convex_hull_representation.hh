@@ -16,26 +16,20 @@ class VectorConvexHullRepresentation : public ConvexHullRepresentation {
 public:
 
     VectorConvexHullRepresentation(shared_ptr<vector<POINT*>> hull, bool upper)
-            : hull(hull), upper(upper){};
+            :  ConvexHullRepresentation(upper),hull(hull){};
 
-	//VectorConvexHullRepresentation(shared_ptr<vector<POINT*> > lower_hull, shared_ptr<vector<POINT*> > upper_hull)
-	//		: lower_hull(lower_hull),upper_hull(upper_hull) {};
-
-	void merge(shared_ptr<VectorConvexHullRepresentation> other_hull) {
-		//shared_ptr<VectorConvexHullRepresentation> hull_vector = std::static_pointer_cast<VectorConvexHullRepresentation>(hull);
-		//assert(hull_vector != nullptr && "Merging two different subclasses");
+	void merge(shared_ptr<ConvexHullRepresentation> hull) {
+		shared_ptr<VectorConvexHullRepresentation> other_hull = std::static_pointer_cast<VectorConvexHullRepresentation>(hull);
+		assert(other_hull != nullptr && "Merging two different subclasses");
 
         assert(other_hull->is_upper() == is_upper() && "Merging two different vectors");
 
-		//vector<POINT*> res_points = mergeHulls((*this), (*hull_vector));
 		if(other_hull->is_upper()) {
             merge_upper_hull((*other_hull));
         }
 		else {
             merge_lower_hull((*other_hull));
         }
-       //return shared_ptr<VectorConvexHullRepresentation>(
-		//		new VectorConvexHullRepresentation(shared_ptr<vector<POINT*> >(new vector<POINT*>(res_points))));
 	}
 
 	/*methods for commont tangent alg*/
@@ -64,10 +58,6 @@ public:
         return hull->at(index);
     }
 
-    bool is_upper() {
-        return upper;
-    }
-
 	void merge_lower_hull(VectorConvexHullRepresentation &other_hull) {
 		pair <int, int> low_tangent = findLowerT((*this), other_hull);
         vector<POINT*> mergedVector;
@@ -86,7 +76,7 @@ public:
         hull = shared_ptr<vector<POINT*> >(new vector<POINT*>(mergedVector));
 	}
 
-    shared_ptr<vector<POINT*>> get_hull() {
+    shared_ptr<vector<POINT*>> get_hull() override {
         return hull;
     }
 
@@ -96,8 +86,6 @@ protected:
 
 private:
 	shared_ptr<vector<POINT*>> hull;
-	bool upper;
-
 };
 
 #endif // VECTOR_CONVEX_HULL_REPRESENTATION
