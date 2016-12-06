@@ -28,7 +28,6 @@ public:
 
 	shared_ptr<vector<POINT*> > convex_points(vector<POINT*>& points, bool isUpper){
 		int type = isUpper ? 1 : -1;
-		int n = points.size();
 		shared_ptr<ConvexHullRepresentation> partial_results[threads];
 		// Array for the indexing, containing info on how many points each thread has to put in final result
 		int position_array[threads];
@@ -40,25 +39,11 @@ public:
 		// PARALLEL SECTION
 		#pragma omp parallel num_threads(threads)
 		{	
-			// Computing the separate convex hulls
-			int id = omp_get_thread_num();
-			pair<int, int> range = get_range(n, id);
-			vector<POINT*> working_points;
-			for (int i = range.first; i < range.second; i++) {
-				working_points.push_back(points[i]);
-			}
-			// Calculating convex hull of the appropriate part of points.
-			shared_ptr<vector<POINT*> > convex_hull_points;
 			
-			if(isUpper){
-				convex_hull_points = sequential_algorithm->upper_convex_hull(working_points);
-			}
-			else{
-				convex_hull_points = sequential_algorithm->lower_convex_hull(working_points);
-			}
+			int id = omp_get_thread_num();
 
-			partial_results[id] = shared_ptr<ConvexHullRepresentation>(new R(convex_hull_points, isUpper));
-
+			// Computing the separate convex hulls
+			partial_results[id] = build_sequential_hull(id, points, isUpper);
 			// Partial convex hulls built
 
 			int leftmost = partial_results[id] -> find_leftmost_point();
@@ -128,9 +113,9 @@ public:
 		//END OF SEQUENTIAL SECTION
 
 		// PARALLEL SECITON
-		// write points into final result
 		#pragma omp parallel num_threads(threads)
 		{
+			// write points into final vector
 			int id = omp_get_thread_num();
 			int start_index = final_position_array[id];
 			int leftmost = left_n_right[id].first;
@@ -140,8 +125,31 @@ public:
 				result_points -> at(start_position + (-type)*(i + start_index)) = partial_results[id] -> get_point(leftmost + (-type)*i);
 			}
 		}
+		// END OF PARALLEL SECITON
+
 		return result_points;
-	}
+}
+
+private:
+	shared_ptr<ConvexHullRepresentation> build_sequential_hull(int id, vector<POINT*>& points, bool isUpper){
+		int n = points.size();
+		pair<int, int> range = get_range(n, id);
+		vector<POINT*> working_points;
+		for (int i = range.first; i < range.second; i++) {
+			working_points.push_back(points[i]);
+		}
+		// Calculating convex hull of the appropriate part of points.
+		shared_ptr<vector<POINT*> > convex_hull_points;
+		
+		if(isUpper){
+			convex_hull_points = sequential_algorithm->upper_convex_hull(working_points);
+		}
+		else{
+			convex_hull_points = sequential_algorithm->lower_convex_hull(working_points);
+		}
+
+		return shared_ptr<ConvexHullRepresentation>(new R(convex_hull_points, isUpper));
+}
 
 private:
 	double angular_coefficient(pair<int,int> tangent, ConvexHullRepresentation &hullA, ConvexHullRepresentation &hullB){
