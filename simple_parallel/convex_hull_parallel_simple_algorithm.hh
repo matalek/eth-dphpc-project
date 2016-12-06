@@ -49,8 +49,8 @@ public:
 			int leftmost = partial_results[id] -> find_leftmost_point();
 			int rightmost = partial_results[id] -> find_rightmost_point();
 
-			double steepest_left = 4000000000;
-			double steepest_right = -4000000000;
+			double steepest_left = isUpper ? 4000000000 : -4000000000;
+			double steepest_right = isUpper ? -4000000000 : 4000000000;
 
 			#pragma omp barrier
 			
@@ -63,12 +63,11 @@ public:
 				int right_hull = max(i,id);
 				pair<int,int> tangent = isUpper ? findUpperT(*partial_results[left_hull], *partial_results[right_hull]) : findLowerT(*partial_results[left_hull], *partial_results[right_hull]);
 				double m = angular_coefficient(tangent, *partial_results[left_hull], *partial_results[right_hull]);
-				
 				if(i < id){
 				//Current element is at right of the alanyzed ch
 					if(type*tangent.second < type*leftmost){
 						leftmost = tangent.second;
-						steepest_left = m;
+						//steepest_left = m;
 					}
 					if(type*m < type*steepest_left){
 						steepest_left = m;
@@ -78,7 +77,7 @@ public:
 				//Current element is at left of the alanyzed ch
 					if(type*tangent.first > type*rightmost){
 						rightmost = tangent.first;
-						steepest_right = m;
+						//steepest_right = m;
 					}
 					if(type*m > type*steepest_right){
 						steepest_right = m;
