@@ -204,7 +204,7 @@ public:
 
 			if(isUpper){
 				for(int i = 0; i < position_array[id]; i++){
-					result_points -> at(i + start_index) = partial_results[id] -> get_point(leftmost - i);
+					result_points -> at(accumulator - 1 - (i + start_index)) = partial_results[id] -> get_point(leftmost - i);
 				}
 			}
 			else{
