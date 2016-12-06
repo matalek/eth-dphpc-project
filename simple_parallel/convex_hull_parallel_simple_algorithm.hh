@@ -71,22 +71,16 @@ public:
 			
 			//Find rightmost and leftmost for each pair
 			for(int i = 0; i < threads; i++){
-
-				pair<int,int> tangent;
-
-				//Upper hull
-				if(isUpper){
-					tangent = findUpperT(*partial_results[min(i,id)], *partial_results[max(i,id)]);
+				if(i==id){
+					continue;
 				}
-				//Lower hull
-				else{
-					tangent = findLowerT(*partial_results[min(i,id)], *partial_results[max(i,id)]);
-				}
-
+				int left_hull = min(i,id);
+				int right_hull = max(i,id);
+				pair<int,int> tangent = isUpper ? findUpperT(*partial_results[left_hull], *partial_results[right_hull]) : findLowerT(*partial_results[left_hull], *partial_results[right_hull]);
+				double m = angular_coefficient(tangent, *partial_results[left_hull], *partial_results[right_hull]);
+				
 				if(i < id){
 				//Current element is at right of the alanyzed ch
-					double m = angular_coefficient(tangent, *partial_results[i], *partial_results[id]);
-					//hulls rep counterclockwise
 					if(type*tangent.second < type*leftmost){
 						leftmost = tangent.second;
 						steepest_left = m;
@@ -95,9 +89,8 @@ public:
 						steepest_left = m;
 					}
 				}
-				if(id < i){
+				else{
 				//Current element is at left of the alanyzed ch
-					double m = angular_coefficient(tangent, *partial_results[id], *partial_results[i]);
 					if(type*tangent.first > type*rightmost){
 						rightmost = tangent.first;
 						steepest_right = m;
