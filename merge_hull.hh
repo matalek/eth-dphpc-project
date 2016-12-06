@@ -40,7 +40,7 @@ int lowerTangentB(ConvexHullRepresentation &hullA, ConvexHullRepresentation &hul
     POINT * u = hullB.get_point(hullB.go_counter_clockwise(bIndex));
     POINT * w = hullB.get_point(hullB.go_clockwise(bIndex));
     POINT * b = hullB.get_point(bIndex);
-    return !(turnRight(a, b, u) || turnRight(a, b, w));
+    return !turnRight(a, b, w) && turnLeft(a, b, u);
     //return upperTangentA(hullB, hullA, bIndex, aIndex);
 }
 
@@ -49,7 +49,7 @@ int upperTangentB(ConvexHullRepresentation &hullA, ConvexHullRepresentation &hul
     POINT * u = hullB.get_point(hullB.go_counter_clockwise(bIndex));
     POINT * w = hullB.get_point(hullB.go_clockwise(bIndex));
     POINT * b = hullB.get_point(bIndex);
-    return !(turnLeft(a, b, u) || turnLeft(a, b, w));
+    return !turnLeft(a, b, u) && turnRight(a, b, w);
 }
 
 int findLowerTangentA(ConvexHullRepresentation &hullA, ConvexHullRepresentation &hullB, int aIndex, int bIndex) {
