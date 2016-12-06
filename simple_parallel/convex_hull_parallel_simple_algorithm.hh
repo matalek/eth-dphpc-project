@@ -27,6 +27,7 @@ public:
 
 
 	shared_ptr<vector<POINT*> > convex_points(vector<POINT*>& points, bool isUpper){
+		int type = isUpper ? 1 : -1;
 		int n = points.size();
 		shared_ptr<ConvexHullRepresentation> partial_results[threads];
 		// Array for the indexing, containing info on how many points each thread has to put in final result
@@ -36,6 +37,7 @@ public:
 		// Array to store leftmost and rightmost points of each separate hull
 		pair<int,int> left_n_right[threads];
 
+		// PARALLEL SECTION
 		#pragma omp parallel num_threads(threads)
 		{	
 			// Computing the separate convex hulls
@@ -47,6 +49,7 @@ public:
 			}
 			// Calculating convex hull of the appropriate part of points.
 			shared_ptr<vector<POINT*> > convex_hull_points;
+			
 			if(isUpper){
 				convex_hull_points = sequential_algorithm->upper_convex_hull(working_points);
 			}
@@ -63,116 +66,65 @@ public:
 
 			double steepest_left = 4000000000;
 			double steepest_right = -4000000000;
-			double steepest_left_down = -4000000000;
-			double steepest_right_down = 4000000000;
 
 			#pragma omp barrier
-
+			
 			//Find rightmost and leftmost for each pair
 			for(int i = 0; i < threads; i++){
 
 				pair<int,int> tangent;
 
+				//Upper hull
 				if(isUpper){
-					if(i < id){
-
-					//Current element is at right of the alanyzed ch
-						tangent = findUpperT(*partial_results[i], *partial_results[id]);
-						double m = angular_coefficient(tangent, *partial_results[i], *partial_results[id]);
-						//hulls rep counterclockwise
-						if(tangent.second < leftmost){
-							leftmost = tangent.second;
-							steepest_left = m;
-						}
-						if(m <= steepest_left){
-							steepest_left = m;
-						}
-					}
-					if(id < i){
-
-					//Current element is at left of the alanyzed ch
-						tangent = findUpperT(*partial_results[id], *partial_results[i]);
-						double m = angular_coefficient(tangent, *partial_results[id], *partial_results[i]);
-						if(tangent.first > rightmost){
-							rightmost = tangent.first;
-							steepest_right = m;
-						}
-						if(m >= steepest_right){
-							steepest_right = m;
-						}
-					}
+					tangent = findUpperT(*partial_results[min(i,id)], *partial_results[max(i,id)]);
 				}
 				//Lower hull
 				else{
-					if(i < id){
-					//Current element is at right
-						tangent = findLowerT(*partial_results[i], *partial_results[id]);
-						double m = angular_coefficient(tangent, *partial_results[i], *partial_results[id]);
-						//hulls rep counterclockwise
-						if(tangent.second > leftmost){
-							leftmost = tangent.second;
-							steepest_left_down = m;
-						}
-						if(m >= steepest_left_down){
-							steepest_left_down = m;
-						}
+					tangent = findLowerT(*partial_results[min(i,id)], *partial_results[max(i,id)]);
+				}
+
+				if(i < id){
+				//Current element is at right of the alanyzed ch
+					double m = angular_coefficient(tangent, *partial_results[i], *partial_results[id]);
+					//hulls rep counterclockwise
+					if(type*tangent.second < type*leftmost){
+						leftmost = tangent.second;
+						steepest_left = m;
 					}
-					if(id < i){
-						tangent = findLowerT(*partial_results[id], *partial_results[i]);
-						double m = angular_coefficient(tangent, *partial_results[id], *partial_results[i]);
-						if(tangent.first < rightmost){
-							rightmost = tangent.first;
-							steepest_right_down = m;
-						}
-						if(m <= steepest_right_down){
-							steepest_right_down = m;
-						}
+					if(type*m < type*steepest_left){
+						steepest_left = m;
+					}
+				}
+				if(id < i){
+				//Current element is at left of the alanyzed ch
+					double m = angular_coefficient(tangent, *partial_results[id], *partial_results[i]);
+					if(type*tangent.first > type*rightmost){
+						rightmost = tangent.first;
+						steepest_right = m;
+					}
+					if(type*m > type*steepest_right){
+						steepest_right = m;
 					}
 				}
 			}
 
 			//Find if current ch takes part to final hull
-			if(isUpper){
-				//Remove the current hull if not in final
-				if(leftmost < rightmost){
-					position_array[id] = 0;
-				}
-				else{
-					position_array[id] = leftmost - rightmost + 1;
-					left_n_right[id].first = leftmost;
-					left_n_right[id].second = rightmost;
-				}
+
+			//Remove the current hull if not in final
+			if((type*leftmost < type*rightmost) || ((leftmost == rightmost) && (type*steepest_left <= type*steepest_right))){
+				position_array[id] = 0;
 			}
 			else{
-				//Remove the current hull if not in final
-				if(leftmost > rightmost){
-					position_array[id] = 0;
-				}
-				else{
-					position_array[id] = rightmost - leftmost + 1;
-					left_n_right[id].first = leftmost;
-					left_n_right[id].second = rightmost;
-				}
-			}
-			//Check not single point under line		
-			if(leftmost == rightmost){
-				// Check if steepest lines form angle < 180'
-				if(isUpper){
-					if(steepest_left <= steepest_right){
-						position_array[id] = 0;
-					}
-				}
-				else{
-					if(steepest_left_down >= steepest_right_down){
-						position_array[id] = 0;
-					}
-				}
+				position_array[id] = abs(leftmost - rightmost) + 1;
+				left_n_right[id].first = leftmost;
+				left_n_right[id].second = rightmost;
 			}
 		}
+		// END OF PARALLEL SECTION
 
-		//Build the final position array result
+		// SEQUENTIAL SECTION
+		// Build the final position array result and indexing
 		int accumulator = 0;
-
 		for(int i = 0; i < threads; i++){
 			final_position_array[i] = accumulator;
 			accumulator += position_array[i];
@@ -180,37 +132,31 @@ public:
 
 		//Declare points array for final result
 		shared_ptr<vector<POINT*> > result_points = shared_ptr<vector<POINT*> >(new vector<POINT*>(accumulator));
+		//END OF SEQUENTIAL SECTION
 
+		// PARALLEL SECITON
+		// write points into final result
 		#pragma omp parallel num_threads(threads)
 		{
 			int id = omp_get_thread_num();
-			//write points into final result
-
 			int start_index = final_position_array[id];
-			//start writing from leftmost point
 			int leftmost = left_n_right[id].first;
+			int start_position = isUpper ? (accumulator - 1) : 0;
 
-			if(isUpper){
-				for(int i = 0; i < position_array[id]; i++){
-					result_points -> at(accumulator - 1 - (i + start_index)) = partial_results[id] -> get_point(leftmost - i);
-				}
-			}
-			else{
-				for(int i = 0; i < position_array[id]; i++){
-					result_points -> at(i + start_index) = partial_results[id] -> get_point(leftmost + i);
-				}
+			for(int i = 0; i < position_array[id]; i++){
+				result_points -> at(start_position + (-type)*(i + start_index)) = partial_results[id] -> get_point(leftmost + (-type)*i);
 			}
 		}
-
 		return result_points;
 	}
+
 private:
 	double angular_coefficient(pair<int,int> tangent, ConvexHullRepresentation &hullA, ConvexHullRepresentation &hullB){
 		POINT* first = hullA.get_point(tangent.first);
 		POINT* second = hullB.get_point(tangent.second);
-		double m = ((long double)(first->y - second->y )) / (long double)(first->x - second->x);
-		return m;
+		return ((double)(first->y - second->y )) / (double)(first->x - second->x);
 }
+
 private:
 	pair<int, int> get_range(int n, int id) {
 		int batch_size = n / threads;
