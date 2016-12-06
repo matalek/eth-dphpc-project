@@ -18,9 +18,11 @@ public:
 
 	// Function which calculates a convex hull of a given points set.
 	shared_ptr<HullWrapper> convex_hull(vector<POINT*>& points) override {
+		shared_ptr<vector<POINT*> > upper_points = convex_points(points,1);
+		shared_ptr<vector<POINT*> > lower_points = convex_points(points,0);
 
-		shared_ptr<VectorConvexHullRepresentation> lower_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(convex_points(points,0),false));
-		shared_ptr<VectorConvexHullRepresentation> upper_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(convex_points(points,1),true));
+		shared_ptr<VectorConvexHullRepresentation> lower_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(lower_points,false));
+		shared_ptr<VectorConvexHullRepresentation> upper_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(upper_points,true));
 		shared_ptr<HullWrapper> ret = shared_ptr<HullWrapper>(new HullWrapper(upper_hull, lower_hull));
 		return ret;
 	}
@@ -59,14 +61,11 @@ public:
 
 			int leftmost = partial_results[id] -> find_leftmost_point();
 			int rightmost = partial_results[id] -> find_rightmost_point();
-			
-			// Elements used to compute the special case in which leftmost==rightmost.
-			// steepest.first = id in partial results
-			// steepest.second = position of the point we computed the tangent with
-			pair<int,int> steepest_left;
-			pair<int,int> steepest_right;
-			LL max_y_left = 0;
-			LL max_y_right = 0;
+
+			double steepest_left = 4000000000;
+			double steepest_right = -4000000000;
+			double steepest_left_down = -4000000000;
+			double steepest_right_down = 4000000000;
 
 			#pragma omp barrier
 
@@ -77,54 +76,65 @@ public:
 
 				if(isUpper){
 					if(i < id){
+
 					//Current element is at right of the alanyzed ch
 						tangent = findUpperT(*partial_results[i], *partial_results[id]);
+						POINT* first = partial_results[i] -> get_point(tangent.first);
+						POINT* second = partial_results[id] -> get_point(tangent.second);
+						double m = ((double)(first->y - second->y ))/ (double)(first->x - second->x);
 						//hulls rep counterclockwise
 						if(tangent.second < leftmost){
 							leftmost = tangent.second;
+							steepest_left = m;
 						}
-						if(partial_results[i] -> get_point(tangent.first) -> y > max_y_left){
-							steepest_left.first = i;
-							steepest_left.second = tangent.first;
-							max_y_left = partial_results[i] -> get_point(tangent.first) -> y;
+						if(m <= steepest_left){
+							steepest_left = m;
 						}
 					}
 					if(id < i){
+
 					//Current element is at left of the alanyzed ch
 						tangent = findUpperT(*partial_results[id], *partial_results[i]);
+						POINT* first = partial_results[id] -> get_point(tangent.first);
+						POINT* second = partial_results[i] -> get_point(tangent.second);
+						double m = ((double)(first->y - second->y ))/ (double)(first->x - second->x);
 						if(tangent.first > rightmost){
 							rightmost = tangent.first;
+							steepest_right = m;
 						}
-						if(partial_results[i] -> get_point(tangent.second) -> y > max_y_right){
-							steepest_right.first = i;
-							steepest_right.second = tangent.second;
-							max_y_right = partial_results[i] -> get_point(tangent.second) -> y;
+						if(m >= steepest_right){
+							steepest_right = m;
 						}
 					}
 				}
+				//Lower hull
 				else{
 					if(i < id){
 					//Current element is at right
 						tangent = findLowerT(*partial_results[i], *partial_results[id]);
+						POINT* first = partial_results[i] -> get_point(tangent.first);
+						POINT* second = partial_results[id] -> get_point(tangent.second);
+						double m = ((long double)(first->y - second->y ))/ (long double)(first->x - second->x);
 						//hulls rep counterclockwise
 						if(tangent.second > leftmost){
 							leftmost = tangent.second;
+							steepest_left_down = m;
 						}
-						if(partial_results[i] -> get_point(tangent.first) -> y < max_y_left){
-							steepest_left.first = i;
-							steepest_left.second = tangent.first;
-							max_y_left = partial_results[i] -> get_point(tangent.first) -> y;
+						if(m >= steepest_left_down){
+							steepest_left_down = m;
 						}
 					}
 					if(id < i){
 						tangent = findLowerT(*partial_results[id], *partial_results[i]);
+						POINT* first = partial_results[id] -> get_point(tangent.first);
+						POINT* second = partial_results[i] -> get_point(tangent.second);
+						double m = ((long double)(first->y - second->y ))/ (long double)(first->x - second->x);
 						if(tangent.first < rightmost){
 							rightmost = tangent.first;
+							steepest_right_down = m;
 						}
-						if(partial_results[i] -> get_point(tangent.second) -> y < max_y_right){
-							steepest_right.first = i;
-							steepest_right.second = tangent.second;
-							max_y_right = partial_results[i] -> get_point(tangent.second) -> y;
+						if(m <= steepest_right_down){
+							steepest_right_down = m;
 						}
 					}
 				}
@@ -155,27 +165,17 @@ public:
 			}
 			#pragma omp barrier
 			//Check not single point under line		
-			if(leftmost == rightmost && id!=0 && id!=threads-1){
-
-				POINT* curr_point = partial_results[id] -> get_point(leftmost);
-
-				POINT* left_sider = partial_results[steepest_left.first] -> get_point(steepest_left.second);
-				POINT* right_sider = partial_results[steepest_right.first] -> get_point(steepest_right.second);
-				
-				//build line and check wether point stands under it
-				double y_diff = (right_sider->y - left_sider->y);
-				double x_diff = (right_sider->x - left_sider->x);
-				double m = y_diff/x_diff;
-				double curr_x = (curr_point->x - right_sider->x);
-				double line_y = (m)*(curr_x) + right_sider->y;
-
+			if(leftmost == rightmost){
+//printf("id: %d, %lld, %lld\n", id, line_y, curr_point->y);
+				// Check if steepest lines form angle < 180'
 				if(isUpper){
-					if((LL)line_y >= curr_point->y){
+					if(steepest_left <= steepest_right){
 						position_array[id] = 0;
+//printf("X");
 					}
 				}
 				else{
-					if((LL)line_y <= curr_point->y){
+					if(steepest_left_down >= steepest_right_down){
 						position_array[id] = 0;
 					}
 				}

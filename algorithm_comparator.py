@@ -90,7 +90,7 @@ for num_of_points in range(
     for repetition in range(0, CONST_REP_NUMBER):
 
         # Print progress information to screen
-        print '\nGenerationg points for TAKE ' + str(repetition) + '...\n'
+        print '\nGenerating points for TAKE ' + str(repetition) + '...\n'
 
         # Generate input points
         subprocess.call(
