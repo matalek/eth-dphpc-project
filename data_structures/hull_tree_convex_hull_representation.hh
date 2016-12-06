@@ -16,19 +16,23 @@ using namespace std;
 class HullTreeConvexHullRepresentation : public ConvexHullRepresentation {
 
 public:
-    HullTreeConvexHullRepresentation() { };
+    HullTreeConvexHullRepresentation(bool upper) : ConvexHullRepresentation(upper) { };
 
     // Constructing object from convex hull points.
-    HullTreeConvexHullRepresentation(shared_ptr<POINTS> points) {
+    HullTreeConvexHullRepresentation(shared_ptr<POINTS> points, bool upper)
+            : ConvexHullRepresentation(upper) {
+
+        if (upper) {
+            // TODO(matalek): maybe think about something more efficient.
+            reverse(points->begin(), points->end());
+        }
         tree = shared_ptr<HullTreeNode>(new HullTreeNode(points, 0, points->size() - 1));
         tree->init();
     };
 
-    shared_ptr<ConvexHullRepresentation> merge(shared_ptr<ConvexHullRepresentation> hull) override {
-        return hull;
-    }
+    void merge(shared_ptr<ConvexHullRepresentation> hull) { }
 
-    shared_ptr<vector<POINT*> > get_points() override {
+    shared_ptr<vector<POINT*> > get_hull() override {
         auto res = shared_ptr<vector<POINT*> >(new POINTS());
         if (!empty()) {
             auto node = tree->get_most_left();
@@ -36,32 +40,43 @@ public:
                 res->push_back(node->get_point());
                 node = node->get_succ();
             }
+            if (upper) {
+                reverse(res->begin(), res->end());
+            }
         }
         return res;
     }
 
+
     /*methods for commont tangent alg*/
 
     int find_rightmost_point() override {
-        int index = 0;
-        return index;
+        return upper ? 0 : size() - 1;
     }
 
     int find_leftmost_point() override {
-        int index = 0;
-        return index;
+        return upper ? size() - 1 : 0;
     }
 
     int go_counter_clockwise(int index) override {
+        if (index < size() - 1) {
+            return index + 1;
+        }
         return 0;
     }
 
     int go_clockwise(int index) override {
-        return 0;
+        if (index > 0) {
+            return index - 1;
+        }
+        return size() - 1;
     }
 
     POINT* get_point(int index) override {
-        return nullptr;
+        if (upper) {
+            index = size() - 1 - index;
+        }
+        return tree->find_node(index)->get_point();
     }
 
     void print() const {
@@ -76,11 +91,26 @@ public:
         return !tree;
     }
 
+    int size() const {
+        return tree->get_d();
+    }
+
+    shared_ptr<HullTreeConvexHullRepresentation> trim(int left, int right) {
+        POINT* left_p = get_point(left), * right_p = get_point(right);
+
+        auto first_split = split(right_p->x);
+
+        // TODO(matalek): very ugly, think about something different
+        auto second_split = first_split.first->split(left_p->x - 1);
+
+        return second_split.second;
+    }
+
     pair<shared_ptr<HullTreeConvexHullRepresentation>, shared_ptr<HullTreeConvexHullRepresentation> > split(LL x0) {
         auto split_nodes = tree->split(x0);
         pair<shared_ptr<HullTreeConvexHullRepresentation>, shared_ptr<HullTreeConvexHullRepresentation> > res;
-        return make_pair(shared_ptr<HullTreeConvexHullRepresentation>(new HullTreeConvexHullRepresentation(split_nodes.first)),
-                shared_ptr<HullTreeConvexHullRepresentation>(new HullTreeConvexHullRepresentation(split_nodes.second)));
+        return make_pair(shared_ptr<HullTreeConvexHullRepresentation>(new HullTreeConvexHullRepresentation(split_nodes.first, upper)),
+                shared_ptr<HullTreeConvexHullRepresentation>(new HullTreeConvexHullRepresentation(split_nodes.second, upper)));
     }
 
     // Merges hull trees, some of which might be empty. This method does not remove
@@ -107,7 +137,9 @@ public:
             }
         }
 
-
+        if (!non_empty_cnt) {
+            return empty_hull(hulls[0]->is_upper());
+        }
         shared_ptr<HullTreeConvexHullRepresentation> res = merge_non_empty_hulls(non_empty, non_empty_cnt);
 
         delete [] sum;
@@ -121,7 +153,7 @@ public:
     static shared_ptr<HullTreeConvexHullRepresentation> merge_non_empty_hulls(shared_ptr<HullTreeConvexHullRepresentation>* hulls, int n) {
         omp_set_nested(1);
         return shared_ptr<HullTreeConvexHullRepresentation>(
-                new HullTreeConvexHullRepresentation(HullTreeNode::merge_non_empty_hulls(hulls, 0, n - 1)));
+                new HullTreeConvexHullRepresentation(HullTreeNode::merge_non_empty_hulls(hulls, 0, n - 1), hulls[0]->is_upper()));
     }
 
 protected:
@@ -275,8 +307,26 @@ private:
             return make_pair(me, copy);
         }
 
+        shared_ptr<HullTreeNode> find_node(int index) {
+            if (!left && !right) {
+                return shared_from_this();
+            }
+            int left_d = 0;
+            if (left) {
+                left_d = left->d;
+            }
+            if (left_d > index) {
+                // Going left.
+                return left->find_node(index);
+            }
+            // Going right
+            return right->find_node(index - left_d);
+        }
+
         void print() {
             if ((!left) && (!right)) {
+                // TODO(matalek): delete when measuring performance.
+                assert(!!point);
                 point->print();
             } else {
                 if (left) {
@@ -302,6 +352,14 @@ private:
 
         shared_ptr<HullTreeNode> get_most_left() const{
             return most_left;
+        }
+
+        shared_ptr<HullTreeNode> get_most_right() const{
+            return most_right;
+        }
+
+        int get_d() const {
+            return d;
         }
 
     private:
@@ -333,7 +391,20 @@ private:
     shared_ptr<HullTreeNode> tree;
 
     // Constructing object based on the tree node.
-    HullTreeConvexHullRepresentation(shared_ptr<HullTreeNode> tree) : tree(tree) { }
+    HullTreeConvexHullRepresentation(shared_ptr<HullTreeNode> tree, bool upper)
+            : ConvexHullRepresentation(upper), tree(tree) { }
+
+    shared_ptr<HullTreeNode> find_node(int index) {
+        return tree->find_node(index);
+    }
+
+public:
+    static shared_ptr<HullTreeConvexHullRepresentation> empty_hull(bool upper) {
+        return shared_ptr<HullTreeConvexHullRepresentation>(
+                new HullTreeConvexHullRepresentation((shared_ptr<HullTreeNode>) nullptr, upper));
+    }
+
+
 };
 
 
