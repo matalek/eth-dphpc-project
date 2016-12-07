@@ -82,7 +82,7 @@ int findUpperTangentB(ConvexHullRepresentation &hullA, ConvexHullRepresentation 
 
 //TODO: make it more general
 pair<int,int> findLowerT(ConvexHullRepresentation &hullA, ConvexHullRepresentation &hullB) {
-    pair<char, double> returnValues;
+    pair<int, int> returnValues;
     int aIndex = hullA.find_rightmost_point();
     int bIndex = hullB.find_leftmost_point();
     while (!(lowerTangentA(hullA, hullB, aIndex, bIndex) && lowerTangentB(hullA, hullB, aIndex, bIndex))) {
@@ -95,7 +95,7 @@ pair<int,int> findLowerT(ConvexHullRepresentation &hullA, ConvexHullRepresentati
 }
 
 pair<int,int> findUpperT(ConvexHullRepresentation &hullA, ConvexHullRepresentation &hullB, int aIndex, int bIndex) {
-    pair<char, double> returnValues;
+    pair<int, int> returnValues;
 
     while (!(upperTangentA(hullA, hullB, aIndex, bIndex) && upperTangentB(hullA, hullB, aIndex, bIndex))) {
         aIndex = findUpperTangentA(hullA, hullB, aIndex, bIndex);
