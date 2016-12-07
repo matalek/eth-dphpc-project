@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <memory>
+#include <cfloat>
 #include "../geometric_helpers.hh"
 #include "../algorithm_interfaces/convex_hull_sequential_algorithm.hh"
 #include "../algorithm_interfaces/convex_hull_parallel_algorithm.hh"
@@ -49,8 +50,8 @@ public:
 			int leftmost = partial_results[id] -> find_leftmost_point();
 			int rightmost = partial_results[id] -> find_rightmost_point();
 
-			double steepest_left = isUpper ? 4000000000 : -4000000000;
-			double steepest_right = isUpper ? -4000000000 : 4000000000;
+			double steepest_left = type * DBL_MAX;
+			double steepest_right = (-type) * DBL_MAX;
 
 			#pragma omp barrier
 			
