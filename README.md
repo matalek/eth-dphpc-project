@@ -35,9 +35,6 @@ and then
 
 ```sh
 $ ./scripts/plotter.py
-# -c <number of different combination in number of points>
-# -w <step width>
-# -s <starting value>
 # -a <algorithms to compare in the format <algo1:num_of_threads algo2:num_of_threads algo3:num_of_threads ...>>
 ```
 
