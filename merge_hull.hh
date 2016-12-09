@@ -40,7 +40,7 @@ int lowerTangentB(ConvexHullRepresentation &hullA, ConvexHullRepresentation &hul
     POINT * u = hullB.get_point(hullB.go_counter_clockwise(bIndex));
     POINT * w = hullB.get_point(hullB.go_clockwise(bIndex));
     POINT * b = hullB.get_point(bIndex);
-    return !(turnRight(a, b, u) || turnRight(a, b, w));
+    return !turnRight(a, b, w) && turnLeft(a, b, u);
     //return upperTangentA(hullB, hullA, bIndex, aIndex);
 }
 
@@ -49,7 +49,7 @@ int upperTangentB(ConvexHullRepresentation &hullA, ConvexHullRepresentation &hul
     POINT * u = hullB.get_point(hullB.go_counter_clockwise(bIndex));
     POINT * w = hullB.get_point(hullB.go_clockwise(bIndex));
     POINT * b = hullB.get_point(bIndex);
-    return !(turnLeft(a, b, u) || turnLeft(a, b, w));
+    return !turnLeft(a, b, u) && turnRight(a, b, w);
 }
 
 int findLowerTangentA(ConvexHullRepresentation &hullA, ConvexHullRepresentation &hullB, int aIndex, int bIndex) {
@@ -82,7 +82,7 @@ int findUpperTangentB(ConvexHullRepresentation &hullA, ConvexHullRepresentation 
 
 //TODO: make it more general
 pair<int,int> findLowerT(ConvexHullRepresentation &hullA, ConvexHullRepresentation &hullB) {
-    pair<char, double> returnValues;
+    pair<int, int> returnValues;
     int aIndex = hullA.find_rightmost_point();
     int bIndex = hullB.find_leftmost_point();
     while (!(lowerTangentA(hullA, hullB, aIndex, bIndex) && lowerTangentB(hullA, hullB, aIndex, bIndex))) {
@@ -95,7 +95,7 @@ pair<int,int> findLowerT(ConvexHullRepresentation &hullA, ConvexHullRepresentati
 }
 
 pair<int,int> findUpperT(ConvexHullRepresentation &hullA, ConvexHullRepresentation &hullB, int aIndex, int bIndex) {
-    pair<char, double> returnValues;
+    pair<int, int> returnValues;
 
     while (!(upperTangentA(hullA, hullB, aIndex, bIndex) && upperTangentB(hullA, hullB, aIndex, bIndex))) {
         aIndex = findUpperTangentA(hullA, hullB, aIndex, bIndex);

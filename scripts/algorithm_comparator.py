@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 
 
 # Comparator to ensure correctness of result
-def compare_function(cgal , alg):
+def compare_function(cgal, alg):
     # create array with points (remove last char which is \n)
     alg_points = alg[:-1].split('\n')[2:]
     cgal_points = cgal[:-1].split('\n')[2:]
@@ -57,7 +57,7 @@ CONST_COMB_NUMBER = int(sys.argv[2])
 # Initialize a map to contain temporary values
 key_value = {}
 
-#build executables
+# Build executables
 subprocess.call('make clean', shell=True)
 subprocess.call('make', shell=True)
 subprocess.call('make -C generator/', shell=True)
@@ -70,7 +70,7 @@ subprocess.call('(cd cgal && make)', shell=True)
 for key in range(0, len(sys.argv) - 12):
     algorithm = sys.argv[12 + key]
     # create and open a csv file to store results
-    ofile = open('log_files/log_results_' + algorithm.replace('/', '_').replace(':','_t_') + '.csv', "wb")
+    ofile = open('log_files/log_results_' + algorithm.replace('/', '_').replace(':', '_t_') + '.csv', "wb")
     writer = csv.writer(ofile)
     writer.writerow(['#Input Points', 'Exec_Time [us]'])
     ofile.close()
@@ -90,7 +90,7 @@ for num_of_points in range(
     for repetition in range(0, CONST_REP_NUMBER):
 
         # Print progress information to screen
-        print '\nGenerating points for TAKE ' + str(repetition) + '...\n'
+        print '\nGenerating points for TAKE ' + str(repetition + 1) + '...\n'
 
         # Generate input points
         subprocess.call(
@@ -117,7 +117,7 @@ for num_of_points in range(
             # evaluate correctness on points array
             if not compare_function(cgal_result, alg_result):
                 print 'ERROR, ALGORITHM INCORRECT'
-                print 'AGLORITHM:\n' + alg_result
+                print 'ALGORITHM:\n' + alg_result
                 print 'CGAL:\n' + cgal_result
                 sys.exit()
 
@@ -141,5 +141,4 @@ print('\n--------------------------------------\n| -----------------------------
       '\n| ----------------------------------- |\n--------------------------------------\n')
 
 # Call plotter to plot results
-subprocess.call('./plotter.py -c ' + str(CONST_COMB_NUMBER) + ' -w ' + str(CONST_STEP_WIDTH) + ' -s ' + str(CONST_STARTING_VALUE) +
-                ' -a ' + (" ".join(sys.argv[12:])), shell=True)
+subprocess.call('./scripts/plotter.py -a ' + (" ".join(sys.argv[12:])), shell=True)
