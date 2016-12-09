@@ -47,7 +47,6 @@ public:
         return res;
     }
 
-
     /*methods for commont tangent alg*/
 
     int find_rightmost_point() override {

@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include "../geometric_helpers.hh"
+#include "../parallel_helper.hh"
 #include "convex_hull_sequential_algorithm.hh"
 #include "convex_hull_parallel_algorithm.hh"
 
@@ -13,7 +14,7 @@ template <class R>
 class ConvexHullParallelTreeAlgorithm : public ConvexHullParallelAlgorithm {
 
 public:
-	ConvexHullParallelTreeAlgorithm(int threads) 
+	ConvexHullParallelTreeAlgorithm(int threads)
 		: ConvexHullParallelAlgorithm(threads) { }
 
 	// Function which calculates a convex hull of a given points set.
@@ -25,9 +26,9 @@ public:
 		{
 			int id = omp_get_thread_num();
 			// Calculating part of points for the given thread.
-			pair<int, int> range = get_range(n, id);
+			pair<int, int> range = ParallelHelper::get_range(n, threads, id);
 			vector<POINT*> working_points;
-			for (int i = range.first; i < range.second; i++) {
+			for (int i = range.first; i <= range.second; i++) {
 				working_points.push_back(points[i]);
 			}
 			// Calculating convex hull of the appropriate part of points.
@@ -51,21 +52,6 @@ public:
 			level >>= 1;
 		}
 		return partial_results[1];
-	}
-
-private:
-	pair<int, int> get_range(int n, int id) {
-		int batch_size = n / threads;
-
-		int start = batch_size * id;
-		int end;
-		if (id == threads - 1) {
-			end = n;
-		} else {
-			end = batch_size * (id + 1); 
-		}
-
-		return make_pair(start, end);
 	}
 };
 

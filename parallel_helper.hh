@@ -3,6 +3,7 @@
 
 #include <omp.h>
 #include <vector>
+#include <cmath>
 
 using namespace std;
 
@@ -30,7 +31,7 @@ public:
 			int id = omp_get_thread_num();
 			v[id] = numbers[id];
 		}
-		
+
 		if (n < cur) {
 			#pragma omp parallel num_threads(cur - n)
 			{
@@ -50,7 +51,7 @@ public:
 				int half = step >> 1;
 				v[i + step - 1] += v[i + half - 1];
 			}
-		} 
+		}
 
 		int sum_all = v[cur - 1];
 		v[cur - 1] = 0;
@@ -78,6 +79,22 @@ public:
 		numbers[n - 1] = sum_all;
 
 		delete[] v;
+	}
+
+	// Calculates appropriate range of points for the given thread
+	// (divides points equally between threads).
+	static pair<int, int> get_range(int n, int groups_cnt, int id) {
+		int batch_size = ceil((double) n / groups_cnt);
+
+		int start = batch_size * id;
+		int end;
+		if (id == groups_cnt - 1) {
+			end = n - 1;
+		} else {
+			end = batch_size * (id + 1) - 1;
+		}
+
+		return make_pair(start, end);
 	}
 };
 
