@@ -60,6 +60,20 @@ For example:
 ./scripts/alg_result_printer.py SimpleParallel:4
 ```
 
+## Generated points Printer script
+
+Useful debugging tool.
+It prints all the points in tmp.log
+Execute from prompt command:
+```sh
+$ chmod u+x scripts/original_generated_points_printer.py
+```
+and then 
+
+```sh
+$ ./scripts/original_generated_points_printer.py
+```
+
 ## Building tester program
 
 Execute from prompt command:
