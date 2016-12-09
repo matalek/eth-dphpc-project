@@ -2,8 +2,6 @@
 import subprocess
 import csv
 import sys
-import numpy as np
-import matplotlib.pyplot as plt
 
 # Usage ./algorithm_comparator.py
 # -c <number of different combinations of number of points> 
@@ -15,7 +13,7 @@ import matplotlib.pyplot as plt
 
 
 # Comparator to ensure correctness of result
-def compare_function(cgal , alg):
+def compare_function(cgal, alg):
     # create array with points (remove last char which is \n)
     alg_points = alg[:-1].split('\n')[2:]
     cgal_points = cgal[:-1].split('\n')[2:]
@@ -26,6 +24,7 @@ def compare_function(cgal , alg):
     for point in alg_points:
         if point not in cgal_points:
             return False
+
     return True
 
 
@@ -54,10 +53,10 @@ CONST_STARTING_VALUE = int(sys.argv[6])
 CONST_STEP_WIDTH = int(sys.argv[4])
 CONST_COMB_NUMBER = int(sys.argv[2])
 
-# Initialize a map to contain temporary values
-key_value = {}
+# Initialize the map from algorithm to execution times
+algorithms_map = {}
 
-#build executables
+# Build executables
 subprocess.call('make clean', shell=True)
 subprocess.call('make', shell=True)
 subprocess.call('make -C generator/', shell=True)
@@ -71,7 +70,7 @@ for key in range(0, len(sys.argv) - 12):
     algorithm = sys.argv[12 + key]
 
     # create and open a csv file to store results
-    ofile = open('log_files/log_results_' + algorithm.replace('/', '_').replace(':','_t_') + '.csv', "wb")
+    ofile = open('log_files/log_results_' + algorithm.replace('/', '_').replace(':', '_t_') + '.csv', "wb")
     writer = csv.writer(ofile)
     columns_title = ['#Input Points', '']
     for i in range(0, CONST_REP_NUMBER):
@@ -80,7 +79,7 @@ for key in range(0, len(sys.argv) - 12):
     ofile.close()
 
     # Initialize the map between algorithm and execution times
-    key_value[algorithm] = []
+    algorithms_map[algorithm] = []
 
 # Start tests
 for num_of_points in range(
@@ -122,30 +121,24 @@ for num_of_points in range(
 
             # evaluate correctness on points array
             if not compare_function(cgal_result, alg_result):
-                print 'ERROR, ALGORITHM INCORRECT'
-                print 'ALGORITHM:\n' + alg_result
-                print 'CGAL:\n' + cgal_result
+                print 'ERROR, ALGORITHM INCORRECT\nALGORITHM:\n' + alg_result + '\nCGAL:\n' + cgal_result
                 sys.exit()
 
             # Update tmp store
-            key_value[algorithm].append(int(alg_result.split('\n')[0].split(' ')[1]))
+            algorithms_map[algorithm].append(int(alg_result.split('\n')[0].split(' ')[1]))
 
     # Delete tmp file containing the points
     subprocess.call('rm tmp.log', shell=True)
 
     # Write a new row in every CSV with this step's result
-    for algorithm in key_value:
+    for algorithm in algorithms_map:
         ofile = open('log_files/log_results_' + algorithm.replace('/', '_').replace(':', '_t_') + '.csv', "a")
         writer = csv.writer(ofile)
-        writer.writerow([num_of_points, ''] + key_value[algorithm])
-        key_value[algorithm] = []
+        writer.writerow([num_of_points, ''] + algorithms_map[algorithm])
+        algorithms_map[algorithm] = []
         ofile.close()
 
 # Print progress information to screen
 print('\n--------------------------------------\n| ----------------------------------- |\n'
-      '| |COMPARISON COMPLETED SUCCESSFULLY| |'
+      '| |COMPUTATION COMPLETED SUCCESSFULLY| |'
       '\n| ----------------------------------- |\n--------------------------------------\n')
-
-# Call plotter to plot results
-# subprocess.call('./scripts/plotter.py -c ' + str(CONST_COMB_NUMBER) + ' -w ' + str(CONST_STEP_WIDTH) + ' -s ' + str(CONST_STARTING_VALUE) +
-#                ' -a ' + (" ".join(sys.argv[12:])), shell=True)

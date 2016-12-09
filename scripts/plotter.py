@@ -63,7 +63,7 @@ plt.grid(True)
 for index in range(2, len(sys.argv)):
     algorithm = sys.argv[index]
 
-    #Skip sequential for speedup
+    # Skip sequential algorithm
     if algorithm == 'Sequential:1':
         continue
 

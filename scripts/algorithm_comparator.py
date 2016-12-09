@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 
 
 # Comparator to ensure correctness of result
-def compare_function(cgal , alg):
+def compare_function(cgal, alg):
     # create array with points (remove last char which is \n)
     alg_points = alg[:-1].split('\n')[2:]
     cgal_points = cgal[:-1].split('\n')[2:]
@@ -57,7 +57,7 @@ CONST_COMB_NUMBER = int(sys.argv[2])
 # Initialize a map to contain temporary values
 key_value = {}
 
-#build executables
+# Build executables
 subprocess.call('make clean', shell=True)
 subprocess.call('make', shell=True)
 subprocess.call('make -C generator/', shell=True)
@@ -70,7 +70,7 @@ subprocess.call('(cd cgal && make)', shell=True)
 for key in range(0, len(sys.argv) - 12):
     algorithm = sys.argv[12 + key]
     # create and open a csv file to store results
-    ofile = open('log_files/log_results_' + algorithm.replace('/', '_').replace(':','_t_') + '.csv', "wb")
+    ofile = open('log_files/log_results_' + algorithm.replace('/', '_').replace(':', '_t_') + '.csv', "wb")
     writer = csv.writer(ofile)
     writer.writerow(['#Input Points', 'Exec_Time [us]'])
     ofile.close()
