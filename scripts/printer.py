@@ -14,12 +14,12 @@ alg.append(subprocess.check_output('cat tmp.log | ./cgal/cgal_graham_andrew', sh
 
 i=0
 for val in (211,212):
-    firstline = 0
+    first_line = 0
     x = []
     y = []
     for point in alg[i].split('\n'):
-        if firstline<2:
-            firstline+=1
+        if first_line < 2:
+            first_line += 1
             continue
 
         line = point.split(' ')
@@ -28,6 +28,7 @@ for val in (211,212):
             x.append(int(line[0]))
             y.append(int(line[1]))
 
+    # Check if inline points are present
     for index in range(0, len(x)-2):
         a = x[index]
         b = y[index]
@@ -41,6 +42,7 @@ for val in (211,212):
         if (n-b)*(w-m) == (z-n)*(m-a):
             print 'Inline points'
 
+    # Plot result
     plt.subplot(val)
     plt.ylim([np.amin(y) + np.amin(y)/10,np.amax(y) + np.amax(y)/10])
     plt.xlim([np.amin(x) + np.amin(x)/10,np.amax(x) + np.amax(x)/10])

@@ -36,7 +36,7 @@ for index in range(8 , len(sys.argv)):
     if algorithm.split("/")[0] != 'sequential':
         appendix = 'tds'
 
-    with open('./log_files/log_results_' + algorithm.replace("/","_").replace(":","_t_")
+    with open('../log_files/log_results_' + algorithm.replace("/","_").replace(":","_t_")
                       + '.csv','rb') as f:
         reader = csv.reader(f)
         for row in reader:
@@ -66,5 +66,5 @@ for index in range(8 , len(sys.argv)):
 plt.legend(loc=2)
 
 plt.ylim([0,5])
-plt.savefig('./logs_plots/speedup_' + ("&".join(sys.argv[8:])).replace("/", "_") + '.png')
+plt.savefig('../logs_plots/speedup_' + ("&".join(sys.argv[8:])).replace("/", "_") + '.png')
 plt.show()

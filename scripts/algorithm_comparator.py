@@ -90,7 +90,7 @@ for num_of_points in range(
     for repetition in range(0, CONST_REP_NUMBER):
 
         # Print progress information to screen
-        print '\nGenerating points for TAKE ' + str(repetition) + '...\n'
+        print '\nGenerating points for TAKE ' + str(repetition + 1) + '...\n'
 
         # Generate input points
         subprocess.call(
@@ -117,7 +117,7 @@ for num_of_points in range(
             # evaluate correctness on points array
             if not compare_function(cgal_result, alg_result):
                 print 'ERROR, ALGORITHM INCORRECT'
-                print 'AGLORITHM:\n' + alg_result
+                print 'ALGORITHM:\n' + alg_result
                 print 'CGAL:\n' + cgal_result
                 sys.exit()
 
@@ -141,5 +141,5 @@ print('\n--------------------------------------\n| -----------------------------
       '\n| ----------------------------------- |\n--------------------------------------\n')
 
 # Call plotter to plot results
-subprocess.call('./plotter.py -c ' + str(CONST_COMB_NUMBER) + ' -w ' + str(CONST_STEP_WIDTH) + ' -s ' + str(CONST_STARTING_VALUE) +
-                ' -a ' + (" ".join(sys.argv[12:])), shell=True)
+subprocess.call('./scripts/plotter.py -c ' + str(CONST_COMB_NUMBER) + ' -w ' + str(CONST_STEP_WIDTH) + ' -s ' +
+                str(CONST_STARTING_VALUE) + ' -a ' + (" ".join(sys.argv[12:])), shell=True)

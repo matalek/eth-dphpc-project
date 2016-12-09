@@ -15,7 +15,7 @@ starting_value = int(sys.argv[6])
 step_width = int(sys.argv[4])
 comb_number = int(sys.argv[2])
 
-colors = ['b','r','g','k']
+colors = ['b', 'r', 'g', 'k', 'y']
 count = 0
 
 plt.title("Performance comparison")
@@ -25,7 +25,7 @@ plt.grid(True)
 
 x = np.arange(starting_value, comb_number*step_width + starting_value, step_width)
 
-for index in range(8 , len(sys.argv)):
+for index in range(8, len(sys.argv)):
     algorithm = sys.argv[index]
     flag = -1
     rt = []
@@ -34,24 +34,22 @@ for index in range(8 , len(sys.argv)):
     if algorithm.split("/")[0] != 'sequential':
         appendix = 'tds'
 
-    with open('./log_files/log_results_' + algorithm.replace("/","_").replace(":","_t_")
-                      + '.csv','rb') as f:
+    with open('./log_files/log_results_' + algorithm.replace("/", "_").replace(":", "_t_") + '.csv', 'rb') as f:
         reader = csv.reader(f)
         for row in reader:
             # skip first row
-            if(flag == -1):
+            if flag == -1:
                 flag += 1
                 continue
 
-            rt.append(float(row[1])/(1000000))
+            rt.append(float(row[1])/(10 ** 6))
 
     y = np.array(rt)
-    my_label = algorithm.replace("_", " ").replace(":"," ")  + ' ' + appendix
-    plt.plot(x, y, colors[count] + '-', label = my_label)
+    my_label = algorithm.replace("_", " ").replace(":", " ") + ' ' + appendix
+    plt.plot(x, y, colors[count] + '-', label=my_label)
     count += 1
 
 plt.legend(loc=2)
-
 
 plt.savefig('./logs_plots/' + ("&".join(sys.argv[8:])).replace("/", "_") + '.png')
 plt.show()
