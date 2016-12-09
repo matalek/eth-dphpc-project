@@ -141,5 +141,4 @@ print('\n--------------------------------------\n| -----------------------------
       '\n| ----------------------------------- |\n--------------------------------------\n')
 
 # Call plotter to plot results
-subprocess.call('./scripts/plotter.py -c ' + str(CONST_COMB_NUMBER) + ' -w ' + str(CONST_STEP_WIDTH) + ' -s ' +
-                str(CONST_STARTING_VALUE) + ' -a ' + (" ".join(sys.argv[12:])), shell=True)
+subprocess.call('./scripts/plotter.py -a ' + (" ".join(sys.argv[12:])), shell=True)
