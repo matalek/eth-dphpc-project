@@ -28,7 +28,7 @@ for point in alg.split('\n'):
 # Plot results
 plt.ylim([np.amin(y) + np.amin(y)/10,np.amax(y) + np.amax(y)/10])
 plt.xlim([np.amin(x) + np.amin(x)/10,np.amax(x) + np.amax(x)/10])
-plt.plot(x,y, 'o-')
+plt.plot(x,y, 'o')
 plt.grid(True)
 i += 1
 
