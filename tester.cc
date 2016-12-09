@@ -18,6 +18,7 @@
 #include "simple_parallel/simple_parallel_algorithm.hh"
 #include "naive_parallel/naive_parallel_algorithm.hh"
 #include "algorithm_interfaces/convex_hull_parallel_tree_algorithm.hh"
+#include "hull_tree/hull_tree_algorithm.hh"
 
 using namespace std;
 using namespace std::chrono;
@@ -39,6 +40,8 @@ ConvexHullAlgorithm* load_algorithm(char* argv[]) {
 		algorithm = new NaiveParallelAlgorithm(atoi(argv[2]));
 	} else if (name == "SimpleParallel") {
 		algorithm = new SimpleParallelAlgorithm(atoi(argv[2]));
+	} else if (name == "HullTree") {
+		algorithm = new HullTreeAlgorithm(atoi(argv[2]));
 	} else {
 		assert(false && "No algorithm found with this name");
 	}
