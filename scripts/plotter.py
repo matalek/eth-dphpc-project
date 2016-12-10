@@ -59,6 +59,7 @@ plt.title("Speedup")
 plt.ylabel('Speedup')
 plt.xlabel('Number of input points')
 plt.grid(True)
+count = 0
 
 for index in range(2, len(sys.argv)):
     algorithm = sys.argv[index]
