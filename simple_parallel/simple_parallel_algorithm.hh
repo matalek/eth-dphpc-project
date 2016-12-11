@@ -1,5 +1,5 @@
-#ifndef SIMPLE_PARALLEL
-#define SIMPLE_PARALLEL
+#ifndef SIMPLE_PARALLEL_ALGORITHM
+#define SIMPLE_PARALLEL_ALGORITHM
 
 #include <vector>
 #include <stdio.h>
@@ -13,7 +13,6 @@
 #include "../parallel_helper.hh"
 #include "../merge_hull.hh"
 #include "../sequential/andrew_algorithm.hh"
-
 
 using namespace std;
 
@@ -32,10 +31,9 @@ public:
 		return ret;
 	}
 
-
 	shared_ptr<vector<POINT*> > convex_points(vector<POINT*>& points, bool isUpper){
 		int type = isUpper ? 1 : -1;
-		shared_ptr<ConvexHullRepresentation> partial_results[threads];
+		shared_ptr<ConvexHullRepresentation>* partial_results = new shared_ptr<ConvexHullRepresentation>[threads];
 		// Array for the indexing, containing info on how many points each thread has to put in final result
 		int* position_array = new int[threads];
 		// // Array for the indexing, containing info on which position in final result each thread should start writing at
@@ -46,7 +44,6 @@ public:
 		// PARALLEL SECTION
 		#pragma omp parallel num_threads(threads)
 		{
-
 			int id = omp_get_thread_num();
 
 			// Computing the separate convex hulls
@@ -74,7 +71,6 @@ public:
 				//Current element is at right of the alanyzed ch
 					if(type*tangent.second < type*leftmost){
 						leftmost = tangent.second;
-						//steepest_left = m;
 					}
 					if(type*m < type*steepest_left){
 						steepest_left = m;
@@ -84,7 +80,6 @@ public:
 				//Current element is at left of the alanyzed ch
 					if(type*tangent.first > type*rightmost){
 						rightmost = tangent.first;
-						//steepest_right = m;
 					}
 					if(type*m > type*steepest_right){
 						steepest_right = m;
@@ -111,6 +106,8 @@ public:
 		int total_size = final_position_array[threads - 1];
 
 		//Declare points array for final result
+		// We could theoretically create dynamic array here so that it would be faster,
+		// but it won't probably affect the speed much.
 		shared_ptr<vector<POINT*> > result_points = shared_ptr<vector<POINT*> >(new vector<POINT*>(total_size));
 
 		// PARALLEL SECITON
@@ -128,15 +125,20 @@ public:
 		}
 		// END OF PARALLEL SECITON
 
+		// Cleaning up.
+		delete [] position_array;
+		delete [] final_position_array;
+		delete [] partial_results;
+		delete [] left_n_right;
+
 		return result_points;
 	}
 
-private:
 	shared_ptr<ConvexHullRepresentation> build_sequential_hull(int id, vector<POINT*>& points, bool isUpper){
 		int n = points.size();
-		pair<int, int> range = get_range(n, id);
+		pair<int, int> range = ParallelHelper::get_range(n, threads, id);
 		vector<POINT*> working_points;
-		for (int i = range.first; i < range.second; i++) {
+		for (int i = range.first; i <= range.second; i++) {
 			working_points.push_back(points[i]);
 		}
 		// Calculating convex hull of the appropriate part of points.
@@ -152,27 +154,11 @@ private:
 		return shared_ptr<ConvexHullRepresentation>(new VectorConvexHullRepresentation(convex_hull_points, isUpper));
 	}
 
-private:
 	double angular_coefficient(pair<int,int> tangent, ConvexHullRepresentation &hullA, ConvexHullRepresentation &hullB){
 		POINT* first = hullA.get_point(tangent.first);
 		POINT* second = hullB.get_point(tangent.second);
 		return ((double)(first->y - second->y )) / (double)(first->x - second->x);
 	}
-
-private:
-	pair<int, int> get_range(int n, int id) {
-		int batch_size = n / threads;
-
-		int start = batch_size * id;
-		int end;
-		if (id == threads - 1) {
-			end = n;
-		} else {
-			end = batch_size * (id + 1);
-		}
-
-		return make_pair(start, end);
-	}
 };
 
-#endif // SIMPLE_PARALLEL
+#endif // SIMPLE_PARALLEL_ALGORITHM
