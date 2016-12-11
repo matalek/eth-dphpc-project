@@ -10,8 +10,10 @@
 #include <omp.h>
 
 #include "../geometric_helpers.hh"
+#include "../parallel_helper.hh"
 #include "../merge_hull.hh"
 #include "../sequential/andrew_algorithm.hh"
+
 
 using namespace std;
 
@@ -35,11 +37,11 @@ public:
 		int type = isUpper ? 1 : -1;
 		shared_ptr<ConvexHullRepresentation> partial_results[threads];
 		// Array for the indexing, containing info on how many points each thread has to put in final result
-		int position_array[threads];
-		// Array for the indexing, containing info on which position in final result each thread should start writing at
-		int final_position_array[threads];
+		int* position_array = new int[threads];
+		// // Array for the indexing, containing info on which position in final result each thread should start writing at
+		int* final_position_array;
 		// Array to store leftmost and rightmost points of each separate hull
-		pair<int,int> left_n_right[threads];
+		pair<int,int>* left_n_right = new pair<int, int>[threads];
 
 		// PARALLEL SECTION
 		#pragma omp parallel num_threads(threads)
@@ -104,26 +106,21 @@ public:
 		}
 		// END OF PARALLEL SECTION
 
-		// SEQUENTIAL SECTION
 		// Build the final position array result and indexing
-		int accumulator = 0;
-		for(int i = 0; i < threads; i++){
-			final_position_array[i] = accumulator;
-			accumulator += position_array[i];
-		}
+		final_position_array = ParallelHelper::prefix_sum(position_array, threads);
+		int total_size = final_position_array[threads - 1];
 
 		//Declare points array for final result
-		shared_ptr<vector<POINT*> > result_points = shared_ptr<vector<POINT*> >(new vector<POINT*>(accumulator));
-		//END OF SEQUENTIAL SECTION
+		shared_ptr<vector<POINT*> > result_points = shared_ptr<vector<POINT*> >(new vector<POINT*>(total_size));
 
 		// PARALLEL SECITON
 		#pragma omp parallel num_threads(threads)
 		{
 			// write points into final vector
 			int id = omp_get_thread_num();
-			int start_index = final_position_array[id];
+			int start_index = (id > 0) ? final_position_array[id - 1] : 0;
 			int leftmost = left_n_right[id].first;
-			int start_position = isUpper ? (accumulator - 1) : 0;
+			int start_position = isUpper ? (total_size - 1) : 0;
 
 			for(int i = 0; i < position_array[id]; i++){
 				result_points -> at(start_position + (-type)*(i + start_index)) = partial_results[id] -> get_point(leftmost + (-type)*i);
