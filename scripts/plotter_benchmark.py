@@ -21,7 +21,7 @@ for index in range(2, len(sys.argv)):
     algorithm = Algorithm.Algorithm(sys.argv[index])
     flag = -1
 
-    with open('./log_files_euler/log_results_' + algorithm.name.replace("/", "_").replace(":", "_t_") +
+    with open('./log_files_euler/euler_log_results_' + algorithm.name.replace("/", "_").replace(":", "_t_") +
                       '.csv', 'rb') as f:
         reader = csv.reader(f)
         for row in reader:
