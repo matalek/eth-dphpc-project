@@ -9,16 +9,41 @@ import matplotlib.pyplot as plt
 # Usage ./plotter_benchmark.py
 # -a <algorithms to compare in the format <algo1:num_of_threads algo2:num_of_threads algo3:num_of_threads ...>>
 
-colors = ['b', 'r', 'g', 'k', 'y', 'c']
+CONST_ALGORITHMS = ['SimpleParallel', 'NaiveParallel', 'HullTree']
+CONST_POINTS = 10000000
+CONST_THREADS = [2, 4, 8, 16, 32]
 
-# Map of algortihms. The map will be {algorithm_name, Algorithm}
-algorithms = {}
+def build_algorithms():
+    algorithms = {}
+    # Build the map of algorithms
+    for algorithm_name in CONST_ALGORITHMS:
 
-count = 0
+        for num_of_threads in CONST_THREADS:
+            algorithm = Algorithm.Algorithm(algorithm_name + ':' + str(num_of_threads))
+            flag = -1
 
-# Build the map of algorithms
-for index in range(2, len(sys.argv)):
-    algorithm = Algorithm.Algorithm(sys.argv[index])
+            with open('./log_files_euler/euler_log_results_' + algorithm.name.replace("/", "_").replace(":", "_t_") +
+                              '.csv', 'rb') as f:
+                reader = csv.reader(f)
+                for row in reader:
+                    # skip first row
+                    if flag == -1:
+                        flag += 1
+                        continue
+
+                    num_of_input_points = (int(row[0]))
+
+                    # Build array containing all measured values
+                    measured_execution_times = []
+                    for value in row[2:]:
+                        measured_execution_times.append(float(value))
+
+                    algorithm.execution_time[num_of_input_points] = measured_execution_times
+
+            algorithms[algorithm.name] = algorithm
+
+    # Build Sequential
+    algorithm = Algorithm.Algorithm('Sequential:1')
     flag = -1
 
     with open('./log_files_euler/euler_log_results_' + algorithm.name.replace("/", "_").replace(":", "_t_") +
@@ -41,14 +66,22 @@ for index in range(2, len(sys.argv)):
 
     algorithms[algorithm.name] = algorithm
 
+    return algorithms
+
+
+colors = ['b', 'r', 'g', 'k', 'y', 'c']
+
+# Map of algortihms. The map will be {algorithm_name, Algorithm}
+algorithms = build_algorithms()
+
 # Execution Time plotter -------------------------------------------------------------------------------------------
 
 plt.title("Performance comparison")
 plt.ylabel('Response Time [s]')
 plt.xlabel('Number of input points')
 plt.grid(True)
-
-for algorithm_name in algorithms:
+count = 0
+for algorithm_name in sys.argv[2:]:
     curr_algorithm = algorithms[algorithm_name]
 
     # Make axis start from 0
@@ -95,7 +128,7 @@ plt.grid(True)
 sequential_algorithm = algorithms['Sequential:1']
 count = 0
 maximum_sp = 0
-for algorithm_name in algorithms:
+for algorithm_name in sys.argv[2:]:
 
     if algorithm_name != 'Sequential:1':
 
@@ -131,4 +164,74 @@ for algorithm_name in algorithms:
 plt.legend(loc=3)
 plt.ylim(ymin=0, ymax=int(maximum_sp) + 1)
 plt.savefig('./logs_plots/speedup_' + ("&".join(sys.argv[8:])).replace("/", "_") + '.png')
+plt.show()
+
+# Plot execution time x numof threads-----------------------------------------------------------------------------
+
+plt.title("Performance comparison")
+plt.ylabel('Response Time [s]')
+plt.xlabel('Number of threads')
+
+count = 0
+for algorithm_name in CONST_ALGORITHMS:
+
+
+    mean_execution_time = []
+    stdv = []
+    my_label = algorithm_name
+    for n_threads in CONST_THREADS:
+        curr_algorithm = algorithms[algorithm_name + ':' + str(n_threads)]
+        measured_execution_time = curr_algorithm.execution_time[CONST_POINTS]
+
+        mean_execution_time.append(float(np.mean(measured_execution_time) / (10 ** 6)))
+        stdv.append(float(np.std(measured_execution_time) / (10 ** 6)))
+
+    plt.plot(CONST_THREADS, mean_execution_time, colors[count] + 'o--', label=my_label)
+    count += 1
+
+# Sequential
+mean_execution_time = []
+stdv = []
+my_label = 'Sequential'
+
+seq_algorithm = algorithms['Sequential:1']
+sequential_exec_time = seq_algorithm.execution_time[CONST_POINTS]
+mean_sequential_exec_time = float(np.mean(sequential_exec_time) / (10 ** 6))
+sequential_stdv = float(np.std(sequential_exec_time) / (10 ** 6))
+for n_threads in CONST_THREADS:
+    mean_execution_time.append(mean_sequential_exec_time)
+    stdv.append(sequential_stdv)
+
+plt.plot(CONST_THREADS, mean_execution_time, colors[count] + 'o--', label=my_label)
+plt.xticks(CONST_THREADS)
+plt.grid(True)
+plt.legend(loc=1)
+plt.show()
+plt.clf()
+
+# Plot Speedup x numof threads-----------------------------------------------------------------------------
+
+plt.title("Performance comparison")
+plt.ylabel('Speedup')
+plt.xlabel('Number of threads')
+
+count = 0
+for algorithm_name in CONST_ALGORITHMS:
+
+    mean_execution_time = []
+    stdv = []
+    my_label = algorithm_name
+    for n_threads in CONST_THREADS:
+        curr_algorithm = algorithms[algorithm_name + ':' + str(n_threads)]
+        measured_execution_time = curr_algorithm.execution_time[CONST_POINTS]
+
+        mean_execution_time.append(mean_sequential_exec_time / float(np.mean(measured_execution_time) / (10 ** 6)))
+        stdv.append(float(np.std(measured_execution_time) / (10 ** 6)))
+
+    plt.plot(CONST_THREADS, mean_execution_time, colors[count] + 'o--', label=my_label)
+    count += 1
+
+plt.xticks(CONST_THREADS)
+plt.grid(True)
+plt.legend(loc=1)
 plt.show()
