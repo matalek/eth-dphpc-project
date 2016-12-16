@@ -39,8 +39,8 @@ public:
 
 		// PARALLEL SECTION
 		#pragma omp parallel num_threads(threads)
-		{	
-			
+		{
+
 			int id = omp_get_thread_num();
 
 			// Computing the separate convex hulls
@@ -54,7 +54,11 @@ public:
 			double steepest_right = (-type) * DBL_MAX;
 
 			#pragma omp barrier
-			
+
+			if (id == 0) {
+				ConvexHullAlgorithm::middle_time = high_resolution_clock::now();
+			}
+
 			//Find rightmost and leftmost for each pair
 			for(int i = 0; i < threads; i++){
 				if(i==id){
@@ -140,7 +144,7 @@ private:
 		}
 		// Calculating convex hull of the appropriate part of points.
 		shared_ptr<vector<POINT*> > convex_hull_points;
-		
+
 		if(isUpper){
 			convex_hull_points = sequential_algorithm->upper_convex_hull(working_points);
 		}

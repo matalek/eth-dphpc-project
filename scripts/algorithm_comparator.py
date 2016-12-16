@@ -112,7 +112,7 @@ for num_of_points in range(
 
             # Apply given algorithm. Output of algorithm: time\n resulting_points
             alg_result = subprocess.check_output(
-                'cat tmp.log | ./tester ' + algorithm_name + ':' + concurrency + " 1", shell=True)
+                'cat tmp.log | ./tester ' + algorithm_name + ':' + concurrency + ' 1', shell=True)
 
             # evaluate correctness on points array
             if not compare_function(cgal_result, alg_result):
@@ -122,7 +122,8 @@ for num_of_points in range(
                 sys.exit()
 
             # Update tmp store
-            key_value[algorithm] += int(alg_result.split('\n')[0].split(' ')[1])
+            key_value[algorithm] += int(alg_result.split('\n')[0].split(' ')[1]) + \
+                                    int(alg_result.split('\n')[0].split(' ')[2])
 
     # Delete tmp file containing the points
     subprocess.call('rm tmp.log', shell=True)
