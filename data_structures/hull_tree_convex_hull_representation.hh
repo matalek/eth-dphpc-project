@@ -127,8 +127,8 @@ public:
             sum[id] = !(hulls[id]->empty());
         }
 
-        ParallelHelper::prefix_sum(sum, n);
-        int non_empty_cnt = sum[n - 1];
+        int* sum_pref = ParallelHelper::prefix_sum(sum, n);
+        int non_empty_cnt = sum_pref[n - 1];
 
         shared_ptr<HullTreeConvexHullRepresentation>* non_empty =
                 new shared_ptr<HullTreeConvexHullRepresentation>[non_empty_cnt];
@@ -137,7 +137,7 @@ public:
         {
             int id = omp_get_thread_num();
             if (!hulls[id]->empty()) {
-                non_empty[sum[id] - 1] = hulls[id];
+                non_empty[sum_pref[id] - 1] = hulls[id];
             }
         }
 
@@ -147,6 +147,7 @@ public:
         shared_ptr<HullTreeConvexHullRepresentation> res = merge_non_empty_hulls(non_empty, non_empty_cnt);
 
         delete [] sum;
+        delete [] sum_pref;
         delete [] non_empty;
 
         return res;
