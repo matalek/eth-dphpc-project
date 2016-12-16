@@ -5,6 +5,8 @@
 #include <chrono>
 #include <string>
 
+#include <iostream>
+
 #include "geometric_helpers.hh"
 #include "merge_hull.hh"
 
@@ -33,15 +35,30 @@ using namespace std::chrono;
 ConvexHullAlgorithm* load_algorithm(char* argv[]) {
 	ConvexHullAlgorithm* algorithm;
 	// TODO(matalek): provide nicer way to create an appropriate algorithm.
-	string name = (string) argv[1];
+	string arg = (string) argv[1];
+
+	int threads;
+	string name;
+	size_t split_point = arg.find(':');
+
+	if (split_point != string::npos) {
+		name = arg.substr(0, split_point);
+		threads = stoi(arg.substr(split_point + 1));
+	} else {
+		name = arg;
+	}
+
 	if (name == "Sequential") {
 		algorithm = new AndrewAlgorithm();
 	} else if (name == "NaiveParallel") {
-		algorithm = new NaiveParallelAlgorithm(atoi(argv[2]));
+		assert(threads > 0);
+		algorithm = new NaiveParallelAlgorithm(threads);
 	} else if (name == "SimpleParallel") {
-		algorithm = new SimpleParallelAlgorithm(atoi(argv[2]));
+		assert(threads > 0);
+		algorithm = new SimpleParallelAlgorithm(threads);
 	} else if (name == "HullTree") {
-		algorithm = new HullTreeAlgorithm(atoi(argv[2]));
+		assert(threads > 0);
+		algorithm = new HullTreeAlgorithm(threads);
 	} else {
 		assert(false && "No algorithm found with this name");
 	}
