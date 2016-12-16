@@ -27,6 +27,21 @@ def compare_function(cgal, alg):
 
     return True
 
+# Insert function check_output if not present
+if "check_output" not in dir(subprocess ):
+    def f(*popenargs, **kwargs):
+        if 'stdout' in kwargs:
+            raise ValueError('stdout argument not allowed, it will be overridden.')
+        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
+        output, unused_err = process.communicate()
+        retcode = process.poll()
+        if retcode:
+            cmd = kwargs.get("args")
+            if cmd is None:
+                cmd = popenargs[0]
+            raise subprocess.CalledProcessError(retcode, cmd)
+        return output
+    subprocess.check_output = f
 
 # Check user input correctness
 if int(sys.argv[10]) <= 0 or len(sys.argv) <= 11:
@@ -57,13 +72,9 @@ CONST_COMB_NUMBER = int(sys.argv[2])
 algorithms_map = {}
 
 # Build executables
-subprocess.call('make clean', shell=True)
 subprocess.call('make', shell=True)
 subprocess.call('make -C generator/', shell=True)
 subprocess.call('mkdir -p log_files', shell=True)
-subprocess.call('mkdir -p logs_plots', shell=True)
-subprocess.call('(cd cgal && cmake .)', shell=True)
-subprocess.call('(cd cgal && make)', shell=True)
 
 # Generate empty CSVs for eveery algorithm tested
 for key in range(0, len(sys.argv) - 12):
@@ -104,7 +115,7 @@ for num_of_points in range(
 
         # Apply CGAL_algorithm to compare our result to
         cgal_result = subprocess.check_output(
-            'cat tmp.log | ./cgal/cgal_graham_andrew', shell=True)
+            'cat tmp.log | ./tester Squential:1', shell=True)
 
         # Apply every given algorithm to the set of points
         for key in range(0, len(sys.argv) - 12):
@@ -117,7 +128,7 @@ for num_of_points in range(
 
             # Apply given algorithm. Output of algorithm: time\n resulting_points
             alg_result = subprocess.check_output(
-                'cat tmp.log | ./tester ' + algorithm_name + ' ' + concurrency, shell=True)
+                'cat tmp.log | ./tester ' + algorithm_name + ':' + concurrency, shell=True)
 
             # evaluate correctness on points array
             if not compare_function(cgal_result, alg_result):
