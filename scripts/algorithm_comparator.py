@@ -112,7 +112,7 @@ for num_of_points in range(
 
             # Apply given algorithm. Output of algorithm: time\n resulting_points
             alg_result = subprocess.check_output(
-                'cat tmp.log | ./tester ' + algorithm_name + ' ' + concurrency, shell=True)
+                'cat tmp.log | ./tester ' + algorithm_name + ':' + concurrency, shell=True)
 
             # evaluate correctness on points array
             if not compare_function(cgal_result, alg_result):
