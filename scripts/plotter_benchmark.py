@@ -5,12 +5,13 @@ import csv
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 
 # Usage ./plotter_benchmark.py
 # -a <algorithms to compare in the format <algo1:num_of_threads algo2:num_of_threads algo3:num_of_threads ...>>
 
 CONST_ALGORITHMS = ['SimpleParallel', 'NaiveParallel', 'HullTree']
-CONST_POINTS = 10000000
+CONST_POINTS = 1000000
 CONST_THREADS = [2, 4, 8, 16, 32]
 
 def build_algorithms():
@@ -67,6 +68,10 @@ def build_algorithms():
     algorithms[algorithm.name] = algorithm
 
     return algorithms
+
+
+def calculate_boundary(algorithm_name):
+    return map(lambda threads : CONST_POINTS / (CONST_POINTS / threads + 2*threads * math.log(CONST_POINTS / threads, 2)**2), CONST_THREADS)
 
 
 colors = ['b', 'r', 'g', 'k', 'y', 'c']
@@ -235,3 +240,30 @@ plt.xticks(CONST_THREADS)
 plt.grid(True)
 plt.legend(loc=1)
 plt.show()
+
+# Plot Speedup x numof threads with theoretical boundaries-----------------------------------------------------------------------------
+
+plt.title("Performance comparison")
+plt.ylabel('Speedup')
+plt.xlabel('Number of threads')
+
+for algorithm_name in CONST_ALGORITHMS:
+    mean_execution_time = []
+    stdv = []
+    my_label = algorithm_name
+    for n_threads in CONST_THREADS:
+        curr_algorithm = algorithms[algorithm_name + ':' + str(n_threads)]
+        measured_execution_time = curr_algorithm.execution_time[CONST_POINTS]
+
+        mean_execution_time.append(mean_sequential_exec_time / float(np.mean(measured_execution_time) / (10 ** 6)))
+        stdv.append(float(np.std(measured_execution_time) / (10 ** 6)))
+
+    plt.plot(CONST_THREADS, mean_execution_time, 'bo--', label=my_label)
+
+    plt.plot(CONST_THREADS, calculate_boundary(algorithm_name), 'r')
+    count += 1
+
+    plt.xticks(CONST_THREADS)
+    plt.grid(True)
+    plt.legend(loc=1)
+    plt.show()

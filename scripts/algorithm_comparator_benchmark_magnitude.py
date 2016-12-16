@@ -41,7 +41,7 @@ if "check_output" not in dir(subprocess ):
 # Store parameters passed by user
 CONST_REP_NUMBER = 20
 CONST_COORDINATE_RANGE = 4000000000
-CONST_POINTS = [1000, 10000]
+CONST_POINTS = [1000, 10000, 100000, 1000000, 10000000]
 CONST_CSV_SUFFIXES = ['', '_mid', '_end']
 
 # Initialize the map from algorithm to execution times
