@@ -41,7 +41,7 @@ if "check_output" not in dir(subprocess ):
 # Store parameters passed by user
 CONST_REP_NUMBER = 20
 CONST_COORDINATE_RANGE = 4000000000
-CONST_POINTS = [1000, 10000, 100000, 1000000, 10000000, 100000000]
+CONST_POINTS = [1000, 10000]
 CONST_CSV_SUFFIXES = ['', '_mid', '_end']
 
 # Initialize the map from algorithm to execution times
@@ -70,13 +70,13 @@ for key in range(0, len(sys.argv) - 2):
 
         algorithms_map[algorithm].append([])
 
-i = 0
+step_count = 0
 # Start tests
 for num_of_points in CONST_POINTS:
-    i += 1
+    step_count += 1
     # Print progress information to screen
     print ('\n-----------------------------------------\nBEGINNING STEP: ' +
-           str(i) +
+           str(step_count) +
            ', POINTS:' + str(num_of_points) + '\n-----------------------------------------'
            )
 
@@ -129,8 +129,9 @@ for num_of_points in CONST_POINTS:
             writer = csv.writer(ofile)
             writer.writerow([num_of_points, ''] + algorithms_map[algorithm][i])
             ofile.close()
-            i+=1
-        algorithms_map[algorithm] = []
+
+            algorithms_map[algorithm][i] = []
+            i += 1
 
 # Print progress information to screen
 print('\n--------------------------------------\n| ----------------------------------- |\n'
