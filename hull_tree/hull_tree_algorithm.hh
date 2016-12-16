@@ -60,6 +60,11 @@ private:
 			else {
 				convex_hull_points = sequential_algorithm->lower_convex_hull(working_points);
 			}
+
+			if (start == 0) {
+				ConvexHullAlgorithm::middle_time = high_resolution_clock::now();
+			}
+
 			return shared_ptr<HullTreeConvexHullRepresentation>(new HullTreeConvexHullRepresentation(convex_hull_points, is_upper));
 		}
 

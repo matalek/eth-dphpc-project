@@ -3,18 +3,23 @@
 
 #include <vector>
 #include <memory>
+#include <chrono>
 #include "../geometric_helpers.hh"
 #include "../data_structures/hull_wrapper.hh"
 
 using namespace std;
+using namespace std::chrono;
 
 class ConvexHullAlgorithm {
 
 public:
+	static high_resolution_clock::time_point middle_time;
+
+	static int a;
+
 	virtual ~ConvexHullAlgorithm() { };
 
 	virtual shared_ptr<HullWrapper> convex_hull(vector<POINT*>&) = 0;
-
 };
 
 #endif // CONVEX_HULL_ALGORITHM
