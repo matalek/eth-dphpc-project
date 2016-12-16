@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <chrono>
 #include <string>
-
 #include <iostream>
+#include <fstream>
 
 #include "geometric_helpers.hh"
 #include "merge_hull.hh"
@@ -67,17 +67,46 @@ ConvexHullAlgorithm* load_algorithm(char* argv[]) {
 
 int main(int argc, char* argv[]) {
 	// Number of points.
-	int n;
-	scanf("%d", &n);
 
-	// Reading from standard input points.
+	bool standard_input = false;
+	if (argc == 3) {
+		standard_input = true;
+	}
+
+	int n;
+
+	ifstream input_file;
+	if (!standard_input) {
+		input_file = ifstream("/mnt/hostfs/team08/tmp.log");
+		if (!input_file.is_open()) {
+		    cout << "Unable to open file\n";
+		    return 1;
+		}
+	}
+
+	if (standard_input) {
+		cin >> n;
+	} else {
+		input_file >> n;
+	}
+
+	// Reading points.
 	vector<POINT> points(n);
 	vector<POINT*> points_pointers(n);
+
 	for (int i = 0; i < n; i++) {
-		int x, y;
-		scanf("%d%d", &x, &y);
-		points[i] = POINT(x, y);
+		LL x, y;
+		if (standard_input) {
+			cin >> x >> y;
+		} else {
+        	input_file >> x >> y;
+        }
+        points[i] = POINT(x, y);
 		points_pointers[i] = &points[i];
+    }
+
+    if (!standard_input) {
+	    input_file.close();
 	}
 
 	ConvexHullAlgorithm* algorithm;
@@ -88,10 +117,10 @@ int main(int argc, char* argv[]) {
     shared_ptr<HullWrapper> convex_hull_points = shared_ptr<HullWrapper>(algorithm->convex_hull(points_pointers));
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
-	printf("TIME: ");
-	printf("%ld", duration_cast<microseconds>( t2 - t1 ).count());
+	cout << "TIME: ";
+	cout << duration_cast<microseconds>( t2 - t1 ).count() << "\n";
     shared_ptr<vector<POINT*>> result = convex_hull_points->get_points();
-    printf("\n%lu\n", result->size());
+    cout << result->size() << "\n";
     for (POINT* point : (*result)) {
         point->print();
     }

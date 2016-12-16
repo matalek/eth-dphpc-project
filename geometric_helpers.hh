@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <vector>
+#include <iostream>
 
 typedef long long int LL;
 
@@ -22,13 +23,13 @@ struct POINT {
 	int x, y;
 
 	POINT(int x = 0, int y = 0) : x(x), y(y) { }
-	
+
 	bool operator ==(const POINT& a) {
-		return a.x == x && a.y == y; 
+		return a.x == x && a.y == y;
 	}
 
 	void print() {
-		printf("%d %d\n", x, y);
+		std::cout << x << " " << y << "\n";
 	}
 };
 
