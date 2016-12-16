@@ -10,6 +10,7 @@
 #include "../parallel_helper.hh"
 #include "../merge_hull.hh"
 #include "convex_hull_representation.hh"
+#include "representation_iterator.hh"
 
 using namespace std;
 
@@ -76,6 +77,10 @@ public:
             index = size() - 1 - index;
         }
         return tree->find_node(index)->get_point();
+    }
+
+    shared_ptr<RepresentationIterator> get_iterator(int index) {
+        return shared_ptr<RepresentationIterator>(new HullTreeIterator(tree, index, size(), upper));
     }
 
     void print() const {
@@ -397,6 +402,81 @@ private:
     shared_ptr<HullTreeNode> find_node(int index) {
         return tree->find_node(index);
     }
+
+    class HullTreeIterator : public RepresentationIterator {
+
+    public:
+        HullTreeIterator(shared_ptr<HullTreeNode> root, int index, int n, bool upper)
+                : root(root), index(index), n(n), upper(upper) {
+            if (upper) {
+                index = n - 1 - index;
+            }
+            node = root->find_node(index);
+        }
+
+        POINT* get_point() {
+            return node->get_point();
+        }
+
+        void go_clockwise() {
+            node = get_clockwise();
+            if (index > 0) {
+                index--;
+            } else {
+                index = n - 1;
+            }
+        }
+
+        void go_counter_clockwise() {
+            node = get_counter_clockwise();
+            if (index < n - 1) {
+                index++;
+            } else {
+                index = 0;
+            }
+        }
+
+        POINT* get_point_clockwise() {
+            return get_clockwise()->get_point();
+        }
+
+        POINT* get_point_counter_clockwise() {
+            return get_counter_clockwise()->get_point();
+        }
+
+        int get_index() {
+            return index;
+        }
+
+    private:
+        shared_ptr<HullTreeNode> root, node;
+        int index, n;
+        bool upper;
+
+        shared_ptr<HullTreeNode> get_clockwise() {
+            return (upper) ? get_succ() : get_prev();
+        }
+
+        shared_ptr<HullTreeNode> get_counter_clockwise() {
+            return (upper) ? get_prev() : get_succ();
+        }
+
+        shared_ptr<HullTreeNode> get_succ() {
+            auto candidate = node->get_succ();
+            if (!candidate) {
+                return root->get_most_left();
+            }
+            return candidate;
+        }
+
+        shared_ptr<HullTreeNode> get_prev() {
+            auto candidate = node->get_prev();
+            if (!candidate) {
+                return root->get_most_right();
+            }
+            return candidate;
+        }
+    };
 
 public:
     static shared_ptr<HullTreeConvexHullRepresentation> empty_hull(bool upper) {

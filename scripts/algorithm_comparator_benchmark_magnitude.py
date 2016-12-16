@@ -4,11 +4,6 @@ import csv
 import sys
 
 # Usage ./algorithm_comparator.py
-# -c <number of different combinations of number of points> 
-# -w <width of steps>
-# -s <starting number of points>
-# -r <range of points coordinates>
-# -R <number of repetition for each number of points>
 # -a <algorithms to compare in the format <algo1:num_of_threads algo2:num_of_threads algo3:num_of_threads ...>>
 
 
@@ -43,30 +38,11 @@ if "check_output" not in dir(subprocess ):
         return output
     subprocess.check_output = f
 
-# Check user input correctness
-if int(sys.argv[10]) <= 0 or len(sys.argv) <= 11:
-    print 'ERROR in usage, provide int number of repetition for each value (ex. -R 20)'
-    exit
-if int(sys.argv[8]) <= 0 or len(sys.argv) <= 9:
-    print 'ERROR in usage, provide int range of points coordinates (ex. -r 20)'
-    exit   
-if int(sys.argv[6]) <= 0 or len(sys.argv) <= 7:
-    print 'ERROR in usage, provide int starting number of points (ex. -s 100)'
-    exit
-if int(sys.argv[4]) <= 0 or len(sys.argv) <= 5:
-    print 'ERROR in usage, provide int width in steps (ex. -w 50)'
-    exit
-if int(sys.argv[2]) <= 0 or len(sys.argv) <= 3:
-    print 'ERROR in usage, provide int number of different combinations (ex. -c 20)'
-    exit
-
-
 # Store parameters passed by user
-CONST_REP_NUMBER = int(sys.argv[10])
-CONST_COORDINATE_RANGE = int(sys.argv[8])
-CONST_STARTING_VALUE = int(sys.argv[6])
-CONST_STEP_WIDTH = int(sys.argv[4])
-CONST_COMB_NUMBER = int(sys.argv[2])
+CONST_REP_NUMBER = 20
+CONST_COORDINATE_RANGE = 4000000000
+CONST_POINTS = [1000, 10000]
+CONST_CSV_SUFFIXES = ['', '_mid', '_end']
 
 # Initialize the map from algorithm to execution times
 algorithms_map = {}
@@ -77,28 +53,30 @@ subprocess.call('make -C generator/', shell=True)
 subprocess.call('mkdir -p log_files', shell=True)
 
 # Generate empty CSVs for eveery algorithm tested
-for key in range(0, len(sys.argv) - 12):
-    algorithm = sys.argv[12 + key]
-
-    # create and open a csv file to store results
-    ofile = open('log_files/log_results_' + algorithm.replace('/', '_').replace(':', '_t_') + '.csv', "wb")
-    writer = csv.writer(ofile)
-    columns_title = ['#Input Points', '']
-    for i in range(0, CONST_REP_NUMBER):
-        columns_title.append('Exec_Time[us]_R_' + str(i + 1))
-    writer.writerow(columns_title)
-    ofile.close()
-
+for key in range(0, len(sys.argv) - 2):
+    algorithm = sys.argv[2 + key]
     # Initialize the map between algorithm and execution times
     algorithms_map[algorithm] = []
+    for suffix in CONST_CSV_SUFFIXES:
 
+        # create and open a csv file to store results
+        ofile = open('log_files/log_results_' + algorithm.replace('/', '_').replace(':', '_t_') + suffix + '.csv', "wb")
+        writer = csv.writer(ofile)
+        columns_title = ['#Input Points', '']
+        for i in range(0, CONST_REP_NUMBER):
+            columns_title.append('Exec_Time[us]_R_' + str(i + 1))
+        writer.writerow(columns_title)
+        ofile.close()
+
+        algorithms_map[algorithm].append([])
+
+step_count = 0
 # Start tests
-for num_of_points in range(
-        CONST_STARTING_VALUE, CONST_STEP_WIDTH*CONST_COMB_NUMBER + CONST_STARTING_VALUE, CONST_STEP_WIDTH):
-
+for num_of_points in CONST_POINTS:
+    step_count += 1
     # Print progress information to screen
     print ('\n-----------------------------------------\nBEGINNING STEP: ' +
-           str(((num_of_points-CONST_STARTING_VALUE)/CONST_STEP_WIDTH)+1) +
+           str(step_count) +
            ', POINTS:' + str(num_of_points) + '\n-----------------------------------------'
            )
 
@@ -115,11 +93,11 @@ for num_of_points in range(
 
         # Apply CGAL_algorithm to compare our result to
         cgal_result = subprocess.check_output(
-            'cat tmp.log | ./tester Squential:1', shell=True)
+            'cat tmp.log | ./tester Sequential:1 1', shell=True)
 
         # Apply every given algorithm to the set of points
-        for key in range(0, len(sys.argv) - 12):
-            algorithm = sys.argv[12 + key]
+        for key in range(0, len(sys.argv) - 2):
+            algorithm = sys.argv[2 + key]
             algorithm_name = algorithm.split(":")[0]
             concurrency = algorithm.split(":")[1]
 
@@ -128,7 +106,7 @@ for num_of_points in range(
 
             # Apply given algorithm. Output of algorithm: time\n resulting_points
             alg_result = subprocess.check_output(
-                'cat tmp.log | ./tester ' + algorithm_name + ':' + concurrency, shell=True)
+                'cat tmp.log | ./tester ' + algorithm_name + ':' + concurrency + ' 1', shell=True)
 
             # evaluate correctness on points array
             if not compare_function(cgal_result, alg_result):
@@ -136,18 +114,24 @@ for num_of_points in range(
                 sys.exit()
 
             # Update tmp store
-            algorithms_map[algorithm].append(int(alg_result.split('\n')[0].split(' ')[1]))
-
-    # Delete tmp file containing the points
-    subprocess.call('rm tmp.log', shell=True)
+            time_0 = int(alg_result.split('\n')[0].split(' ')[1])
+            time_1 = int(alg_result.split('\n')[0].split(' ')[2])
+            algorithms_map[algorithm][0].append(time_0 + time_1)
+            algorithms_map[algorithm][1].append(time_0)
+            algorithms_map[algorithm][2].append(time_1)
 
     # Write a new row in every CSV with this step's result
     for algorithm in algorithms_map:
-        ofile = open('log_files/log_results_' + algorithm.replace('/', '_').replace(':', '_t_') + '.csv', "a")
-        writer = csv.writer(ofile)
-        writer.writerow([num_of_points, ''] + algorithms_map[algorithm])
-        algorithms_map[algorithm] = []
-        ofile.close()
+        i = 0
+        for suffix in CONST_CSV_SUFFIXES:
+            ofile = open('log_files/log_results_' + algorithm.replace('/', '_').replace(':', '_t_')
+                         + suffix + '.csv', "a")
+            writer = csv.writer(ofile)
+            writer.writerow([num_of_points, ''] + algorithms_map[algorithm][i])
+            ofile.close()
+
+            algorithms_map[algorithm][i] = []
+            i += 1
 
 # Print progress information to screen
 print('\n--------------------------------------\n| ----------------------------------- |\n'

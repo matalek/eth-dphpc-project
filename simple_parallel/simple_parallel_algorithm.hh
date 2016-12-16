@@ -58,6 +58,10 @@ public:
 
 			#pragma omp barrier
 
+			if (id == 0) {
+				ConvexHullAlgorithm::middle_time = high_resolution_clock::now();
+			}
+
 			//Find rightmost and leftmost for each pair
 			for(int i = 0; i < threads; i++){
 				if(i==id){

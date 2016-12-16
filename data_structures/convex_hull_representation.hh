@@ -6,11 +6,12 @@
 #include <memory>
 
 #include "../geometric_helpers.hh"
+#include "representation_iterator.hh"
 
 using namespace std;
 
 // Represents abstract convex hull representation.
-// Possible subclasses have to implement also constructor which takes 
+// Possible subclasses have to implement also constructor which takes
 // a shared pointer of vector of points.
 class ConvexHullRepresentation {
 
@@ -39,6 +40,7 @@ public:
 	virtual int find_rightmost_point() = 0;
 	virtual int find_leftmost_point() = 0;
 	virtual POINT* get_point(int index) = 0;
+	virtual shared_ptr<RepresentationIterator> get_iterator(int index) = 0;
 	virtual int go_counter_clockwise(int index) = 0;
 	virtual int go_clockwise(int index) = 0;
 	virtual	shared_ptr<vector<POINT*>> get_hull() = 0;

@@ -1,9 +1,8 @@
 #!/usr/bin/env python
+#SBATCH --gres=mic:1 -n 64 -N 1
 import subprocess
 import csv
 import sys
-import numpy as np
-import matplotlib.pyplot as plt
 
 # Usage ./algorithm_comparator.py
 # -c <number of different combinations of number of points> 
@@ -26,8 +25,27 @@ def compare_function(cgal, alg):
     for point in alg_points:
         if point not in cgal_points:
             return False
+
     return True
 
+subprocess.call('export SINK_LD_LIBRARY_PATH=/opt/intel/composer_xe_2015/lib/mic/', shell=True)
+subprocess.call('export OMP_NUM_THREADS=64', shell=True)
+
+# Insert function check_output if not present
+if "check_output" not in dir(subprocess ):
+    def f(*popenargs, **kwargs):
+        if 'stdout' in kwargs:
+            raise ValueError('stdout argument not allowed, it will be overridden.')
+        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
+        output, unused_err = process.communicate()
+        retcode = process.poll()
+        if retcode:
+            cmd = kwargs.get("args")
+            if cmd is None:
+                cmd = popenargs[0]
+            raise subprocess.CalledProcessError(retcode, cmd)
+        return output
+    subprocess.check_output = f
 
 # Check user input correctness
 if int(sys.argv[10]) <= 0 or len(sys.argv) <= 11:
@@ -54,27 +72,30 @@ CONST_STARTING_VALUE = int(sys.argv[6])
 CONST_STEP_WIDTH = int(sys.argv[4])
 CONST_COMB_NUMBER = int(sys.argv[2])
 
-# Initialize a map to contain temporary values
-key_value = {}
+# Initialize the map from algorithm to execution times
+algorithms_map = {}
 
 # Build executables
-subprocess.call('make clean', shell=True)
 subprocess.call('make', shell=True)
 subprocess.call('make -C generator/', shell=True)
 subprocess.call('mkdir -p log_files', shell=True)
-subprocess.call('mkdir -p logs_plots', shell=True)
-subprocess.call('(cd cgal && cmake .)', shell=True)
-subprocess.call('(cd cgal && make)', shell=True)
+subprocess.call('icc -mmic -fopenmp -std=c++11 tester.cc -o test.mic', shell=True)
 
 # Generate empty CSVs for eveery algorithm tested
 for key in range(0, len(sys.argv) - 12):
     algorithm = sys.argv[12 + key]
+
     # create and open a csv file to store results
     ofile = open('log_files/log_results_' + algorithm.replace('/', '_').replace(':', '_t_') + '.csv', "wb")
     writer = csv.writer(ofile)
-    writer.writerow(['#Input Points', 'Exec_Time [us]'])
+    columns_title = ['#Input Points', '']
+    for i in range(0, CONST_REP_NUMBER):
+        columns_title.append('Exec_Time[us]_R_' + str(i + 1))
+    writer.writerow(columns_title)
     ofile.close()
-    key_value[algorithm] = 0
+
+    # Initialize the map between algorithm and execution times
+    algorithms_map[algorithm] = []
 
 # Start tests
 for num_of_points in range(
@@ -99,7 +120,7 @@ for num_of_points in range(
 
         # Apply CGAL_algorithm to compare our result to
         cgal_result = subprocess.check_output(
-            'cat tmp.log | ./cgal/cgal_graham_andrew', shell=True)
+            'srun --gres=mic:1 micnativeloadex ./test.mic -a Sequential:1', shell=True)
 
         # Apply every given algorithm to the set of points
         for key in range(0, len(sys.argv) - 12):
@@ -112,34 +133,26 @@ for num_of_points in range(
 
             # Apply given algorithm. Output of algorithm: time\n resulting_points
             alg_result = subprocess.check_output(
-                'cat tmp.log | ./tester ' + algorithm_name + ':' + concurrency + ' 1', shell=True)
+                'srun --gres=mic:1 micnativeloadex ./test.mic -a ' + algorithm_name + ' ' + concurrency, shell=True)
 
             # evaluate correctness on points array
             if not compare_function(cgal_result, alg_result):
-                print 'ERROR, ALGORITHM INCORRECT'
-                print 'ALGORITHM:\n' + alg_result
-                print 'CGAL:\n' + cgal_result
+                print 'ERROR, ALGORITHM INCORRECT\nALGORITHM:\n' + alg_result + '\nCGAL:\n' + cgal_result
                 sys.exit()
 
             # Update tmp store
-            key_value[algorithm] += int(alg_result.split('\n')[0].split(' ')[1]) + \
-                                    int(alg_result.split('\n')[0].split(' ')[2])
+            algorithms_map[algorithm].append(int(alg_result.split('\n')[0].split(' ')[1]))
 
-    # Delete tmp file containing the points
-    subprocess.call('rm tmp.log', shell=True)
 
     # Write a new row in every CSV with this step's result
-    for algorithm in key_value:
+    for algorithm in algorithms_map:
         ofile = open('log_files/log_results_' + algorithm.replace('/', '_').replace(':', '_t_') + '.csv', "a")
         writer = csv.writer(ofile)
-        writer.writerow([num_of_points, key_value[algorithm] / CONST_REP_NUMBER])
-        key_value[algorithm] = 0
+        writer.writerow([num_of_points, ''] + algorithms_map[algorithm])
+        algorithms_map[algorithm] = []
         ofile.close()
 
 # Print progress information to screen
 print('\n--------------------------------------\n| ----------------------------------- |\n'
-      '| |COMPARISON COMPLETED SUCCESSFULLY| |'
+      '| |COMPUTATION COMPLETED SUCCESSFULLY| |'
       '\n| ----------------------------------- |\n--------------------------------------\n')
-
-# Call plotter to plot results
-subprocess.call('./scripts/plotter.py -a ' + (" ".join(sys.argv[12:])), shell=True)

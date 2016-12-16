@@ -39,6 +39,8 @@ public:
             partial_results[threads + id] =  sequential_algorithm->convex_hull(working_points);
 		}
 
+		ConvexHullAlgorithm::middle_time = high_resolution_clock::now();
+
 		int level = threads >> 1;
 		while (level > 0) {
 			#pragma omp parallel num_threads(level)

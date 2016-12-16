@@ -8,6 +8,7 @@
 #include "../geometric_helpers.hh"
 #include "../merge_hull.hh"
 #include "convex_hull_representation.hh"
+#include "representation_iterator.hh"
 
 using namespace std;
 
@@ -58,6 +59,10 @@ public:
         return hull->at(index);
     }
 
+    shared_ptr<RepresentationIterator> get_iterator(int index) {
+        return shared_ptr<RepresentationIterator>(new VectorHullIterator(hull, index));
+    }
+
 	void merge_lower_hull(VectorConvexHullRepresentation &other_hull) {
 		pair <int, int> low_tangent = findLowerT((*this), other_hull);
         vector<POINT*> mergedVector;
@@ -86,6 +91,50 @@ protected:
 
 private:
 	shared_ptr<vector<POINT*>> hull;
+
+    class VectorHullIterator : public RepresentationIterator {
+
+    public:
+        VectorHullIterator(shared_ptr<vector<POINT*>> hull, int index):
+                hull(hull),index(index) { }
+
+        POINT* get_point() {
+            return hull->at(index);
+        }
+
+        void go_clockwise() {
+            index = get_clockwise_index();
+        }
+
+        void go_counter_clockwise() {
+            index = get_counter_clockwise_index();
+        }
+
+        POINT* get_point_clockwise() {
+            return hull->at(get_clockwise_index());
+        }
+
+        POINT* get_point_counter_clockwise() {
+            return hull->at(get_counter_clockwise_index());
+        }
+
+        int get_index() {
+            return index;
+        }
+
+    private:
+
+        int get_clockwise_index() {
+            return index > 0 ? index - 1 : hull->size() -1;
+        }
+
+        int get_counter_clockwise_index() {
+            return (index + 1) % hull->size();
+        }
+
+        int index;
+        shared_ptr<vector<POINT*>> hull;
+    };
 };
 
 #endif // VECTOR_CONVEX_HULL_REPRESENTATION

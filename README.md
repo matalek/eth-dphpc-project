@@ -9,10 +9,10 @@ Execute from prompt command:
 ```sh
 $ chmod u+x scripts/algorithm_comparator.py
 ```
-and then 
+and then
 ```sh
 $ ./scripts/algorithm_comparator.py
-# -c <number of different combinations of number of points> 
+# -c <number of different combinations of number of points>
 # -w <width of steps>
 # -s <starting number of points>
 # -r <range of points coordinates>
@@ -37,7 +37,7 @@ Execute from prompt command:
 ```sh
 $ chmod u+x scripts/plotter_script.py
 ```
-and then 
+and then
 
 ```sh
 $ ./scripts/plotter.py
@@ -57,7 +57,7 @@ Execute from prompt command:
 ```sh
 $ chmod u+x scripts/alg_result_printer.py
 ```
-and then 
+and then
 
 ```sh
 $ ./alg_result_printer.py
@@ -77,7 +77,7 @@ Execute from prompt command:
 ```sh
 $ chmod u+x scripts/original_generated_points_printer.py
 ```
-and then 
+and then
 
 ```sh
 $ ./scripts/original_generated_points_printer.py
@@ -94,12 +94,13 @@ $ make
 
 Execute from prompt command:
 ```sh
-$ ./tester algorithm_name [threads_count]
+$ ./tester algorithm_name[:threads_count] [standard_input]
 ```
 where:
-- `algorithm_name` is the name of the algorithm. Available algorithms are listed in the 
+- `algorithm_name` is the name of the algorithm. Available algorithms are listed in the
 table below.
 - `threads_count` (optional) is the number of threads in case of parallel version.
+- `standard_input` should be set to some value (e.g. 1) when we want to read data from the standard input, otherwise we read from input file on Xeon Phi.
 
 ### Available algorithms
 | Algorithm name | Type | Implementation |
