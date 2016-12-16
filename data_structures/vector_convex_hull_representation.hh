@@ -8,6 +8,7 @@
 #include "../geometric_helpers.hh"
 #include "../merge_hull.hh"
 #include "convex_hull_representation.hh"
+#include "representation_iterator.hh"
 
 using namespace std;
 
@@ -56,6 +57,11 @@ public:
 
 	POINT* get_point(int index) override {
         return hull->at(index);
+    }
+
+    shared_ptr<RepresentationIterator> get_iterator(int index) {
+        // TODO: implement this method.
+        return nullptr;
     }
 
 	void merge_lower_hull(VectorConvexHullRepresentation &other_hull) {
