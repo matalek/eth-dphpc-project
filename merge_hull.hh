@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <algorithm>
 #include "data_structures/convex_hull_representation.hh"
+#include "data_structures/representation_iterator.hh"
 
 
 using namespace std;
@@ -18,37 +19,36 @@ int turn_left(POINT *a, POINT *b, POINT *c) {
     return DetPointer(a, b, c) > 0;
 }
 
-int left_lower_tangent(ConvexHullRepresentation &hull, int index, POINT *b) {
-    POINT *a = hull.get_point(index);
-    POINT *u = hull.get_point(hull.go_counter_clockwise(index));
-    POINT *w = hull.get_point(hull.go_clockwise(index));
+int left_lower_tangent(shared_ptr<RepresentationIterator> iterator, POINT *b) {
+    POINT *a = iterator->get_point();
+    POINT *u = iterator->get_point_counter_clockwise();
+    POINT *w = iterator->get_point_clockwise();
     return turn_right(b, a, w) && !turn_left(b, a, u);
 }
 
 // A is always the left hull, B is the right one
-int left_upper_tangent(ConvexHullRepresentation &left_hull, int aIndex, POINT *b) {
-    POINT *a = left_hull.get_point(aIndex);
-    POINT *u = left_hull.get_point(left_hull.go_counter_clockwise(aIndex));
-    POINT *w = left_hull.get_point(left_hull.go_clockwise(aIndex));
+int left_upper_tangent(shared_ptr<RepresentationIterator> iterator, POINT *b) {
+    POINT *a = iterator->get_point();
+    POINT *u = iterator->get_point_counter_clockwise();
+    POINT *w = iterator->get_point_clockwise();
     return turn_left(b, a, u) && !turn_right(b, a, w);
 }
 
-int lowerTangentB(ConvexHullRepresentation &right_hull, int index, POINT *a) {
-    POINT *u = right_hull.get_point(right_hull.go_counter_clockwise(index));
-    POINT *w = right_hull.get_point(right_hull.go_clockwise(index));
-    POINT *b = right_hull.get_point(index);
+int lowerTangentB(shared_ptr<RepresentationIterator> iterator, POINT *a) {
+    POINT *u = iterator->get_point_counter_clockwise();
+    POINT *w = iterator->get_point_clockwise();
+    POINT *b = iterator->get_point();
     return !turn_right(a, b, w) && turn_left(a, b, u);
-    //return left_upper_tangent(right_hull, left_hull, index, aIndex);
 }
 
-int right_upper_tangent(ConvexHullRepresentation &right_hull, int index, POINT *a) {
-    POINT *b = right_hull.get_point(index);
-    POINT *u = right_hull.get_point(right_hull.go_counter_clockwise(index));
-    POINT *w = right_hull.get_point(right_hull.go_clockwise(index));
+int right_upper_tangent(shared_ptr<RepresentationIterator> iterator, POINT *a) {
+    POINT *b = iterator->get_point();
+    POINT *u = iterator->get_point_counter_clockwise();
+    POINT *w = iterator->get_point_clockwise();
     return !turn_left(a, b, u) && turn_right(a, b, w);
 }
 
-int findLowerTangentA(ConvexHullRepresentation &left_hull, ConvexHullRepresentation &right_hull, int aIndex, int bIndex) {
+/*int findLowerTangentA(ConvexHullRepresentation &left_hull, ConvexHullRepresentation &right_hull, int aIndex, int bIndex) {
     while (!left_lower_tangent(left_hull, aIndex, right_hull.get_point(bIndex))) {
         aIndex = left_hull.go_clockwise(aIndex);
     }
@@ -60,48 +60,46 @@ int findLowerTangentB(ConvexHullRepresentation &left_hull, ConvexHullRepresentat
         bIndex = right_hull.go_counter_clockwise(bIndex);
     }
     return bIndex;
-}
+}*/
 
-int find_left_upper_tangent(ConvexHullRepresentation &hull, int index, POINT *p) {
-    while (!left_upper_tangent(hull, index, p)) {
-        index = hull.go_counter_clockwise(index);
+void find_left_upper_tangent( shared_ptr<RepresentationIterator> iterator, POINT *p) {
+    while (!left_upper_tangent(iterator, p)) {
+        iterator->go_counter_clockwise();
     }
-    return index;
 }
 
-int find_right_upper_tangent(ConvexHullRepresentation &hull, int index, POINT *p) {
-    while (!right_upper_tangent(hull, index, p)) {
-        index = hull.go_clockwise(index);
+
+void find_right_upper_tangent(shared_ptr<RepresentationIterator> iterator, POINT *p) {
+    while (!right_upper_tangent(iterator, p)) {
+        iterator->go_clockwise();
     }
-    return index;
 }
 
-//TODO: make it more general
 pair<int, int> findLowerT(ConvexHullRepresentation &left_hull, ConvexHullRepresentation &right_hull) {
     pair<int, int> returnValues;
-    int left_index = left_hull.find_rightmost_point();
-    int right_index = right_hull.find_leftmost_point();
-    while (!(left_lower_tangent(left_hull, left_index, right_hull.get_point(right_index)) &&
-             lowerTangentB(right_hull, right_index, left_hull.get_point(left_index)))) {
-        left_index = find_right_upper_tangent(left_hull, left_index, right_hull.get_point(right_index));
-        right_index = find_left_upper_tangent(right_hull, right_index, left_hull.get_point(left_index));
+    shared_ptr<RepresentationIterator> left_iter = left_hull.get_iterator(left_hull.find_rightmost_point());
+    shared_ptr<RepresentationIterator> right_iter = right_hull.get_iterator(right_hull.find_leftmost_point());
+    while (!(right_upper_tangent(left_iter, right_iter->get_point()) &&
+             lowerTangentB(right_iter, left_iter->get_point()))) {
+        find_right_upper_tangent(left_iter, right_iter->get_point());
+        find_left_upper_tangent(right_iter, left_iter->get_point());
     }
-    returnValues.first = left_index;
-    returnValues.second = right_index;
+    returnValues.first = left_iter->get_index();
+    returnValues.second = right_iter->get_index();
     return returnValues;
 }
 
 pair<int, int> findUpperT(ConvexHullRepresentation &left_hull, ConvexHullRepresentation &right_hull) {
     pair<int, int> returnValues;
-    int left_index = left_hull.find_rightmost_point();
-    int right_index = right_hull.find_leftmost_point();
-    while (!(left_upper_tangent(left_hull, left_index, right_hull.get_point(right_index)) &&
-            right_upper_tangent(right_hull, right_index, left_hull.get_point(left_index)))) {
-        left_index = find_left_upper_tangent(left_hull, left_index, right_hull.get_point(right_index));
-        right_index = find_right_upper_tangent(right_hull, right_index, left_hull.get_point(left_index));
+    shared_ptr<RepresentationIterator> left_iter = left_hull.get_iterator(left_hull.find_rightmost_point());
+    shared_ptr<RepresentationIterator> right_iter = right_hull.get_iterator(right_hull.find_leftmost_point());
+    while (!(left_upper_tangent(left_iter, right_iter->get_point()) &&
+            right_upper_tangent(right_iter, left_iter->get_point()))) {
+        find_left_upper_tangent(left_iter, right_iter->get_point());
+        find_right_upper_tangent(right_iter, left_iter->get_point());
     }
-    returnValues.first = left_index;
-    returnValues.second = right_index;
+    returnValues.first = left_iter->get_index();
+    returnValues.second = right_iter->get_index();
     return returnValues;
 }
 

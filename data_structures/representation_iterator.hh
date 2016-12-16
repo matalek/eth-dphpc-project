@@ -21,6 +21,7 @@ public:
 	virtual void go_counter_clockwise() = 0;
 	virtual POINT* get_point_clockwise() = 0;
 	virtual POINT* get_point_counter_clockwise() = 0;
+	virtual int get_index() = 0;
 };
 
 #endif // REPRESENTATION_ITERATOR

@@ -428,6 +428,10 @@ private:
             return get_counter_clockwise()->get_point();
         }
 
+        int get_index() {
+            //TODO: implement this
+            return -1;
+        }
     private:
         shared_ptr<HullTreeNode> root, node;
 
