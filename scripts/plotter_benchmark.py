@@ -71,7 +71,22 @@ def build_algorithms():
 
 
 def calculate_boundary(algorithm_name):
-    return map(lambda threads : CONST_POINTS / (CONST_POINTS / threads + 2*threads * math.log(CONST_POINTS / threads, 2)**2), CONST_THREADS)
+
+    # Uncomment appropriate line depending on input data shape
+    expected_size = lambda n : math.log(n, 2)
+    # expected_size = lambda n : 100 * n**(1/3)
+    # expected_size = lambda n : n
+
+    if algorithm_name == 'NaiveParallel':
+        overhead = lambda threads : 2 * math.log(threads) * expected_size(CONST_POINTS / threads)
+    elif algorithm_name == 'SimpleParallel':
+        overhead = lambda threads : 2 * threads * math.log(CONST_POINTS / threads, 2)**2
+    elif algorithm_name == 'HullTree':
+        overhead = lambda threads : 10 * math.log(threads, 2) + math.log(CONST_POINTS / threads, 2)
+
+    boundary = lambda threads : CONST_POINTS / (CONST_POINTS / threads + overhead(threads))
+
+    return map(boundary, CONST_THREADS)
 
 
 colors = ['b', 'r', 'g', 'k', 'y', 'c']
