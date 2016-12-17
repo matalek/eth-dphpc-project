@@ -70,7 +70,14 @@ private:
 
 
 		int N = ceil((double) n / d);
-		int sqrt_N = ceil(sqrt(N));
+		int sqrt_N = sqrt(N);
+		// TODO(matalek): make it more general and pretty.
+		if (N == 32) {
+			sqrt_N = 4;
+		}
+		if (sqrt_N == 1) {
+			sqrt_N++;
+		}
 
 		shared_ptr<HullTreeConvexHullRepresentation>*
 				partial_results = new shared_ptr<HullTreeConvexHullRepresentation>[sqrt_N];
@@ -81,6 +88,7 @@ private:
 
 		#pragma omp parallel num_threads(sqrt_N)
 		{
+
 			int id = omp_get_thread_num();
 			pair<int, int> range = ParallelHelper::get_range(n, sqrt_N, id);
 			// Shifting range values.
