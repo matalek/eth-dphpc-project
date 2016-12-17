@@ -28,7 +28,7 @@ struct POINT {
 		return a.x == x && a.y == y;
 	}
 
-	void print() {
+	void print() const {
 		std::cout << x << " " << y << "\n";
 	}
 };

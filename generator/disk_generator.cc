@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <set>
 #include <cmath>
+#include <iostream>
 #include "../geometric_helpers.hh"
 
 using namespace std;
@@ -27,7 +28,7 @@ int main() {
 
 	// Number of points.
 	int n, range;
-	scanf("%d%d", &n, &range);
+	cin >> n >> range;
 
 	set<POINT, points_compare> points;
 	// Range should be big enough so we can easily generate points that will not
@@ -39,12 +40,12 @@ int main() {
 			point = POINT(rand_coordinate(range), rand_coordinate(range));
 		 }while(pow(point.x,2) + pow(point.y,2) > pow(range,2));
 		 points.insert(point);
-		 
+
 	}
 
-	printf("%d\n", n);
-	for (POINT point : points) {
-		point.print();
+	cout << n << "\n";
+	for (set<POINT, points_compare>::iterator it = points.begin(); it != points.end(); ++it) {
+		it->print();
 	}
 
 	return 0;
