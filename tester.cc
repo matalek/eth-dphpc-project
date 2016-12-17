@@ -33,6 +33,8 @@ high_resolution_clock::time_point ConvexHullAlgorithm::middle_time;
 // - include its header file in this file,
 // - add an apropriate 'if' statement in the 'load_algorithm' function.
 
+bool is_sequential;
+
 // Loads an appropriate algorithm based on command line params.
 ConvexHullAlgorithm* load_algorithm(char* argv[]) {
 	ConvexHullAlgorithm* algorithm;
@@ -51,6 +53,7 @@ ConvexHullAlgorithm* load_algorithm(char* argv[]) {
 	}
 
 	if (name == "Sequential") {
+		is_sequential = true;
 		algorithm = new AndrewAlgorithm();
 	} else if (name == "NaiveParallel") {
 		assert(threads > 0);
@@ -120,8 +123,12 @@ int main(int argc, char* argv[]) {
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
 	cout << "TIME: ";
-	cout << duration_cast<microseconds>( ConvexHullAlgorithm::middle_time - t1 ).count() << " "
-			<< duration_cast<microseconds>( t2 - ConvexHullAlgorithm::middle_time ).count() << "\n";
+	if (is_sequential) {
+		cout << duration_cast<microseconds>( t2 - t1 ).count() << " " << 0 << "\n";
+	} else {
+		cout << duration_cast<microseconds>( ConvexHullAlgorithm::middle_time - t1 ).count() << " "
+				<< duration_cast<microseconds>( t2 - ConvexHullAlgorithm::middle_time ).count() << "\n";
+	}
     shared_ptr<vector<POINT*>> result = convex_hull_points->get_points();
     cout << result->size() << "\n";
     for (POINT* point : (*result)) {
