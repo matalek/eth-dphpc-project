@@ -74,9 +74,12 @@ def build_algorithms():
 def calculate_boundary(algorithm_name):
 
     # Uncomment appropriate line depending on input data shape
-    expected_size = lambda n : math.log(n, 2)
-    # expected_size = lambda n : 100 * n**(1/3)
-    # expected_size = lambda n : n
+    if figure == 'square':
+        expected_size = lambda n : math.log(n, 2)
+    elif figure == 'disk':
+        expected_size = lambda n : 100 * n**(1/3)
+    elif figure == 'circle':
+        expected_size = lambda n : n
 
     if algorithm_name == 'NaiveParallel':
         overhead = lambda threads : 2 * math.log(threads) * expected_size(CONST_POINTS / threads)
