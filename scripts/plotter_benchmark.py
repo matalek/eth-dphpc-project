@@ -11,7 +11,7 @@ import math
 # -a <algorithms to compare in the format <algo1:num_of_threads algo2:num_of_threads algo3:num_of_threads ...>>
 
 CONST_ALGORITHMS = ['SimpleParallel', 'NaiveParallel', 'HullTree']
-CONST_POINTS = 1000000
+CONST_POINTS = 10000000
 CONST_THREADS = [2, 4, 8, 16, 32]
 
 def build_algorithms():
@@ -23,7 +23,7 @@ def build_algorithms():
             algorithm = Algorithm.Algorithm(algorithm_name + ':' + str(num_of_threads))
             flag = -1
 
-            with open('./log_files_euler/euler_log_results_' + algorithm.name.replace("/", "_").replace(":", "_t_") +
+            with open('./log_files/log_files_euler/euler_square/log_results_' + algorithm.name.replace("/", "_").replace(":", "_t_") +
                               '.csv', 'rb') as f:
                 reader = csv.reader(f)
                 for row in reader:
@@ -47,7 +47,7 @@ def build_algorithms():
     algorithm = Algorithm.Algorithm('Sequential:1')
     flag = -1
 
-    with open('./log_files_euler/euler_log_results_' + algorithm.name.replace("/", "_").replace(":", "_t_") +
+    with open('./log_files/log_files_euler/euler_square/log_results_' + algorithm.name.replace("/", "_").replace(":", "_t_") +
                       '.csv', 'rb') as f:
         reader = csv.reader(f)
         for row in reader:
@@ -135,6 +135,7 @@ plt.legend(loc=2)
 plt.ylim()
 plt.savefig('./logs_plots/' + ("&".join(sys.argv[8:])).replace("/", "_") + '.png')
 plt.show()
+plt.clf()
 
 
 # Speedup plot -------------------------------------------------------------------------------------------------
@@ -185,6 +186,7 @@ plt.legend(loc=3)
 plt.ylim(ymin=0, ymax=int(maximum_sp) + 1)
 plt.savefig('./logs_plots/speedup_' + ("&".join(sys.argv[8:])).replace("/", "_") + '.png')
 plt.show()
+plt.clf()
 
 # Plot execution time x numof threads-----------------------------------------------------------------------------
 
@@ -255,6 +257,7 @@ plt.xticks(CONST_THREADS)
 plt.grid(True)
 plt.legend(loc=1)
 plt.show()
+plt.clf()
 
 # Plot Speedup x numof threads with theoretical boundaries-----------------------------------------------------------------------------
 
@@ -282,3 +285,54 @@ for algorithm_name in CONST_ALGORITHMS:
     plt.grid(True)
     plt.legend(loc=1)
     plt.show()
+plt.clf()
+
+# BoxPlots --------------------------------------------------------------------------------
+plt.title("Performance comparison")
+plt.ylabel('Response Time [s]')
+plt.xlabel('Number of input points')
+plt.grid(True)
+count = 0
+for algorithm_name in sys.argv[2:]:
+    curr_algorithm = algorithms[algorithm_name]
+
+    # Make axis start from 0
+    num_of_input_points = [0]
+    mean_execution_time = [0.0]
+    stdv = [0.0]
+    datas = []
+
+    # Sort in increasing number of points
+    sorted_num_of_points = sorted(curr_algorithm.execution_time.items(), key=operator.itemgetter(0))
+
+    for points in sorted_num_of_points:
+
+        curr_num_of_points = points[0]
+        num_of_input_points.append(curr_num_of_points)
+
+        measured_execution_time = curr_algorithm.execution_time[curr_num_of_points]
+
+        mean_execution_time.append(float(np.mean(measured_execution_time) / (10 ** 6)))
+        stdv.append(float(np.std(measured_execution_time) / (10 ** 6)))
+
+        # spread = float(np.std(measured_execution_time) / (10 ** 6))
+        # center = float(np.mean(measured_execution_time) / (10 ** 6))
+        # flier_high = float(np.percentile(measured_execution_time, 99) / (10 ** 6))
+        # flier_low = float(np.percentile(measured_execution_time, 1) / (10 ** 6))
+        # data = np.random.lognormal(size=(flier_low, flier_high), mean=center, sigma=spread)
+
+        datas.append(np.array(measured_execution_time) / (10 ** 6))
+
+    if algorithm_name == 'Sequential:1':
+        my_label = 'Sequential'
+    else:
+        my_label = algorithm_name.replace("_", " ").replace(":", " ") + ' threads'
+
+    # plt.plot(num_of_input_points, mean_execution_time, colors[count] + 'o--', label=my_label)
+    # plt.errorbar(num_of_input_points, mean_execution_time, stdv, ecolor=colors[count], fmt='|')
+    plt.boxplot(datas)
+    count += 1
+
+plt.ylim()
+plt.savefig('./logs_plots/' + ("&".join(sys.argv[8:])).replace("/", "_") + '.png')
+plt.show()
