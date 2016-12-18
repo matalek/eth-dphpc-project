@@ -13,6 +13,7 @@ import math
 CONST_ALGORITHMS = ['SimpleParallel', 'NaiveParallel', 'HullTree']
 CONST_POINTS = 10000000
 CONST_THREADS = [2, 4, 8, 16, 32]
+figure = 'square'
 
 def build_algorithms():
     algorithms = {}
@@ -23,7 +24,7 @@ def build_algorithms():
             algorithm = Algorithm.Algorithm(algorithm_name + ':' + str(num_of_threads))
             flag = -1
 
-            with open('./log_files/log_files_euler/euler_square/log_results_' + algorithm.name.replace("/", "_").replace(":", "_t_") +
+            with open('./log_files/log_files_euler/euler_' + figure +'/log_results_' + algorithm.name.replace("/", "_").replace(":", "_t_") +
                               '.csv', 'rb') as f:
                 reader = csv.reader(f)
                 for row in reader:
@@ -47,7 +48,7 @@ def build_algorithms():
     algorithm = Algorithm.Algorithm('Sequential:1')
     flag = -1
 
-    with open('./log_files/log_files_euler/euler_square/log_results_' + algorithm.name.replace("/", "_").replace(":", "_t_") +
+    with open('./log_files/log_files_euler/euler_' + figure + '/log_results_' + algorithm.name.replace("/", "_").replace(":", "_t_") +
                       '.csv', 'rb') as f:
         reader = csv.reader(f)
         for row in reader:
