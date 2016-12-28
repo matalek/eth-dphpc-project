@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <vector>
 #include <iostream>
+#include <string>
 
 typedef long long int LL;
 
@@ -30,6 +31,10 @@ struct POINT {
 
 	void print() const {
 		std::cout << x << " " << y << "\n";
+	}
+	
+	std::string toString() const {
+		return x + " " + y;
 	}
 };
 
