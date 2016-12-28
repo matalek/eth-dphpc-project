@@ -24,12 +24,17 @@ public:
 
 	// Function which calculates a convex hull of a given points set.
 	shared_ptr<HullWrapper> convex_hull(vector<POINT*>& points) override {
-
+		ConvexHullAlgorithm::sequential_time = 0;
+		start_time = high_resolution_clock::now();
 		shared_ptr<VectorConvexHullRepresentation> lower_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(convex_points(points,0),false));
+		start_time = high_resolution_clock::now();
 		shared_ptr<VectorConvexHullRepresentation> upper_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(convex_points(points,1),true));
 		shared_ptr<HullWrapper> ret = shared_ptr<HullWrapper>(new HullWrapper(upper_hull, lower_hull));
 		return ret;
 	}
+
+private:
+	high_resolution_clock::time_point start_time;
 
 	shared_ptr<vector<POINT*> > convex_points(vector<POINT*>& points, bool isUpper){
 		int type = isUpper ? 1 : -1;
@@ -59,7 +64,7 @@ public:
 			#pragma omp barrier
 
 			if (id == 0) {
-				ConvexHullAlgorithm::middle_time = high_resolution_clock::now();
+				ConvexHullAlgorithm::sequential_time += duration_cast<microseconds>( high_resolution_clock::now() - start_time ).count();
 			}
 
 			//Find rightmost and leftmost for each pair

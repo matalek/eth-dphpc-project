@@ -19,6 +19,9 @@ public:
 
 	// Function which calculates a convex hull of a given points set.
 	shared_ptr<HullWrapper> convex_hull(vector<POINT*>& points) override {
+		high_resolution_clock::time_point start_time = high_resolution_clock::now();
+		ConvexHullAlgorithm::sequential_time = 0;
+
 		int n = points.size();
 
 		shared_ptr<HullWrapper> partial_results[2 * threads];
@@ -39,7 +42,7 @@ public:
             partial_results[threads + id] =  sequential_algorithm->convex_hull(working_points);
 		}
 
-		ConvexHullAlgorithm::middle_time = high_resolution_clock::now();
+		ConvexHullAlgorithm::sequential_time =  duration_cast<microseconds>( high_resolution_clock::now() - start_time).count();
 
 		int level = threads >> 1;
 		while (level > 0) {
