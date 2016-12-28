@@ -25,7 +25,8 @@
 using namespace std;
 using namespace std::chrono;
 
-high_resolution_clock::time_point ConvexHullAlgorithm::middle_time;
+// high_resolution_clock::time_point ConvexHullAlgorithm::middle_time;
+LL ConvexHullAlgorithm::sequential_time;
 
 // In order to add a new algorithm:
 // - create a class subtyping ConveHullAlgorithm providing implementation
@@ -126,8 +127,8 @@ int main(int argc, char* argv[]) {
 	if (is_sequential) {
 		cout << duration_cast<microseconds>( t2 - t1 ).count() << " " << 0 << "\n";
 	} else {
-		cout << duration_cast<microseconds>( ConvexHullAlgorithm::middle_time - t1 ).count() << " "
-				<< duration_cast<microseconds>( t2 - ConvexHullAlgorithm::middle_time ).count() << "\n";
+		cout << ConvexHullAlgorithm::sequential_time << " "
+				<< duration_cast<microseconds>( t2 - t1 ).count() - ConvexHullAlgorithm::sequential_time << "\n";
 	}
     shared_ptr<vector<POINT*>> result = convex_hull_points->get_points();
     cout << result->size() << "\n";

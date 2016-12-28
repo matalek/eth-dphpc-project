@@ -13,7 +13,7 @@ using namespace std::chrono;
 class ConvexHullAlgorithm {
 
 public:
-	static high_resolution_clock::time_point middle_time;
+	static long long int sequential_time;
 
 	static int a;
 

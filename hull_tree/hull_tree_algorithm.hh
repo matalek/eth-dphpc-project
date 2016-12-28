@@ -27,7 +27,10 @@ public:
 	shared_ptr<HullWrapper> convex_hull(vector<POINT*>& points) override {
 		omp_set_nested(1);
 
+		ConvexHullAlgorithm::sequential_time = 0;
+		start_time = high_resolution_clock::now();
 		shared_ptr<vector<POINT*> > upper_points = convex_points(points, 1);
+		start_time = high_resolution_clock::now();
 		shared_ptr<vector<POINT*> > lower_points = convex_points(points, 0);
 
 		shared_ptr<VectorConvexHullRepresentation> lower_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(lower_points, false));
@@ -37,6 +40,8 @@ public:
 	}
 
 private:
+	high_resolution_clock::time_point start_time;
+
 	shared_ptr<vector<POINT*> > convex_points(vector<POINT*>& points, bool is_upper) {
 		int n = points.size();
 		d = ceil((float) n / threads);
@@ -62,7 +67,7 @@ private:
 			}
 
 			if (start == 0) {
-				ConvexHullAlgorithm::middle_time = high_resolution_clock::now();
+				ConvexHullAlgorithm::sequential_time += duration_cast<microseconds>( high_resolution_clock::now() - start_time ).count();
 			}
 
 			return shared_ptr<HullTreeConvexHullRepresentation>(new HullTreeConvexHullRepresentation(convex_hull_points, is_upper));
