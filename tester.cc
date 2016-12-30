@@ -37,7 +37,7 @@ LL ConvexHullAlgorithm::sequential_time;
 
 bool is_sequential;
 string algorithms[3] = {"SimpleParallel", "NaiveParallel", "HullTree"};
-string threads_count[5] = {"2", "4", "8", "16", "32"};
+string threads_count[6] = {"2", "4", "8", "16", "32", "64"};
 string points_dimension[4] = {"10000", "100000", "1000000", "10000000"};
 
 // Loads an appropriate algorithm based on command line params.
@@ -75,7 +75,7 @@ ConvexHullAlgorithm* load_algorithm(string arg) {
 }
 
 int main(int argc, char* argv[]) {
-	printf("Start");
+	cout << "Start";
 
 	ConvexHullAlgorithm* algorithm;
 	for (auto num_of_points : points_dimension){
@@ -92,6 +92,7 @@ int main(int argc, char* argv[]) {
 			}
 			for (auto algorithm_name : algorithms){
 				for (auto n_threads : threads_count){
+					cout << algorithm_name;
 					algorithm = load_algorithm(algorithm_name + ":" + n_threads);
 					ofstream output_file;
 					output_file.open ("log_files/" + algorithm_name + "_t_" + n_threads + ".log", ios::app);			
