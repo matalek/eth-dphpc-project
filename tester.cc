@@ -37,7 +37,7 @@ LL ConvexHullAlgorithm::sequential_time;
 
 bool is_sequential;
 string algorithms[3] = {"SimpleParallel", "NaiveParallel", "HullTree"};
-string threads_count[5] = {"2", "4", "8", "16", "32", "64", ""128};
+string threads_count[5] = {"2", "4", "8", "16", "32"};
 string points_dimension[4] = {"10000", "100000", "1000000", "10000000"};
 
 // Loads an appropriate algorithm based on command line params.
