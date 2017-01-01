@@ -12,12 +12,15 @@ import math
 
 
 CONST_COLORS = ['b', 'r', 'g', 'k', 'y', 'c']
+
 CONST_ALGORITHMS_NAMES = ['SimpleParallel', 'NaiveParallel', 'HullTree']
 CONST_POINTS = 10000000
 CONST_THREADS = [2, 4, 8, 16, 32]
 CONST_SHAPE = 'square'
 CONST_MACHINE = 'euler'
-CONST_SOURCE_FILE = ('./log_files/log_files_' + CONST_MACHINE + '/' + CONST_MACHINE + '_' + CONST_SHAPE + '/' + CONST_MACHINE + '_' + CONST_SHAPE + '_')
+
+CONST_SOURCE_FILE = ('./log_files/log_files_' + CONST_MACHINE + '/' + CONST_MACHINE + '_' + CONST_SHAPE + '/' +
+                     CONST_MACHINE + '_' + CONST_SHAPE + '_')
 
 
 # Create the mapping for algorithms {algorithms, execution_times}
