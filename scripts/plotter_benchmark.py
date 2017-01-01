@@ -10,12 +10,14 @@ import math
 # Usage ./plotter_benchmark.py
 # -a <algorithms to compare in the format <algo1:num_of_threads algo2:num_of_threads algo3:num_of_threads ...>>
 
+
+CONST_COLORS = ['b', 'r', 'g', 'k', 'y', 'c']
 CONST_ALGORITHMS_NAMES = ['SimpleParallel', 'NaiveParallel', 'HullTree']
 CONST_POINTS = 10000000
 CONST_THREADS = [2, 4, 8, 16, 32]
 CONST_SHAPE = 'square'
-CONST_COLORS = ['b', 'r', 'g', 'k', 'y', 'c']
-CONST_SOURCE_FILE = ('./log_files/log_files_euler/euler_' + CONST_SHAPE + '/log_results_')
+CONST_MACHINE = 'euler'
+CONST_SOURCE_FILE = ('./log_files/log_files_' + CONST_MACHINE + '/' + CONST_MACHINE + '_' + CONST_SHAPE + '/' + CONST_MACHINE + '_' + CONST_SHAPE + '_')
 
 
 # Create the mapping for algorithms {algorithms, execution_times}
@@ -28,7 +30,7 @@ def build_algorithms():
             algorithm = Algorithm.Algorithm(algorithm_name + ':' + str(num_of_threads))
             first_row = True
 
-            with open(CONST_SOURCE_FILE + algorithm.name.replace("/", "_").replace(":", "_t_") + '.csv', 'rb') as f:
+            with open(CONST_SOURCE_FILE + algorithm.name.replace("/", "_").replace(":", "_") + '.csv', 'rb') as f:
                 reader = csv.reader(f)
                 for row in reader:
                     # skip first row
@@ -51,7 +53,7 @@ def build_algorithms():
     algorithm = Algorithm.Algorithm('Sequential:1')
     first_row = True
     
-    with open(CONST_SOURCE_FILE + algorithm.name.replace("/", "_").replace(":", "_t_") + '.csv', 'rb') as f:
+    with open(CONST_SOURCE_FILE + algorithm.name.replace("/", "_").replace(":", "_") + '.csv', 'rb') as f:
         reader = csv.reader(f)
         for row in reader:
             # skip first row
