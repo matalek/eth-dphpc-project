@@ -9,7 +9,7 @@
 
 #include "geometric_helpers.hh"
 #include "merge_hull.hh"
-#include "./generator/generator.hh"
+#include "./generator/generator_loader.hh"
 
 #include "algorithm_interfaces/convex_hull_sequential_algorithm.hh"
 #include "algorithm_interfaces/convex_hull_parallel_algorithm.hh"
@@ -39,6 +39,7 @@ bool is_sequential;
 string algorithms[3] = {"SimpleParallel", "NaiveParallel", "HullTree"};
 string threads_count[6] = {"2", "4", "8", "16", "32", "64"};
 string points_dimension[2] = {"10000000", "10000000"};
+string shape = "square";
 
 // Loads an appropriate algorithm based on command line params.
 ConvexHullAlgorithm* load_algorithm(string arg) {
@@ -85,9 +86,11 @@ int main(int argc, char* argv[]) {
 			vector<POINT> points;
 
 			// TODO call correct generator based on argv
-			points = generate_points(n);
+			Generator* generator = load_generator(shape);
+			points = generator->generate_points(n);
+			delete(generator);
 
-			vector<POINT*> points_pointers(n);	
+			vector<POINT*> points_pointers(n);
 			for (int i = 0; i < n; i++) {
 				points_pointers[i] = &points[i];
 			}
@@ -95,8 +98,8 @@ int main(int argc, char* argv[]) {
 				for (auto n_threads : threads_count){
 					algorithm = load_algorithm(algorithm_name + ":" + n_threads);
 					ofstream output_file;
-					output_file.open ("/mnt/hostfs/team08/log_files/" + algorithm_name + "_" + n_threads + ".log", ios::app);			
-	
+					output_file.open ("/mnt/hostfs/team08/log_files/" + algorithm_name + "_" + n_threads + ".log", ios::app);
+
 					high_resolution_clock::time_point t1 = high_resolution_clock::now();
 				    	shared_ptr<HullWrapper> convex_hull_points = shared_ptr<HullWrapper>(algorithm->convex_hull(points_pointers));
 					high_resolution_clock::time_point t2 = high_resolution_clock::now();
@@ -112,7 +115,7 @@ int main(int argc, char* argv[]) {
 
 			algorithm = load_algorithm("Sequential:1");
 			ofstream output_file;
-			output_file.open ("/mnt/hostfs/team08/log_files/Sequential_1.log", ios::app);			
+			output_file.open ("/mnt/hostfs/team08/log_files/Sequential_1.log", ios::app);
 
 			//computing exec time (could find better way)
 			high_resolution_clock::time_point t1 = high_resolution_clock::now();
