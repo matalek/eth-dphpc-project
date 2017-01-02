@@ -16,7 +16,7 @@ CONST_COLORS = ['b', 'r', 'g', 'k', 'y', 'c']
 CONST_ALGORITHMS_NAMES = ['SimpleParallel', 'NaiveParallel', 'HullTree']
 CONST_POINTS = 10000000
 CONST_THREADS = [2, 4, 8, 16, 32, 64]
-CONST_SHAPE = 'circle'
+CONST_SHAPE = 'square'
 CONST_MACHINE = 'xeon'
 
 CONST_SOURCE_FILE = ('./log_files/log_files_' + CONST_MACHINE + '/' + CONST_MACHINE + '_' + CONST_SHAPE + '/' +
@@ -31,9 +31,10 @@ def build_algorithms():
 
         for num_of_threads in CONST_THREADS:
             algorithm = Algorithm.Algorithm(algorithm_name + ':' + str(num_of_threads))
-            first_row = True
-
+            
+	    # Overall time
             with open(CONST_SOURCE_FILE + algorithm.name.replace("/", "_").replace(":", "_") + '.csv', 'rb') as f:
+		first_row = True
                 reader = csv.reader(f)
                 for row in reader:
                     # skip first row
@@ -49,6 +50,44 @@ def build_algorithms():
                         measured_execution_times.append(float(value))
 
                     algorithm.execution_time[num_of_input_points] = measured_execution_times
+
+	    # Mid time
+	    with open(CONST_SOURCE_FILE + algorithm.name.replace("/", "_").replace(":", "_") + '_mid.csv', 'rb') as f:
+		first_row = True
+                reader = csv.reader(f)
+                for row in reader:
+                    # skip first row
+                    if first_row:
+                        first_row = False
+                        continue
+
+                    num_of_input_points = (int(row[0]))
+
+                    # Build array containing all measured values
+                    measured_execution_times = []
+                    for value in row[2:]:
+                        measured_execution_times.append(float(value))
+
+                    algorithm.mid_execution_time[num_of_input_points] = measured_execution_times
+
+	    # End time
+	    with open(CONST_SOURCE_FILE + algorithm.name.replace("/", "_").replace(":", "_") + '_end.csv', 'rb') as f:
+		first_row = True
+                reader = csv.reader(f)
+                for row in reader:
+                    # skip first row
+                    if first_row:
+                        first_row = False
+                        continue
+
+                    num_of_input_points = (int(row[0]))
+
+                    # Build array containing all measured values
+                    measured_execution_times = []
+                    for value in row[2:]:
+                        measured_execution_times.append(float(value))
+
+                    algorithm.end_execution_time[num_of_input_points] = measured_execution_times
 
             algorithms[algorithm.name] = algorithm
 
@@ -213,9 +252,13 @@ def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
         for n_threads in CONST_THREADS:
             curr_algorithm = algorithms[algorithm_name + ':' + str(n_threads)]
             measured_execution_time = curr_algorithm.execution_time[CONST_POINTS]
+	    start_execution_time = curr_algorithm.mid_execution_time[CONST_POINTS]
+	    end_execution_time = curr_algorithm.end_execution_time[CONST_POINTS]
 
             mean_execution_time.append(float(np.average(measured_execution_time) / (10 ** 6)))
             stdv.append(float(np.std(measured_execution_time) / (10 ** 6)))
+
+	    print(algorithm_name + ' ' + str(n_threads) + ' ' + CONST_SHAPE + ': ' + str(float(np.average(start_execution_time) / (10 ** 6))) + ' ' + str(float(np.average(end_execution_time) / (10 ** 6))))
 
         plt.plot(CONST_THREADS, mean_execution_time, CONST_COLORS[count] + 'o--', label=my_label)
         plt.errorbar(CONST_THREADS, mean_execution_time, stdv, fmt='|', ecolor='k')
@@ -229,12 +272,15 @@ def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
     for n_threads in CONST_THREADS:
         mean_execution_time.append(mean_sequential_exec_time)
         stdv.append(sequential_stdv)
+    print('Sequential ' + CONST_SHAPE + ': ' + str(mean_sequential_exec_time))
 
     plt.plot(CONST_THREADS, mean_execution_time, CONST_COLORS[count] + 'o--', label=my_label)
-    #plt.errorbar(CONST_THREADS, mean_execution_time, stdv, CONST_COLORS[count] + 'o--')
+    plt.errorbar(CONST_THREADS, mean_execution_time, stdv, fmt='|', ecolor='k')
     plt.xticks(CONST_THREADS)
     plt.grid(True)
     plt.legend(loc=1)
+    plt.ylim([0,3.5])
+    plt.savefig('./logs_plots/' + CONST_MACHINE + '_' + CONST_SHAPE + '.png')
     plt.show()
     plt.clf()
 
