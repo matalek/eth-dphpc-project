@@ -354,7 +354,5 @@ plot_speedup_fixed_points(algorithms_map, seq_algorithm)
 # Plot Speedup x numof threads with theoretical boundaries
 plot_theoretical_boundaries(algorithms_map, seq_algorithm)
 
+# Box Plots for fixed points
 plot_box_time_fixed_points(algorithms_map, seq_algorithm)
-
-# BoxPlots for execution time
-box_plots(algorithms_map)
