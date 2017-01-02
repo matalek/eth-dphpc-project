@@ -15,9 +15,9 @@ CONST_COLORS = ['b', 'r', 'g', 'k', 'y', 'c']
 
 CONST_ALGORITHMS_NAMES = ['SimpleParallel', 'NaiveParallel', 'HullTree']
 CONST_POINTS = 10000000
-CONST_THREADS = [2, 4, 8, 16, 32]
+CONST_THREADS = [2, 4, 8, 16, 32, 64]
 CONST_SHAPE = 'circle'
-CONST_MACHINE = 'euler'
+CONST_MACHINE = 'xeon'
 
 CONST_SOURCE_FILE = ('./log_files/log_files_' + CONST_MACHINE + '/' + CONST_MACHINE + '_' + CONST_SHAPE + '/' +
                      CONST_MACHINE + '_' + CONST_SHAPE + '_')
@@ -104,7 +104,7 @@ def calculate_boundary(algorithm_name):
 # Standard execution Time plotter --------------------------------------------------------------------------------------
 def plot_execution_time(algorithms):
     plt.title("Performance comparison")
-    plt.ylabel('Response Time [s]')
+    plt.ylabel('Execution Time [s]')
     plt.xlabel('Number of input points')
     plt.grid(True)
     count = 0
@@ -201,7 +201,7 @@ def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
     sequential_stdv = float(np.std(sequential_exec_time) / (10 ** 6))
 
     plt.title("Performance comparison")
-    plt.ylabel('Response Time [s]')
+    plt.ylabel('Execution Time [s]')
     plt.xlabel('Number of threads')
 
     count = 0
@@ -218,6 +218,7 @@ def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
             stdv.append(float(np.std(measured_execution_time) / (10 ** 6)))
 
         plt.plot(CONST_THREADS, mean_execution_time, CONST_COLORS[count] + 'o--', label=my_label)
+        plt.errorbar(CONST_THREADS, mean_execution_time, stdv, fmt='|', ecolor='k')
         count += 1
 
     # Sequential
@@ -230,6 +231,7 @@ def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
         stdv.append(sequential_stdv)
 
     plt.plot(CONST_THREADS, mean_execution_time, CONST_COLORS[count] + 'o--', label=my_label)
+    #plt.errorbar(CONST_THREADS, mean_execution_time, stdv, CONST_COLORS[count] + 'o--')
     plt.xticks(CONST_THREADS)
     plt.grid(True)
     plt.legend(loc=1)
@@ -270,13 +272,41 @@ def plot_speedup_fixed_points(algorithms, sequential_algorithm):
     plt.clf()
 
 
+# Plot execution time for fixed num of points, num of threads on x axis BOXPLOTS ---------------------------------------
+def plot_box_time_fixed_points(algorithms, sequential_algorithm):
+
+    for algorithm_name in CONST_ALGORITHMS_NAMES:
+
+        plt.title(algorithm_name)
+        plt.ylabel('Execution Time [s]')
+        plt.xlabel('Number of threads')
+
+        mean_execution_time = []
+        stdv = []
+        datas = []
+        my_label = algorithm_name
+        for n_threads in CONST_THREADS:
+            curr_algorithm = algorithms[algorithm_name + ':' + str(n_threads)]
+            measured_execution_time = curr_algorithm.execution_time[CONST_POINTS]
+
+            datas.append(np.array(measured_execution_time) / (10 ** 6))
+
+        plt.boxplot(datas)
+
+        plt.xticks(np.arange(1, len(CONST_THREADS) + 1), CONST_THREADS)
+        plt.grid(True)
+        #plt.legend(loc=1)
+        plt.show()
+        plt.clf()
+
+
 # Plot speedup for every algorithms for fixed num of points, nthreads on x axis with theoretical boundary --------------
 def plot_theoretical_boundaries(algorithms, sequential_algorithm):
 
     sequential_exec_time = sequential_algorithm.execution_time[CONST_POINTS]
     mean_sequential_exec_time = float(np.average(sequential_exec_time) / (10 ** 6))
 
-    plt.title("Performance comparison")
+    plt.title("Speedup")
     plt.ylabel('Speedup')
     plt.xlabel('Number of threads')
     count = 0
@@ -303,49 +333,6 @@ def plot_theoretical_boundaries(algorithms, sequential_algorithm):
         plt.clf()
 
 
-# BoxPlots -------------------------------------------------------------------------------------------------------------
-def box_plots(algorithms):
-    plt.title("Performance comparison")
-    plt.ylabel('Response Time [s]')
-    plt.xlabel('Number of input points')
-    plt.grid(True)
-    count = 0
-    for algorithm_name in sys.argv[2:]:
-        curr_algorithm = algorithms[algorithm_name]
-
-        # Make axis start from 0
-        num_of_input_points = [0]
-        mean_execution_time = [0.0]
-        stdv = [0.0]
-        datas = []
-
-        # Sort in increasing number of points
-        sorted_num_of_points = sorted(curr_algorithm.execution_time.items(), key=operator.itemgetter(0))
-
-        for points in sorted_num_of_points:
-            curr_num_of_points = points[0]
-            num_of_input_points.append(curr_num_of_points)
-
-            measured_execution_time = curr_algorithm.execution_time[curr_num_of_points]
-
-            mean_execution_time.append(float(np.average(measured_execution_time) / (10 ** 6)))
-            stdv.append(float(np.std(measured_execution_time) / (10 ** 6)))
-
-            datas.append(np.array(measured_execution_time) / (10 ** 6))
-
-        if algorithm_name == 'Sequential:1':
-            my_label = 'Sequential'
-        else:
-            my_label = algorithm_name.replace("_", " ").replace(":", " ") + ' threads'
-
-        plt.boxplot(datas)
-        count += 1
-
-    plt.ylim()
-    # plt.savefig('./logs_plots/' + ("&".join(sys.argv[8:])).replace("/", "_") + '.png')
-    plt.show()
-
-
 # Map of algorithms. The map will be {algorithm_name, Algorithm}
 algorithms_map = build_algorithms()
 
@@ -366,6 +353,8 @@ plot_speedup_fixed_points(algorithms_map, seq_algorithm)
 
 # Plot Speedup x numof threads with theoretical boundaries
 plot_theoretical_boundaries(algorithms_map, seq_algorithm)
+
+plot_box_time_fixed_points(algorithms_map, seq_algorithm)
 
 # BoxPlots for execution time
 box_plots(algorithms_map)
