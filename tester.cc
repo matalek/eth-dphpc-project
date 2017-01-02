@@ -73,28 +73,8 @@ ConvexHullAlgorithm* load_algorithm(char* argv[]) {
 
 int main(int argc, char* argv[]) {
 	// Number of points.
-
-	bool standard_input = false;
-	if (argc == 3) {
-		standard_input = true;
-	}
-
 	int n;
-
-	ifstream input_file;
-	if (!standard_input) {
-		input_file = ifstream("/mnt/hostfs/team08/tmp.log");
-		if (!input_file.is_open()) {
-		    cout << "Unable to open file\n";
-		    return 1;
-		}
-	}
-
-	if (standard_input) {
-		cin >> n;
-	} else {
-		input_file >> n;
-	}
+	cin >> n;
 
 	// Reading points.
 	vector<POINT> points(n);
@@ -102,18 +82,10 @@ int main(int argc, char* argv[]) {
 
 	for (int i = 0; i < n; i++) {
 		LL x, y;
-		if (standard_input) {
-			cin >> x >> y;
-		} else {
-        	input_file >> x >> y;
-        }
+		cin >> x >> y;
         points[i] = POINT(x, y);
 		points_pointers[i] = &points[i];
     }
-
-    if (!standard_input) {
-	    input_file.close();
-	}
 
 	ConvexHullAlgorithm* algorithm;
 	algorithm = load_algorithm(argv);

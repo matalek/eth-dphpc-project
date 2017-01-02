@@ -94,13 +94,12 @@ $ make
 
 Execute from prompt command:
 ```sh
-$ ./tester algorithm_name[:threads_count] [standard_input]
+$ ./tester algorithm_name[:threads_count]
 ```
 where:
 - `algorithm_name` is the name of the algorithm. Available algorithms are listed in the
 table below.
 - `threads_count` (optional) is the number of threads in case of parallel version.
-- `standard_input` should be set to some value (e.g. 1) when we want to read data from the standard input, otherwise we read from input file on Xeon Phi.
 
 ### Available algorithms
 | Algorithm name | Type | Implementation |
