@@ -16,7 +16,7 @@ CONST_COLORS = ['b', 'r', 'g', 'k', 'y', 'c']
 CONST_ALGORITHMS_NAMES = ['SimpleParallel', 'NaiveParallel', 'HullTree']
 CONST_POINTS = 10000000
 CONST_THREADS = [2, 4, 8, 16, 32]
-CONST_SHAPE = 'square'
+CONST_SHAPE = 'circle'
 CONST_MACHINE = 'euler'
 
 CONST_SOURCE_FILE = ('./log_files/log_files_' + CONST_MACHINE + '/' + CONST_MACHINE + '_' + CONST_SHAPE + '/' +
@@ -125,7 +125,7 @@ def plot_execution_time(algorithms):
 
             measured_execution_time = curr_algorithm.execution_time[curr_num_of_points]
 
-            mean_execution_time.append(float(np.mean(measured_execution_time) / (10 ** 6)))
+            mean_execution_time.append(float(np.average(measured_execution_time) / (10 ** 6)))
             stdv.append(float(np.std(measured_execution_time) / (10 ** 6)))
 
         if algorithm_name == 'Sequential:1':
@@ -171,8 +171,8 @@ def plot_speedup(algorithms, sequential_algorithm):
                 sequential_exec_time = sequential_algorithm.execution_time[curr_num_of_points]
                 alg_execution_time = curr_algorithm.execution_time[curr_num_of_points]
 
-                mean_sequential_exec_time = np.mean(sequential_exec_time)
-                mean_execution_time = np.mean(alg_execution_time)
+                mean_sequential_exec_time = np.average(sequential_exec_time)
+                mean_execution_time = np.average(alg_execution_time)
 
                 sp = mean_sequential_exec_time / mean_execution_time
 
@@ -197,7 +197,7 @@ def plot_speedup(algorithms, sequential_algorithm):
 def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
 
     sequential_exec_time = sequential_algorithm.execution_time[CONST_POINTS]
-    mean_sequential_exec_time = float(np.mean(sequential_exec_time) / (10 ** 6))
+    mean_sequential_exec_time = float(np.average(sequential_exec_time) / (10 ** 6))
     sequential_stdv = float(np.std(sequential_exec_time) / (10 ** 6))
 
     plt.title("Performance comparison")
@@ -214,7 +214,7 @@ def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
             curr_algorithm = algorithms[algorithm_name + ':' + str(n_threads)]
             measured_execution_time = curr_algorithm.execution_time[CONST_POINTS]
 
-            mean_execution_time.append(float(np.mean(measured_execution_time) / (10 ** 6)))
+            mean_execution_time.append(float(np.average(measured_execution_time) / (10 ** 6)))
             stdv.append(float(np.std(measured_execution_time) / (10 ** 6)))
 
         plt.plot(CONST_THREADS, mean_execution_time, CONST_COLORS[count] + 'o--', label=my_label)
@@ -241,7 +241,7 @@ def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
 def plot_speedup_fixed_points(algorithms, sequential_algorithm):
 
     sequential_exec_time = sequential_algorithm.execution_time[CONST_POINTS]
-    mean_sequential_exec_time = float(np.mean(sequential_exec_time) / (10 ** 6))
+    mean_sequential_exec_time = float(np.average(sequential_exec_time) / (10 ** 6))
 
     plt.title("Speedup")
     plt.ylabel('Speedup')
@@ -257,7 +257,7 @@ def plot_speedup_fixed_points(algorithms, sequential_algorithm):
             curr_algorithm = algorithms[algorithm_name + ':' + str(n_threads)]
             measured_execution_time = curr_algorithm.execution_time[CONST_POINTS]
 
-            mean_execution_time.append(mean_sequential_exec_time / float(np.mean(measured_execution_time) / (10 ** 6)))
+            mean_execution_time.append(mean_sequential_exec_time / float(np.average(measured_execution_time) / (10 ** 6)))
             stdv.append(float(np.std(measured_execution_time) / (10 ** 6)))
 
         plt.plot(CONST_THREADS, mean_execution_time, CONST_COLORS[count] + 'o--', label=my_label)
@@ -274,7 +274,7 @@ def plot_speedup_fixed_points(algorithms, sequential_algorithm):
 def plot_theoretical_boundaries(algorithms, sequential_algorithm):
 
     sequential_exec_time = sequential_algorithm.execution_time[CONST_POINTS]
-    mean_sequential_exec_time = float(np.mean(sequential_exec_time) / (10 ** 6))
+    mean_sequential_exec_time = float(np.average(sequential_exec_time) / (10 ** 6))
 
     plt.title("Performance comparison")
     plt.ylabel('Speedup')
@@ -288,7 +288,7 @@ def plot_theoretical_boundaries(algorithms, sequential_algorithm):
             curr_algorithm = algorithms[algorithm_name + ':' + str(n_threads)]
             measured_execution_time = curr_algorithm.execution_time[CONST_POINTS]
 
-            mean_execution_time.append(mean_sequential_exec_time / float(np.mean(measured_execution_time) / (10 ** 6)))
+            mean_execution_time.append(mean_sequential_exec_time / float(np.average(measured_execution_time) / (10 ** 6)))
             stdv.append(float(np.std(measured_execution_time) / (10 ** 6)))
 
         plt.plot(CONST_THREADS, mean_execution_time, 'bo--', label=my_label)
@@ -328,7 +328,7 @@ def box_plots(algorithms):
 
             measured_execution_time = curr_algorithm.execution_time[curr_num_of_points]
 
-            mean_execution_time.append(float(np.mean(measured_execution_time) / (10 ** 6)))
+            mean_execution_time.append(float(np.average(measured_execution_time) / (10 ** 6)))
             stdv.append(float(np.std(measured_execution_time) / (10 ** 6)))
 
             datas.append(np.array(measured_execution_time) / (10 ** 6))
