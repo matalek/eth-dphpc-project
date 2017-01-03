@@ -4,7 +4,7 @@
 % --------------------------------------------------------------------------
 
 \documentclass[letterpaper]{article}
-\usepackage{spconf,amsmath,amssymb,graphicx,amsthm,newlfont,program}
+\usepackage{spconf,amsmath,amssymb,graphicx,amsthm,newlfont,program,caption,subcaption}
 
 % Example definitions.
 % --------------------
@@ -56,8 +56,8 @@ is a modified version of the template she used in her class.}}
 \maketitle
 %
 
-%\clearpage
-%\iffalse
+\clearpage
+\iffalse
 
 The hard page limit is 6 pages in this style. Do not reduce font size
 or use other tricks to squeeze. This pdf is formatted in the American letter format, so the spacing may look a bit strange when printed out.
@@ -117,7 +117,7 @@ Explain the algorithm you use including their costs.
 As an aside, don't talk about "the complexity of the algorithm.'' It's incorrect,
 problems have a complexity, not algorithms.
 
-%\fi
+\fi
 
 
 \section{Your Proposed Method}\label{sec:yourmethod}
@@ -175,7 +175,7 @@ So called Naive Parallel algorithm is based on merging two convex hulls into one
 Let $A$ and $B$ be two convex hulls so that for every $p \in A, q \in B$ we have $p.x < q.x$, where $\_.x$ denotes the $x$ coordinate of the given point.
 Further, let $p_0, p_1, ..., p_{n-1}$ be the points of $A$ (sorted by $x$ coordinate) and similarly $q_0, q_1, ... q_{m-1}$ be the points of $B$.
 Let $p_i \in A$ and $q_j \in B$ be such points that $\overline{p_iq_j}$ is a common tangent line for $A$ and $B$.
-Then we know that points $p_{i+1}, p_{i + 2}, ..., p_{n - 1}$ and $q_{j + 1}, q_{j + 2}, ..., q_{m - 1}$ are not gonna be in the resulting convex hull.
+Then we know that points $p_{i+1}, p_{i + 2}, ..., p_{n - 1}$ and $q_{j + 1}, q_{j + 2}, ..., q_{m - 1}$ are not going to be in the resulting convex hull.
 Therefore, we have:
 $$CH(A \cup B) = \{ p_0, p_1, ..., p_{i - 1}, p_i, q_j, q_{j + 1}, ..., q_{m - 1} \}$$
 For performing this merge we can use array-like data structure.
@@ -189,12 +189,12 @@ We start with $C_0, C_1, ..., C_{k-1}$ convex hulls.
 In each step we are merging convex hull which were pairs of resulting convex hulls from the previous step. 
 If $I_0, I_1, ..., I_{2l - 1}$ is an input for the step, then we compute the output: $O_0, O_1, ..., O_{l - 1}$ using $l$ processors. 
 $i$-th processor computes $O_i = CH(I_{2i} \cup I_{2i+1})$ using merge algorithm presented above.
-Example scheme for 4 processors is presented on figure \ref{naive-parallel-scheme}.
-Pseudocode for this algorithm is presented as algorithm \ref{alg-naive-parallel}.
+Example scheme for 4 processors is presented on figure \ref{fig:naive-parallel-scheme}.
+Pseudocode for this algorithm is presented as algorithm \ref{alg:naive-parallel}.
 
 % TODO(matalek): think if we should put it without page break.
 \begin{algorithm}
-\label{alg-naive-parallel}
+\label{alg:naive-parallel}
 \begin{program}
 \mbox{A fast exponentiation procedure:}
 \BEGIN \\ %
@@ -222,7 +222,7 @@ Pseudocode for this algorithm is presented as algorithm \ref{alg-naive-parallel}
 \begin{figure}\centering
   \includegraphics[scale=0.5]{img/naive-parallel}
   \caption{Scheme of merging convex hulls for $k=4$}
-  \label{naive-parallel-scheme}
+  \label{fig:naive-parallel-scheme}
 \end{figure}
 
 The time complexity of this algorithm depends on the size of the intermediates convex hulls.
@@ -236,6 +236,60 @@ However, these calculations do not take into the account that calculating initia
 \subsubsection{Simple Parallel algorithm}
 
 This algorithm was originally presented in \cite{SimpleParallel}.
+It is based on computing what part of $C_i$ is also a part of $R$.
+The computations are based on the following observation:
+\begin{observation}
+Let $P_i = \{q_0, q_1, ..., q_{l-1} \},$ where  $q_{j_1}.x < q_{j_2}.x$ for $0 \leq j_1 < j_2 < l$. 
+We have, that for every $0 \leq j_1 < j_2 < j_3 < l$, if $q_{j_1}, q_{j_3} \in C_i$, then $q_{j_2} \in C_i$.
+% TODO(matalek): do we need proof for it?
+\end{observation}
+We will call a point $p$ {\it\bf taken} if and only if $p \in P_i \land p \in C_i$ for some $i$. 
+The above observation means that taken points from one convex hull form an interval (with regards to their indices).
+
+Computing these intervals can be done by computing common tangent line for each pair $C_i$ and $C_j$.
+For these pairs we know how  to compute intervals of taken points (see previous section). 
+For given $i$ we can then compute intersection of the intervals computed for $C_i$ and $C_j$ for every $i \neq j$.
+Let $[j_1, j_2]$ be the interval of indices corresponding to the calculated intersection.
+If $j_1 < j_2$ then this interval corresponds also to the interval of taken points.
+However, when $j_1 = j_2$ there might be two possible cases.
+They are illustrated on the figure \ref{fig:simple-parallel}.
+In the first case we have that the appropriate point is taken, in the second one - it is not.
+The difference between these cases is the angle that common tangents line are forming.
+In the first case, when going from left to right the angle between two steepest common lines is less than $\pi$, in the second case it is greater or equal $\pi$.
+This means, that in the algorithm we need to keep track also of the steepest common tangent lines and use this information for this special case.
+Solution for this special case was not presented in $\cite{SimpleParallel}$ and is originally developed by us.
+% TODO(matalek): is above correct?
+
+\begin{figure}
+\centering
+\begin{subfigure}{.3\textwidth}
+	\centering
+	\includegraphics[width=\linewidth]{img/simple-parallel-taking}
+	\caption{Point with index $j_1$ is taken}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+	\centering
+	\includegraphics[width=\linewidth]{img/simple-parallel-not-taking}
+	\caption{Point with index $j_1$ is not taken}
+\end{subfigure}
+\caption{Different possibilities for $j_1 = j_2$}
+\label{fig:simple-parallel}
+\end{figure}
+
+
+These computations are done in parallel.
+Processor $i$ computes all intervals for $C_i$ and $C_j$, where $j = 0, 1, ..., i -1, i+ 1, ..., k - 1$ and then computes their intersection.
+
+The last steps consist of moving all taken points to one resulting array.
+Firstly, we compute how many points from each convex hull $C_i$ are taken.
+Let the result of this computation be: $l_1, l_2, ..., l_{k-1}$.
+We can then compute starting positions in the resulting array for each taken points set from one convex hull.
+Taken points from $C_i$ should be put at indices from $l_1 + l_2 + ... + l_{i-1}$ to $l_1 + l_2 + ... + l_{i-1} + l_i - 1$.
+Calculating these indices can be done using parallel prefix computation.
+We later copy taken points to the resulting array in parallel - each processor copies points from its own convex hull.
+
+
+The time complexity for this algorithm, as shown in \cite{SimpleParallel}, is equal $O(\frac{n}{k} + k(\log \frac{n}{k})^2)$ and is optimal for $k \leq \frac{\sqrt{n}}{\log n}$.
 
 \subsubsection{Hull Tree algorithm}
 
