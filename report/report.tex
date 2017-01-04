@@ -56,9 +56,6 @@ is a modified version of the template she used in her class.}}
 \maketitle
 %
 
-\clearpage
-\iffalse
-
 The hard page limit is 6 pages in this style. Do not reduce font size
 or use other tricks to squeeze. This pdf is formatted in the American letter format, so the spacing may look a bit strange when printed out.
 
@@ -117,9 +114,6 @@ Explain the algorithm you use including their costs.
 As an aside, don't talk about "the complexity of the algorithm.'' It's incorrect,
 problems have a complexity, not algorithms.
 
-\fi
-
-
 \section{Your Proposed Method}\label{sec:yourmethod}
 
 The purpose of this section is to review a convex hull sequential algorithm for sorted input set and common tangent line algorithm. We also present parallel algorithms for computing a convex hull of a sorted set of points.
@@ -137,6 +131,8 @@ Therefore, in this section, whenever we write ''convex hull'' we are referring t
 However, our implementation computes the entire convex hull (upper and lower).  
 
 \subsubsection{General scheme}
+\label{sec:parallel-general}
+
 Let $k$ denote the number of processors available and $n$ - number of points in the input set.
 Let $P = \{p_0, p_1, ..., p_{n-1} \}$ be the sorted (by $x$ coordinate) set of input points.
 Finally, let $CH(S)$ denote the convex hull of $S$ set and $R=CH(S)$.
@@ -234,6 +230,7 @@ However, these calculations do not take into the account that calculating initia
 % TODO(matalek): maybe more explanation
 
 \subsubsection{Simple Parallel algorithm}
+\label{sec:simple-parallel}
 
 This algorithm was originally presented in \cite{SimpleParallel}.
 It is based on computing what part of $C_i$ is also a part of $R$.
@@ -276,7 +273,6 @@ Solution for this special case was not presented in $\cite{SimpleParallel}$ and 
 \label{fig:simple-parallel}
 \end{figure}
 
-
 These computations are done in parallel.
 Processor $i$ computes all intervals for $C_i$ and $C_j$, where $j = 0, 1, ..., i -1, i+ 1, ..., k - 1$ and then computes their intersection.
 
@@ -294,6 +290,35 @@ The time complexity for this algorithm, as shown in \cite{SimpleParallel}, is eq
 \subsubsection{Hull Tree algorithm}
 
 This algorithm was originally presented in \cite{HullTree}.
+It is based on a special tree-like structure for keeping points of the convex hull.
+Let $n$ denote the number of points in the convex hull.
+This data structure allows:
+\begin{itemize}
+\item creating new hull tree from a convex hull represented as an array,
+\item accessing leftmost and rightmost point in $O(\log n)$ time complexity,
+\item accessing neighboring (with regards to the position on the convex hull) points in $O(1)$ time complexity,
+\item creating hull tree consisting of subset of points from the original hull tree that have $x$ coordinate lower than given one (in $O(\log n)$ time complexity),
+\item merging two hull trees, where one of them consists of points that have $x$ coordinate lower than all the points from the second one (in $O(\log n)$ time complexity, where $n$ and $m$ are the number of points in the merged hull trees).
+\end{itemize}
+The details of implementation of this data structure are presented in the original paper.
+
+This algorithm uses divide and conquer approach. 
+Let $d = \lceil\frac{n}{k}\rceil$ and $S$ be the current set of input points.
+If the size of $S$ is lower or equal than $d$, we execute a sequential version of the algorithm and construct a hull tree based on its result.
+Otherwise, we split $S$ into $\sqrt{k}$ equal subsets based on $x$ coordinate: $S_0, S_1, ..., S_{\sqrt{k} - 1}$.
+% TODO(matalek) maybe add ceil or floor
+We then compute recursively convex hull for each subset, which results in having hull trees $HT_i$ corresponding to convex hulls $C_i$ of these subsets.
+For each recursive call we assign $\sqrt{k}$ processors to compute this convex hull.
+
+In order to merge $HT_0, HT_1, ..., HT_{\sqrt{k} - 1}$ we perform computations similar to these described in the section \ref{sec:simple-parallel}.
+Using $\sqrt{k}^2 = k$ processors we compute for each pair $HT_i$ $HT_j$ ($i \neq j$) common tangent line (for each pair we assign one processor).
+It is possible to perform this step efficiently, because our data structure enables us to quickly access neighboring points.
+Later, we compute the intersection of resulting intervals which results in the intervals of taken points.
+If $q_1$ and $q_2$ are the beginning and the end of one of these intervals, we split hull tree first by $q_1.x$ and discard left convex hull, later by $q_2.x$ and discard right resulting convex hull.
+We are left then with hull tree representing only taken points.
+We merge these hull trees in a tree-like way (similar to described in the section \ref{sec:parallel-general} and pairwise merge of hull trees.
+These operations are performed in parallel by $\sqrt{k}$ processors and take $O(h + k)$ time.
+% TODO(matalek): is this correct time?
 
 \iffalse
 Now comes the ``beef'' of the report, where you explain what you
