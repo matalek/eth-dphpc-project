@@ -30,16 +30,8 @@ public:
 			int id = omp_get_thread_num();
 			// Calculating part of points for the given thread.
 			pair<int, int> range = ParallelHelper::get_range(n, threads, id);
-			vector<POINT*> working_points;
-			for (int i = range.first; i <= range.second; i++) {
-				working_points.push_back(points[i]);
-			}
 			// Calculating convex hull of the appropriate part of points.
-			//shared_ptr<vector<POINT*> > lower_hull_points = sequential_algorithm->lower_convex_hull(working_points);
-            //shared_ptr<vector<POINT*> > upper_hull_points = sequential_algorithm->upper_convex_hull(working_points);
-            //partial_results[threads + id] = shared_ptr<HullWrapper>(sequential_algorithm->convex_hull(working_points));
-			//shared_ptr<HullWrapper> hull_points = sequential_algorithm->convex_hull(working_points);
-            partial_results[threads + id] =  sequential_algorithm->convex_hull(working_points);
+            partial_results[threads + id] =  sequential_algorithm->convex_hull(points, range.first, range.second);
 		}
 
 		ConvexHullAlgorithm::sequential_time =  duration_cast<microseconds>( high_resolution_clock::now() - start_time).count();

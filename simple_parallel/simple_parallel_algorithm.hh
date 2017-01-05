@@ -146,18 +146,14 @@ private:
 	shared_ptr<ConvexHullRepresentation> build_sequential_hull(int id, vector<POINT*>& points, bool isUpper){
 		int n = points.size();
 		pair<int, int> range = ParallelHelper::get_range(n, threads, id);
-		vector<POINT*> working_points;
-		for (int i = range.first; i <= range.second; i++) {
-			working_points.push_back(points[i]);
-		}
 		// Calculating convex hull of the appropriate part of points.
 		shared_ptr<vector<POINT*> > convex_hull_points;
 
 		if(isUpper){
-			convex_hull_points = sequential_algorithm->upper_convex_hull(working_points);
+			convex_hull_points = sequential_algorithm->upper_convex_hull(points, range.first, range.second);
 		}
 		else{
-			convex_hull_points = sequential_algorithm->lower_convex_hull(working_points);
+			convex_hull_points = sequential_algorithm->lower_convex_hull(points, range.first, range.second);
 		}
 
 		return shared_ptr<ConvexHullRepresentation>(new VectorConvexHullRepresentation(convex_hull_points, isUpper));

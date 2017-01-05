@@ -55,15 +55,11 @@ private:
 		if (n <= d) {
 			// Executing sequential version.
 			shared_ptr<POINTS> convex_hull_points;
-			vector<POINT*> working_points;
-			for (int i = start; i <= end; i++) {
-				working_points.push_back(points[i]);
-			}
 			if (is_upper) {
-				convex_hull_points = sequential_algorithm->upper_convex_hull(working_points);
+				convex_hull_points = sequential_algorithm->upper_convex_hull(points, start, end);
 			}
 			else {
-				convex_hull_points = sequential_algorithm->lower_convex_hull(working_points);
+				convex_hull_points = sequential_algorithm->lower_convex_hull(points, start, end);
 			}
 
 			if (start == 0) {
