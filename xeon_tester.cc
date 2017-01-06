@@ -38,8 +38,9 @@ LL ConvexHullAlgorithm::sequential_time;
 bool is_sequential;
 string algorithms[3] = {"SimpleParallel", "NaiveParallel", "HullTree"};
 string threads_count[6] = {"2", "4", "8", "16", "32", "64"};
-string points_dimension[2] = {"10000000", "10000000"};
+string points_dimension[4] = {"10000", "100000", "1000000", "10000000"};
 string shape = "square";
+string destination_file_path = "/mnt/hostfs/team08/log_files/";
 
 // Loads an appropriate algorithm based on command line params.
 ConvexHullAlgorithm* load_algorithm(string arg) {
@@ -98,34 +99,30 @@ int main(int argc, char* argv[]) {
 				for (auto n_threads : threads_count){
 					algorithm = load_algorithm(algorithm_name + ":" + n_threads);
 					ofstream output_file;
-					output_file.open ("/mnt/hostfs/team08/log_files/" + algorithm_name + "_" + n_threads + ".log", ios::app);
+					output_file.open (destination_file_path + algorithm_name + "_" + n_threads + ".log", ios::app);
 
 					high_resolution_clock::time_point t1 = high_resolution_clock::now();
 				    	shared_ptr<HullWrapper> convex_hull_points = shared_ptr<HullWrapper>(algorithm->convex_hull(points_pointers));
 					high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
-					output_file << "POINTS: " << num_of_points << "\nREP: " << (rep + 1);
-					output_file << "\nTIME: ";
+					output_file << "POINTS: " << num_of_points << "\nREP: " << (rep + 1) << "\nTIME: ";
 					output_file << ConvexHullAlgorithm::sequential_time << " "
 							<< duration_cast<microseconds>( t2 - t1 ).count() - ConvexHullAlgorithm::sequential_time << "\n";
-					output_file << "";
 					output_file.close();
 				}
 			}
 
 			algorithm = load_algorithm("Sequential:1");
 			ofstream output_file;
-			output_file.open ("/mnt/hostfs/team08/log_files/Sequential_1.log", ios::app);
+			output_file.open (destination_file_path + "Sequential_1.log", ios::app);
 
 			//computing exec time (could find better way)
 			high_resolution_clock::time_point t1 = high_resolution_clock::now();
 		    	shared_ptr<HullWrapper> convex_hull_points = shared_ptr<HullWrapper>(algorithm->convex_hull(points_pointers));
 			high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
-			output_file << "POINTS: " << num_of_points << "\nREP: " << (rep + 1);
-			output_file << "\nTIME: ";
-			output_file << duration_cast<microseconds>( t2 - t1 ).count() << " " << 0 << "\n\n";
-			output_file << "";
+			output_file << "POINTS: " << num_of_points << "\nREP: " << (rep + 1) << "\nTIME: ";
+			output_file << duration_cast<microseconds>( t2 - t1 ).count() << " " << 0 << "\n";
 			output_file.close();
 		}
 	}
