@@ -17,7 +17,7 @@ CONST_ALGORITHMS_NAMES = ['SimpleParallel', 'NaiveParallel', 'HullTree']
 CONST_POINTS = 10000000
 CONST_THREADS = [2, 4, 8, 16, 32, 64]
 CONST_X_AXIS = np.arange(1, len(CONST_THREADS) + 1)
-CONST_SHAPE = 'square'
+CONST_SHAPE = 'circle'
 CONST_MACHINE = 'xeon'
 
 CONST_SOURCE_FILE = ('./log_files/log_files_' + CONST_MACHINE + '/' + CONST_MACHINE + '_' + CONST_SHAPE + '/' +
@@ -279,7 +279,7 @@ def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
     #plt.errorbar(CONST_X_AXIS, mean_execution_time, stdv, fmt='|', ecolor='k')
     plt.xticks(CONST_X_AXIS, CONST_THREADS)
     plt.grid(True)
-    plt.legend(loc=1)
+    plt.legend(loc=2)
     #plt.ylim([0,3.5])
     plt.savefig('./logs_plots/' + CONST_MACHINE + '_' + CONST_SHAPE + '_' + str(CONST_POINTS) + '.eps', format='eps')
     plt.show()

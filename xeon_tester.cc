@@ -39,7 +39,7 @@ bool is_sequential;
 string algorithms[3] = {"SimpleParallel", "NaiveParallel", "HullTree"};
 string threads_count[6] = {"2", "4", "8", "16", "32", "64"};
 string points_dimension[4] = {"10000", "100000", "1000000", "10000000"};
-string shape = "square";
+string shape = "circle";
 string destination_file_path = "/mnt/hostfs/team08/log_files/";
 
 // Loads an appropriate algorithm based on command line params.
@@ -79,6 +79,7 @@ ConvexHullAlgorithm* load_algorithm(string arg) {
 int main(int argc, char* argv[]) {
 	cout << "START\n";
 	ConvexHullAlgorithm* algorithm;
+	Generator* generator = load_generator(shape);
 	for (auto num_of_points : points_dimension){
 		for (int rep = 0; rep < 4; rep++){
 			//generate input points of size num_of_points
@@ -86,10 +87,8 @@ int main(int argc, char* argv[]) {
 			// Reading points.
 			vector<POINT> points;
 
-			// TODO call correct generator based on argv
-			Generator* generator = load_generator(shape);
+			// TODO call correct generator based on argv			
 			points = generator->generate_points(n);
-			delete(generator);
 
 			vector<POINT*> points_pointers(n);
 			for (int i = 0; i < n; i++) {
