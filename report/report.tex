@@ -128,6 +128,11 @@ very short summary of the section. The typical structure follows.
 
 \mypar{Experimental setup} Xeon Phi
 
+%TODO
+ Specify the platform (processor, frequency, maybe OS, maybe cache sizes)
+as well as the compiler, version, and flags used. If your work is about performance, 
+I strongly recommend that you play with optimization flags and consider also icc for additional potential speedup.
+
 This is how our experiments worked:
 First of all we fixed a shape and a number of points to be generated.
 For each chosen combination we then repeated 100 times the following process:
@@ -141,35 +146,32 @@ For each chosen combination we then repeated 100 times the following process:
 \end{itemize}
 
 This whole process was done for 10K, 100K, 1M and 10M points with a range R of 1B and as shapes we used a square, a disk and a circumference in the following way:
+\begin{itemize}
+\item	Square: Randomly generated with coordinates in the range [-R,R]
 
-\mypar{Square}: Randomly generated with coordinates in the range [-R,R]
+\item	Disk: Randomly generated with coordinates in the range [-R,R]. Points not included in the disk with radius R and center (0,0) were removed and regenerated.
 
-\mypar{Disk}: Randomly generated with coordinates in the range [-R,R]. Points not included in the disk with radius R and center (0,0) were removed and regenerated.
-
-\mypar{Circle}: Randomly generated an angle $\theta$ and created the point ($cos(\theta), sin(\theta)$).
-
-%TODO
- Specify the platform (processor, frequency, maybe OS, maybe cache sizes)
-as well as the compiler, version, and flags used. If your work is about performance, 
-I strongly recommend that you play with optimization flags and consider also icc for additional potential speedup.
+\item	Circle: Randomly generated an angle $\theta$ and created the point ($cos(\theta), sin(\theta)$).
+\end{itemize}
 
 \mypar{Results}
+
 Next divide the experiments into classes, one paragraph for each. In each class of experiments you typically pursue one questions that then is answered by a suitable plot or plots. For example, first you may want to investigate the performance behavior with changing input size, then how your code compares to external benchmarks.
 
 \subsection{Change input size}
-\begin{figure}[!h]\centering
-  \includegraphics[scale=0.33]{./plots/xeon_square.eps}
+\begin{figure}[!ht]\centering
+  \includegraphics[scale=0.33]{./plots/SimpleParallel_8&NaiveParallel_8&HullTree_8&Sequential_1.eps}
   \caption{Comparison of the three algorithms for 8 and 32 threads and the sequential version\label{Input size}}
 \end{figure}
 
 \subsection{Change Threads num}
 
-\begin{figure}[!h]\centering
+\begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/xeon_square_10000000.eps}
   \caption{Execution times of the algorithms with the given number of threads for an input set of 10M points in a square\label{Threads time}}
 \end{figure}
 
-\begin{figure}[!h]\centering
+\begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/speedup_xeon_square_10000000.eps}
   \caption{Speedup of the algorithms with the given number of threads for an input set of 10M points in a square\label{Threads time}}
 \end{figure}
