@@ -11,11 +11,12 @@ import math
 # -a <algorithms to compare in the format <algo1:num_of_threads algo2:num_of_threads algo3:num_of_threads ...>>
 
 
-CONST_COLORS = ['b', 'r', 'g', 'b', 'r', 'g', 'k']
+CONST_COLORS = ['b', 'r', 'g', 'k', 'b', 'r', 'g', 'k']
 
 CONST_ALGORITHMS_NAMES = ['SimpleParallel', 'NaiveParallel', 'HullTree']
 CONST_POINTS = 10000000
 CONST_THREADS = [2, 4, 8, 16, 32, 64]
+CONST_X_AXIS = np.arange(1, len(CONST_THREADS) + 1)
 CONST_SHAPE = 'square'
 CONST_MACHINE = 'xeon'
 
@@ -178,7 +179,7 @@ def plot_execution_time(algorithms):
 
     plt.legend(loc=2)
     # plt.ylim()
-    plt.savefig('./logs_plots/' + ("&".join(sys.argv[8:])).replace("/", "_").replace(":", "_") + '.eps', format='eps')
+    plt.savefig('./logs_plots/' + ("&".join(sys.argv[2:])).replace("/", "_").replace(":", "_") + '.eps', format='eps')
     plt.show()
     plt.clf()
 
@@ -260,8 +261,8 @@ def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
 
 	    print(algorithm_name + ' ' + str(n_threads) + ' ' + CONST_SHAPE + ': ' + str(float(np.average(start_execution_time) / (10 ** 6))) + ' ' + str(float(np.average(end_execution_time) / (10 ** 6))))
 
-        plt.plot(CONST_THREADS, mean_execution_time, CONST_COLORS[count] + 'o--', label=my_label)
-        plt.errorbar(CONST_THREADS, mean_execution_time, stdv, fmt='|', ecolor='k')
+        plt.plot(CONST_X_AXIS, mean_execution_time, CONST_COLORS[count] + 'o--', label=my_label)
+        plt.errorbar(CONST_X_AXIS, mean_execution_time, stdv, fmt='|', ecolor='k')
         count += 1
 
     # Sequential
@@ -274,12 +275,12 @@ def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
         stdv.append(sequential_stdv)
     print('Sequential ' + CONST_SHAPE + ': ' + str(mean_sequential_exec_time))
 
-    plt.plot(CONST_THREADS, mean_execution_time, CONST_COLORS[count] + 'o--', label=my_label)
-    plt.errorbar(CONST_THREADS, mean_execution_time, stdv, fmt='|', ecolor='k')
-    plt.xticks(CONST_THREADS)
+    #plt.plot(CONST_X_AXIS, mean_execution_time, CONST_COLORS[count] + 'o--', label=my_label)
+    #plt.errorbar(CONST_X_AXIS, mean_execution_time, stdv, fmt='|', ecolor='k')
+    plt.xticks(CONST_X_AXIS, CONST_THREADS)
     plt.grid(True)
     plt.legend(loc=1)
-    plt.ylim([0,3.5])
+    #plt.ylim([0,3.5])
     plt.savefig('./logs_plots/' + CONST_MACHINE + '_' + CONST_SHAPE + '_' + str(CONST_POINTS) + '.eps', format='eps')
     plt.show()
     plt.clf()
@@ -298,20 +299,21 @@ def plot_speedup_fixed_points(algorithms, sequential_algorithm):
     count = 0
     for algorithm_name in CONST_ALGORITHMS_NAMES:
 
-        mean_execution_time = []
+        speedup = []
         stdv = []
         my_label = algorithm_name
         for n_threads in CONST_THREADS:
             curr_algorithm = algorithms[algorithm_name + ':' + str(n_threads)]
             measured_execution_time = curr_algorithm.execution_time[CONST_POINTS]
 
-            mean_execution_time.append(mean_sequential_exec_time / float(np.average(measured_execution_time) / (10 ** 6)))
-            stdv.append(float(np.std(measured_execution_time) / (10 ** 6)))
+            speedup.append(((mean_sequential_exec_time / float(np.average(measured_execution_time) / (10 ** 6))) / n_threads) * math.log(n_threads, 2))
 
-        plt.plot(CONST_THREADS, mean_execution_time, CONST_COLORS[count] + 'o--', label=my_label)
+        plt.plot(CONST_X_AXIS, speedup, CONST_COLORS[count] + 'o--', label=my_label)
         count += 1
 
-    plt.xticks(CONST_THREADS)
+    plt.plot(CONST_X_AXIS, CONST_X_AXIS, 'k-', label='n_threads')
+    plt.xticks(CONST_X_AXIS, CONST_THREADS)
+    plt.yticks(CONST_X_AXIS, CONST_THREADS)
     plt.grid(True)
     plt.legend(loc=2)
     plt.savefig('./logs_plots/speedup_' + CONST_MACHINE + '_' + CONST_SHAPE + '_' + str(CONST_POINTS) + '.eps', format='eps')
