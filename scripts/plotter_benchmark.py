@@ -11,7 +11,7 @@ import math
 # -a <algorithms to compare in the format <algo1:num_of_threads algo2:num_of_threads algo3:num_of_threads ...>>
 
 
-CONST_COLORS = ['b', 'r', 'g', 'k', 'y', 'c']
+CONST_COLORS = ['b', 'r', 'g', 'b', 'r', 'g', 'k']
 
 CONST_ALGORITHMS_NAMES = ['SimpleParallel', 'NaiveParallel', 'HullTree']
 CONST_POINTS = 10000000
@@ -178,7 +178,7 @@ def plot_execution_time(algorithms):
 
     plt.legend(loc=2)
     # plt.ylim()
-    # plt.savefig('./logs_plots/' + ("&".join(sys.argv[8:])).replace("/", "_") + '.png')
+    plt.savefig('./logs_plots/' + ("&".join(sys.argv[8:])).replace("/", "_").replace(":", "_") + '.eps', format='eps')
     plt.show()
     plt.clf()
 
@@ -225,7 +225,7 @@ def plot_speedup(algorithms, sequential_algorithm):
             plt.semilogx(num_of_input_points, speedup, CONST_COLORS[count] + 'o--', label=my_label)
             count += 1
 
-    plt.legend(loc=3)
+    plt.legend(loc=4)
     plt.ylim(ymin=0, ymax=int(maximum_sp) + 1)
     # plt.savefig('./logs_plots/speedup_' + ("&".join(sys.argv[8:])).replace("/", "_") + '.png')
     plt.show()
@@ -280,7 +280,7 @@ def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
     plt.grid(True)
     plt.legend(loc=1)
     plt.ylim([0,3.5])
-    plt.savefig('./logs_plots/' + CONST_MACHINE + '_' + CONST_SHAPE + '.png')
+    plt.savefig('./logs_plots/' + CONST_MACHINE + '_' + CONST_SHAPE + '_' + str(CONST_POINTS) + '.eps', format='eps')
     plt.show()
     plt.clf()
 
@@ -313,7 +313,8 @@ def plot_speedup_fixed_points(algorithms, sequential_algorithm):
 
     plt.xticks(CONST_THREADS)
     plt.grid(True)
-    plt.legend(loc=1)
+    plt.legend(loc=2)
+    plt.savefig('./logs_plots/speedup_' + CONST_MACHINE + '_' + CONST_SHAPE + '_' + str(CONST_POINTS) + '.eps', format='eps')
     plt.show()
     plt.clf()
 
