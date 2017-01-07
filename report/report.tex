@@ -127,15 +127,56 @@ very short summary of the section. The typical structure follows.
 
 \mypar{Experimental setup} Xeon Phi
 
+This is how our experiments worked:
+First of all we fixed a shape and a number of points to be generated.
+For each chosen combination we then repeated 100 times the following process:
+\begin{itemize}
+\item	We reandomly generated the chosen number of points with our generator according to the chosen shape
+\item	We executed each algorithm with each desired number of threads on that point set collecting results in logfiles, measuring two time intervals:
+\begin{itemize}
+\item	seq
+\item	merge
+\end{itemize}
+\end{itemize}
+
+This whole process was done for 10K, 100K, 1M and 10M points with a range R of 1B and as shapes we used a square, a disk and a circumference in the following way:
+
+\mypar{Square}: Randomly generated with coordinates in the range [-R,R]
+
+\mypar{Disk}: Randomly generated with coordinates in the range [-R,R]. Points not included in the disk with radius R and center (0,0) were removed and regenerated.
+
+\mypar{Circle}: Randomly generated an angle $\theta$ and created the point ($cos(\theta), sin(\theta)$).
+
  Specify the platform (processor, frequency, maybe OS, maybe cache sizes)
 as well as the compiler, version, and flags used. If your work is about performance, 
 I strongly recommend that you play with optimization flags and consider also icc for additional potential speedup.
 
-Then explain what kind of benchmarks you ran. The idea is to give enough information so the experiments are reproducible by somebody else on his or her code.
-For sorting you would talk about the input sizes. For a tool that performs NUMA optimization, you would specify the programs you ran.
-
 \mypar{Results}
 Next divide the experiments into classes, one paragraph for each. In each class of experiments you typically pursue one questions that then is answered by a suitable plot or plots. For example, first you may want to investigate the performance behavior with changing input size, then how your code compares to external benchmarks.
+
+\subsection{Change input size}
+\begin{figure}[!h]\centering
+  \includegraphics[scale=0.33]{dft-performance.eps}
+  \caption{Comparison of the three algorithms for 8 and 32 threads and the sequential version\label{Input size}}
+\end{figure}
+
+\subsection{Change Threads num}
+
+\begin{figure}[!h]\centering
+  \includegraphics[scale=0.33]{dft-performance.eps}
+  \caption{Execution times of the algorithms with the given number of threads for an input set of 10M points in a square\label{Threads time}}
+\end{figure}
+
+\begin{figure}[!h]\centering
+  \includegraphics[scale=0.33]{dft-performance.eps}
+  \caption{Speedup of the algorithms with the given number of threads for an input set of 10M points in a square\label{Threads time}}
+\end{figure}
+
+\subsection{Euler vs Xeon}
+\begin{figure}[!h]\centering
+  \includegraphics[scale=0.33]{dft-performance.eps}
+  \caption{Execution times of the algorithms with the given number of threads for an input set of 10M points in a square on Xeon Phi and Euler\label{fftperf}}
+\end{figure}
 
 For some tips on benchmarking including how to create a decent viewgraph see pages 22--27 in \cite{Pueschel:10}.
 
