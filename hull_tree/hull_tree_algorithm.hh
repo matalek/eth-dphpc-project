@@ -29,25 +29,22 @@ public:
 
 		ConvexHullAlgorithm::sequential_time = 0;
 		start_time = high_resolution_clock::now();
-		shared_ptr<vector<POINT*> > upper_points = convex_points(points, 1);
+		shared_ptr<HullTreeConvexHullRepresentation> upper_hull = convex_points(points, true);
 		start_time = high_resolution_clock::now();
-		shared_ptr<vector<POINT*> > lower_points = convex_points(points, 0);
+		shared_ptr<HullTreeConvexHullRepresentation> lower_hull = convex_points(points, false);
 
-		shared_ptr<VectorConvexHullRepresentation> lower_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(lower_points, false));
-		shared_ptr<VectorConvexHullRepresentation> upper_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(upper_points, true));
-		shared_ptr<HullWrapper> ret = shared_ptr<HullWrapper>(new HullWrapper(upper_hull, lower_hull));
-		return ret;
+		return shared_ptr<HullWrapper>(new HullWrapper(upper_hull, lower_hull));
 	}
 
 private:
 	high_resolution_clock::time_point start_time;
 
-	shared_ptr<vector<POINT*> > convex_points(vector<POINT*>& points, bool is_upper) {
+	shared_ptr<HullTreeConvexHullRepresentation> convex_points(vector<POINT*>& points, bool is_upper) {
 		int n = points.size();
 		d = ceil((float) n / threads);
 
 		shared_ptr<HullTreeConvexHullRepresentation> res = convex_points_rec(points, 0, n - 1, is_upper);
-		return res->get_hull();
+		return res;
 	}
 
 	shared_ptr<HullTreeConvexHullRepresentation> convex_points_rec(vector<POINT*>& points, int start, int end, bool is_upper) {
