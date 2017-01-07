@@ -156,19 +156,19 @@ Next divide the experiments into classes, one paragraph for each. In each class 
 
 \subsection{Change input size}
 \begin{figure}[!h]\centering
-  \includegraphics[scale=0.33]{dft-performance.eps}
+  \includegraphics[scale=0.33]{./plots/xeon_square.eps}
   \caption{Comparison of the three algorithms for 8 and 32 threads and the sequential version\label{Input size}}
 \end{figure}
 
 \subsection{Change Threads num}
 
 \begin{figure}[!h]\centering
-  \includegraphics[scale=0.33]{dft-performance.eps}
+  \includegraphics[scale=0.33]{./plots/xeon_square_10000000.eps}
   \caption{Execution times of the algorithms with the given number of threads for an input set of 10M points in a square\label{Threads time}}
 \end{figure}
 
 \begin{figure}[!h]\centering
-  \includegraphics[scale=0.33]{dft-performance.eps}
+  \includegraphics[scale=0.33]{./plots/speedup_xeon_square_10000000.eps}
   \caption{Speedup of the algorithms with the given number of threads for an input set of 10M points in a square\label{Threads time}}
 \end{figure}
 
@@ -189,13 +189,6 @@ An example is in Fig.~\ref{fftperf} (of course you can have a different style).
 answer from the plot in its discussion.
 \item Every plot should be referenced and discussed.
 \end{itemize}
-
-\begin{figure}\centering
-  \includegraphics[scale=0.33]{dft-performance.eps}
-  \caption{Performance of four single precision implementations of the
-  discrete Fourier transform. The operations count is roughly the
-  same. The labels in this plot are maybe a little bit too small.\label{fftperf}}
-\end{figure}
 
 \section{Conclusions}
 
