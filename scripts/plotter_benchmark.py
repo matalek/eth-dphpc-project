@@ -14,10 +14,10 @@ import math
 CONST_COLORS = ['b', 'r', 'g', 'k', 'b', 'r', 'g', 'k']
 
 CONST_ALGORITHMS_NAMES = ['SimpleParallel', 'NaiveParallel', 'HullTree']
-CONST_POINTS = 10000000
+CONST_POINTS = 1000000
 CONST_THREADS = [2, 4, 8, 16, 32, 64]
 CONST_X_AXIS = np.arange(1, len(CONST_THREADS) + 1)
-CONST_SHAPE = 'circle'
+CONST_SHAPE = 'square'
 CONST_MACHINE = 'xeon'
 
 CONST_SOURCE_FILE = ('./log_files/log_files_' + CONST_MACHINE + '/' + CONST_MACHINE + '_' + CONST_SHAPE + '/' +
@@ -279,7 +279,7 @@ def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
     #plt.errorbar(CONST_X_AXIS, mean_execution_time, stdv, fmt='|', ecolor='k')
     plt.xticks(CONST_X_AXIS, CONST_THREADS)
     plt.grid(True)
-    plt.legend(loc=2)
+    plt.legend(loc=1)
     #plt.ylim([0,3.5])
     plt.savefig('./logs_plots/' + CONST_MACHINE + '_' + CONST_SHAPE + '_' + str(CONST_POINTS) + '.eps', format='eps')
     plt.show()
@@ -308,12 +308,12 @@ def plot_speedup_fixed_points(algorithms, sequential_algorithm):
 
 	    speedup.append(mean_sequential_exec_time / float(np.average(measured_execution_time) / (10 ** 6)))
 
-        #plt.semilogy(CONST_X_AXIS, speedup, CONST_COLORS[count] + 'o--', label=my_label, basey=2)
-        plt.plot(CONST_X_AXIS, speedup, CONST_COLORS[count] + 'o--', label=my_label)
+        plt.semilogy(CONST_X_AXIS, speedup, CONST_COLORS[count] + 'o--', label=my_label, basey=2)
+        #plt.plot(CONST_X_AXIS, speedup, CONST_COLORS[count] + 'o--', label=my_label)
         count += 1
 
-    plt.plot(CONST_X_AXIS, CONST_THREADS, 'k-', label='n_threads')
-    #plt.semilogy(CONST_X_AXIS, CONST_THREADS, 'k-', label='n_threads', basey=2)
+    #plt.plot(CONST_X_AXIS, CONST_THREADS, 'k-', label='n_threads')
+    plt.semilogy(CONST_X_AXIS, CONST_THREADS, 'k-', label='n_threads', basey=2)
     plt.xticks(CONST_X_AXIS, CONST_THREADS)
     #plt.yticks(CONST_X_AXIS, CONST_THREADS)
     plt.yticks(CONST_THREADS, CONST_THREADS)
