@@ -122,50 +122,80 @@ Mention and cite any external resources that you used including libraries or oth
 
 \section{Experimental Results}\label{sec:exp}
 
-%TODO
-Here you evaluate your work using experiments. You start again with a
-very short summary of the section. The typical structure follows.
+In order to evaluate the efficiency of our proposed algorithms, we tested them on sets of randomly generated points with different geometric shapes: square, disk and circle.
 
-\mypar{Experimental setup} Xeon Phi
+Regarding scalability we tested both weak and strong scaling, changing the input size and the number of operating threads.
 
+Concerning correctness we compared our results with the ones obtained using th \textit{Convex Hull} implementation available in the library \textit{CGAL}.
+
+\mypar{Experimental setup}
+
+Xeon Phi (momentarily my pc lol)
 %TODO
  Specify the platform (processor, frequency, maybe OS, maybe cache sizes)
 as well as the compiler, version, and flags used. If your work is about performance, 
 I strongly recommend that you play with optimization flags and consider also icc for additional potential speedup.
+\begin{table}[!ht]
+\begin{tabular}{|c|c|}
+\hline Architecture: 		 & x86$\_$64\\
+\hline CPU op-mode(s):        & 32-bit, 64-bit\\
+\hline CPU(s):                & 8\\
+\hline Thread(s) per core:    & 2\\
+\hline Core(s) per socket:    & 4\\
+\hline Socket(s):             & 1\\
+\hline Model name:            & Intel(R) Core(TM) i7-6700HQ\\							 & CPU @ 2.60GHz\\
+\hline CPU MHz:               & 800.007\\
+\hline CPU max MHz:           & 3500.0000\\
+\hline CPU min MHz:           & 800.0000\\
+\hline L1d cache:             & 32K\\
+\hline L1i cache:             & 32K\\
+\hline L2 cache:              & 256K\\
+\hline L3 cache:              & 6144K\\
+\hline
+\end{tabular}
+\caption{Xeon Phi cluster specifications}
+\end{table}
 
-This is how our experiments worked:
-First of all we fixed a shape and a number of points to be generated.
-For each chosen combination we then repeated 100 times the following process:
-\begin{itemize}
-\item	We reandomly generated the chosen number of points with our generator according to the chosen shape
-\item	We executed each algorithm with each desired number of threads on that point set collecting results in logfiles, measuring two time intervals:
-\begin{itemize}
-\item	seq
-\item	merge
-\end{itemize}
-\end{itemize}
+Our implementations are written in \textit{C++} and make use of \textit{OpenMP} for shared-memory multithreading.
+Our applications were compiled using \textit{icc} with the flag \textit{-O2}.
 
-This whole process was done for 10K, 100K, 1M and 10M points with a range R of 1B and as shapes we used a square, a disk and a circumference in the following way:
-\begin{itemize}
-\item	Square: Randomly generated with coordinates in the range [-R,R]
+This is roughly how our experiments worked:
+First of all we fixed a shape and a number of points to be generated. Then we randomly generated the chosen point set and executed each algorithm with each desired number of threads on that point set, collecting results in logfiles, measuring two time intervals: mid and end.
 
-\item	Disk: Randomly generated with coordinates in the range [-R,R]. Points not included in the disk with radius R and center (0,0) were removed and regenerated.
+In order to have reliable experiments we repeated this process 100 times for each chosen combination of number of input points and shape.
 
-\item	Circle: Randomly generated an angle $\theta$ and created the point ($cos(\theta), sin(\theta)$).
-\end{itemize}
+This whole process was done for 10K, 100K, 1M and 10M points generated in a range R of 1B and as shapes we used a square, a disk and a circumference in the following way:
+\mypar{Square}: Randomly generated points with coordinates in the range [-R,R]
+\mypar{Disk}: Randomly generated points with coordinates in the range [-R,R]. Points not included in the disk with radius R and center (0,0) were removed and regenerated.
+\mypar{Circle}: Randomly generated angles $\theta_n$ and created the points ($\frac{R}{2}cos(\theta_n)$, $\frac{R}{2}sin(\theta_n)$).
 
 \mypar{Results}
 
 Next divide the experiments into classes, one paragraph for each. In each class of experiments you typically pursue one questions that then is answered by a suitable plot or plots. For example, first you may want to investigate the performance behavior with changing input size, then how your code compares to external benchmarks.
 
 \subsection{Change input size}
+For the sequential versions, as expected, the growth in execution time when increasing the number of input points is linear for all the selected shapes.
+For the parallel algorithms, instead, the situation slightly differs.
+
+For square and disk they all behave similarly: the effeciency grows when incrementing the input size for less than 1M input points. With a higher number of points ($\geq$ 1M) the execution time grows linearly and it's very similar for all the considered algorithms.
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/SimpleParallel_8&NaiveParallel_8&HullTree_8&Sequential_1.eps}
   \caption{Comparison of the three algorithms for 8 and 32 threads and the sequential version\label{Input size}}
 \end{figure}
-
+Regarding circle, instead, \textit{Pairwise} and \textit{Naive} algorithms have a performance comparable to the one on the square, while \textit{HullTree}'s performance is much worse.
+This is due to the creation of the data structure that for a high number of resulting points (recall that for circle every generated point is part of the final convex hull) needs a lot of time.
+\begin{figure}[!ht]\centering
+  \includegraphics[scale=0.33]{./plots/SimpleParallel_8&NaiveParallel_8&HullTree_8&Sequential_1.eps}
+  \caption{Comparison of the three algorithms for 8 and 32 threads and the sequential version\label{Input size}}
+\end{figure}
 \subsection{Change Threads num}
-
+For square and disk we obtained very good results when changing the number of working threads: for 2, 4 and 8 threads we even obtained superlinear speedup with the HullTree algorithm.
+A good speedup is still visible over 8 threads but we lose efficiency over a certain limit, past that the overhead added by parallelism cannot overweights the benefits introduced by reducing the problem's size.
+\begin{figure}[!ht]\centering
+  \includegraphics[scale=0.33]{./plots/xeon_square_10000000.eps}
+  \caption{Execution times of the algorithms with the given number of threads for an input set of 1M points in a square\label{Threads time}}
+\end{figure}
+We can notice that that point is shifted to a higher number of threads when the input set is bigger. Clearly the lower the number of points the lesser the efficiency obtained by splitting the point set among threads.
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/xeon_square_10000000.eps}
   \caption{Execution times of the algorithms with the given number of threads for an input set of 10M points in a square\label{Threads time}}
@@ -175,7 +205,13 @@ Next divide the experiments into classes, one paragraph for each. In each class 
   \includegraphics[scale=0.33]{./plots/speedup_xeon_square_10000000.eps}
   \caption{Speedup of the algorithms with the given number of threads for an input set of 10M points in a square\label{Threads time}}
 \end{figure}
-
+For circle the situation is again more complicated, since the HullTree algorithm has a very bad performance.
+The other algorithms still have decent speedups but not as good as the square.
+The more memory accesses needed and the parallel overhead are now more present.
+\begin{figure}[!ht]\centering
+  \includegraphics[scale=0.33]{./plots/speedup_xeon_square_10000000.eps}
+  \caption{Speedup of the algorithms with the given number of threads for an input set of 10M points in a square\label{Threads time}}
+\end{figure}
 \subsection{Euler vs Xeon}
 \begin{figure}[!h]\centering
   \includegraphics[scale=0.33]{dft-performance.eps}
