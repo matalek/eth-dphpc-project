@@ -306,14 +306,17 @@ def plot_speedup_fixed_points(algorithms, sequential_algorithm):
             curr_algorithm = algorithms[algorithm_name + ':' + str(n_threads)]
             measured_execution_time = curr_algorithm.execution_time[CONST_POINTS]
 
-            speedup.append(((mean_sequential_exec_time / float(np.average(measured_execution_time) / (10 ** 6))) / n_threads) * math.log(n_threads, 2))
+	    speedup.append(mean_sequential_exec_time / float(np.average(measured_execution_time) / (10 ** 6)))
 
+        #plt.semilogy(CONST_X_AXIS, speedup, CONST_COLORS[count] + 'o--', label=my_label, basey=2)
         plt.plot(CONST_X_AXIS, speedup, CONST_COLORS[count] + 'o--', label=my_label)
         count += 1
 
-    plt.plot(CONST_X_AXIS, CONST_X_AXIS, 'k-', label='n_threads')
+    plt.plot(CONST_X_AXIS, CONST_THREADS, 'k-', label='n_threads')
+    #plt.semilogy(CONST_X_AXIS, CONST_THREADS, 'k-', label='n_threads', basey=2)
     plt.xticks(CONST_X_AXIS, CONST_THREADS)
-    plt.yticks(CONST_X_AXIS, CONST_THREADS)
+    #plt.yticks(CONST_X_AXIS, CONST_THREADS)
+    plt.yticks(CONST_THREADS, CONST_THREADS)
     plt.grid(True)
     plt.legend(loc=2)
     plt.savefig('./logs_plots/speedup_' + CONST_MACHINE + '_' + CONST_SHAPE + '_' + str(CONST_POINTS) + '.eps', format='eps')
