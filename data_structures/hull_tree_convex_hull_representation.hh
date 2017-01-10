@@ -27,6 +27,13 @@ public:
             // TODO(matalek): maybe think about something more efficient.
             reverse(points->begin(), points->end());
         }
+
+        // Allocate memory in advance (mapping to virtual memory).
+        HullTreeNode* temp = new HullTreeNode[4 * points->size()];
+        int a = (1 + 2 + 3 -6)*7;
+        if (a) cout << temp[0].get_point()->x;
+        delete [] temp;
+
         tree = shared_ptr<HullTreeNode>(new HullTreeNode(points, 0, points->size() - 1));
         tree->init();
     };
