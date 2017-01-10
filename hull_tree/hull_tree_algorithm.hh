@@ -66,16 +66,8 @@ private:
 			return shared_ptr<HullTreeConvexHullRepresentation>(new HullTreeConvexHullRepresentation(convex_hull_points, is_upper));
 		}
 
-
 		int N = ceil((double) n / d);
-		int sqrt_N = sqrt(N);
-		// TODO(matalek): make it more general and pretty.
-		if (N == 32) {
-			sqrt_N = 4;
-		}
-		if (sqrt_N == 1) {
-			sqrt_N++;
-		}
+		int sqrt_N = proper_sqrt(N);
 
 		shared_ptr<HullTreeConvexHullRepresentation>*
 				partial_results = new shared_ptr<HullTreeConvexHullRepresentation>[sqrt_N];
@@ -112,6 +104,16 @@ private:
 		delete [] cut_hulls;
 
 		return res;
+	}
+
+	// Calculates approximate square root n, which is the power of 2.
+	int proper_sqrt(int n) {
+		int cur = 2;
+		while (4 * cur * cur <= n) {
+			cur <<= 1;
+		}
+
+		return cur;
 	}
 
 	// Calculates parts of the convex hull taken to the result, based on other hulls.
