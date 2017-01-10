@@ -116,9 +116,10 @@ problems have a complexity, not algorithms.
 
 \section{Your Proposed Method}\label{sec:yourmethod}
 
-The purpose of this section is to review a convex hull sequential algorithm for sorted input set and common tangent line algorithm. We also present parallel algorithms for computing a convex hull of a sorted set of points.
+The purpose of this section is to review a convex hull sequential algorithm for a sorted input set and common tangent line algorithm. We also present parallel algorithms for computing a convex hull for such input.
 
 \subsection{Sequential algorithm}
+% TODO(matalek): do we want to include that?
 
 \subsection{Common tangent line algorithm}
 
@@ -127,26 +128,26 @@ The purpose of this section is to review a convex hull sequential algorithm for 
 Algorithms presented here enable computing the upper hull of the input set. 
 Computing lower hull can be done in a similar way and for simplicity its description is omitted in this report. 
 Therefore, in this section, whenever we write ''convex hull'' we are referring to the upper hull.
-% TODO(matalek): should we maybe replace everywhere to upper hull?
 However, our implementation computes the entire convex hull (upper and lower).  
 
 \subsubsection{General scheme}
 \label{sec:parallel-general}
 
-Let $k$ denote the number of processors available and $n$ - number of points in the input set.
-Let $P = \{p_0, p_1, ..., p_{n-1} \}$ be the sorted (by $x$ coordinate) set of input points.
-Finally, let $CH(S)$ denote the convex hull of $S$ set and $R=CH(S)$.
-All presented here algorithms share common approach.
+Let $k$ denote the number of processors used and $n$ - number of points in the input set.
+For simplicity in all algorithms we will assume that $k$ is the power of 2. 
+Let $P = \{p_0, p_1, ..., p_{n-1} \}$ be the set of sorted (by $x$ coordinate) input points.
+Finally, let $CH(S)$ denote the convex hull of $S$ set and $R=CH(P)$.
+All presented here algorithms share a common approach.
 
-Firstly, we divide the input set into $t$ equal sets based on the $x$ coordinate:
+Firstly, we divide the input set into $k$ equal sets ($\pm 1$ elements) based on the $x$ coordinate:
 $$P_0 = \{p_0, p_1, ..., p_{\lceil{\frac{n}{k}}\rceil - 1}\}$$
 $$P_1 = \{p_{\lceil{\frac{n}{k}}\rceil}, p_{\lceil{\frac{n}{k}}\rceil + 1}, ..., p_{\lceil{2 * \frac{n}{k}}\rceil - 1}\}$$
 $$...$$
 $$P_{k-1} = \{p_{(k-1)\lceil{\frac{n}{k}}\rceil}, p_{(k-1)\lceil{\frac{n}{k}}\rceil + 1}, ..., p_{n- 1} \}$$
 
 
-Then, we execute sequential version of the convex hull algorithm (Andrew's monotone chain) for each of these sets in parallel, using $t$ threads.
-As a result we have convex hull for each of the sets:
+Then, we execute sequential version of the convex hull algorithm (Andrew's monotone chain) for each of these sets in parallel, using $k$ threads.
+As a result we have the convex hull for each of the sets:
 $$C_i = CH(P_i) \textrm{\;\;\; for \;} i \in \{0, 1, ..., k - 1\}$$
 
 For the next step we need the following simple observation:
@@ -156,7 +157,7 @@ If $p \in P_i$ for some $i \in \{0, 1, ..., k - 1\}$, but $p \notin C_i$, then $
 
 The immediate conclusion follows:
 \begin{observation}
-$$C = CH(P_0 \cup P_1 \cup ... \cup P_{k - 1})$$
+$$R = CH(C_0 \cup C_1 \cup ... \cup C_{k - 1})$$
 \end{observation}
 
 This observation enables us to perform the last step of the algorithm.
@@ -167,9 +168,12 @@ All of them are, however, based on the common tangent line algorithm.
 
 \subsubsection{Naive Parallel algorithm}
 
-So called Naive Parallel algorithm is based on merging two convex hulls into one convex hull. 
-Let $A$ and $B$ be two convex hulls so that for every $p \in A, q \in B$ we have $p.x < q.x$, where $\_.x$ denotes the $x$ coordinate of the given point.
-Further, let $p_0, p_1, ..., p_{n-1}$ be the points of $A$ (sorted by $x$ coordinate) and similarly $q_0, q_1, ... q_{m-1}$ be the points of $B$.
+So called Naive Parallel algorithm is based on merging two convex hulls into one convex hull.
+It uses common tangent line algorithm, but the overall concept was developed by us.
+% TODO(matalek): phrase above maybe somehow better
+
+Let $A$ and $B$ be two convex hulls so that for every $p \in A, q \in B$ we have $p.x < q.x$, where $r.x$ denotes the $x$ coordinate of the point $r$.
+Further, let $p_0, p_1, ..., p_{n-1}$ and $q_0, q_1, ... q_{m-1}$ be the points of $A$ and $B$ respectively (sorted by $x$ coordinate).
 Let $p_i \in A$ and $q_j \in B$ be such points that $\overline{p_iq_j}$ is a common tangent line for $A$ and $B$.
 Then we know that points $p_{i+1}, p_{i + 2}, ..., p_{n - 1}$ and $q_{j + 1}, q_{j + 2}, ..., q_{m - 1}$ are not going to be in the resulting convex hull.
 Therefore, we have:
@@ -178,12 +182,11 @@ For performing this merge we can use array-like data structure.
 The time complexity of this is equal to $O(n + m)$.
 % TODO(matalek): is it true? check with common tangent line complexity
 
-Using this merge algorithm we can perform computing the convex hull of the entire set in the form of the tree. 
-We assume that number of processors $k$ is the power of 2. 
+Using this merge algorithm we can compute the convex hull of the entire set in the form of the tree.
 Our algorithm consists of $\log k$ steps.
 We start with $C_0, C_1, ..., C_{k-1}$ convex hulls.
 In each step we are merging convex hull which were pairs of resulting convex hulls from the previous step. 
-If $I_0, I_1, ..., I_{2l - 1}$ is an input for the step, then we compute the output: $O_0, O_1, ..., O_{l - 1}$ using $l$ processors. 
+If $I_0, I_1, ..., I_{2l - 1}$ is the input for the step, then we compute the output: $O_0, O_1, ..., O_{l - 1}$ using $l$ processors. 
 $i$-th processor computes $O_i = CH(I_{2i} \cup I_{2i+1})$ using merge algorithm presented above.
 Example scheme for 4 processors is presented on figure \ref{fig:naive-parallel-scheme}.
 Pseudocode for this algorithm is presented as algorithm \ref{alg:naive-parallel}.
@@ -192,7 +195,7 @@ Pseudocode for this algorithm is presented as algorithm \ref{alg:naive-parallel}
 \begin{algorithm}
 \label{alg:naive-parallel}
 \begin{program}
-\mbox{A fast exponentiation procedure:}
+\mbox{NaiveParallel algorithm:}
 \BEGIN \\ %
   level := k / 2;
   partial\_results := array(2 * k);
@@ -221,13 +224,12 @@ Pseudocode for this algorithm is presented as algorithm \ref{alg:naive-parallel}
   \label{fig:naive-parallel-scheme}
 \end{figure}
 
-The time complexity of this algorithm depends on the size of the intermediates convex hulls.
+The time complexity of this algorithm depends on the size of intermediates convex hulls.
 In the worst case scenario size of the convex hull will be linear to the size of the input.
 Then, time complexity of the algorithm can be estimated as:
 $$O(\frac{n}{k}) + O(2\frac{n}{k}) + O(4\frac{n}{k}) + ... + O(k\frac{n}{k}) = O(n)$$
-We can see that asymptotically this algorithm in the worst case scenario does not provide any speedup with more threads.
-However, these calculations do not take into the account that calculating initial convex hull is connected with bigger constant than performing merging steps. 
-% TODO(matalek): maybe more explanation
+We can see that asymptotically this algorithm in the worst case scenario does not provide any speedup when using more threads.
+However, as shown and explained in next sections, this algorithm proved to be quite efficient.
 
 \subsubsection{Simple Parallel algorithm}
 \label{sec:simple-parallel}
@@ -236,11 +238,11 @@ This algorithm was originally presented in \cite{SimpleParallel}.
 It is based on computing what part of $C_i$ is also a part of $R$.
 The computations are based on the following observation:
 \begin{observation}
-Let $P_i = \{q_0, q_1, ..., q_{l-1} \},$ where  $q_{j_1}.x < q_{j_2}.x$ for $0 \leq j_1 < j_2 < l$. 
-We have, that for every $0 \leq j_1 < j_2 < j_3 < l$, if $q_{j_1}, q_{j_3} \in C_i$, then $q_{j_2} \in C_i$.
+Let $C_i = \{q_0, q_1, ..., q_{l-1} \},$ where  $q_{j_1}.x < q_{j_2}.x$ for $0 \leq j_1 < j_2 < l$. 
+We have, that for every $0 \leq j_1 < j_2 < j_3 < l$, if $q_{j_1}, q_{j_3} \in R$, then $q_{j_2} \in R$.
 % TODO(matalek): do we need proof for it?
 \end{observation}
-We will call a point $p$ {\it\bf taken} if and only if $p \in P_i \land p \in C_i$ for some $i$. 
+We will call a point $p$ {\it\bf taken} if and only if $p \in C_i \land p \in R$ for some $i$. 
 The above observation means that taken points from one convex hull form an interval (with regards to their indices).
 
 Computing these intervals can be done by computing common tangent line for each pair $C_i$ and $C_j$.
@@ -294,31 +296,35 @@ It is based on a special tree-like structure for keeping points of the convex hu
 Let $n$ denote the number of points in the convex hull.
 This data structure allows:
 \begin{itemize}
-\item creating new hull tree from a convex hull represented as an array,
-\item accessing leftmost and rightmost point in $O(\log n)$ time complexity,
-\item accessing neighboring (with regards to the position on the convex hull) points in $O(1)$ time complexity,
-\item creating hull tree consisting of subset of points from the original hull tree that have $x$ coordinate lower than given one (in $O(\log n)$ time complexity),
-\item merging two hull trees, where one of them consists of points that have $x$ coordinate lower than all the points from the second one (in $O(\log n)$ time complexity, where $n$ and $m$ are the number of points in the merged hull trees).
+\item creating a new hull tree from a convex hull represented as an array, in $O(n)$ time complexity,
+\item accessing leftmost and rightmost point, in $O(\log n)$ time complexity,
+\item accessing neighboring (with regards to the position on the convex hull) points, in $O(1)$ time complexity,
+\item creating a hull tree consisting of subset of points from the original hull tree that have $x$ coordinate lower than given one, in $O(\log n)$ time complexity,
+\item merging two hull trees, where one of them consists of points that have $x$ coordinate lower than all the points from the second one, in $O(\log n)$ time complexity, where $n$ and $m$ are the number of points in the hull trees to be merged.
 \end{itemize}
 The details of implementation of this data structure are presented in the original paper.
+% TODO(matalek): is paper a good word?
 
 This algorithm uses divide and conquer approach. 
 Let $d = \lceil\frac{n}{k}\rceil$ and $S$ be the current set of input points.
 If the size of $S$ is lower or equal than $d$, we execute a sequential version of the algorithm and construct a hull tree based on its result.
-Otherwise, we split $S$ into $\sqrt{k}$ equal subsets based on $x$ coordinate: $S_0, S_1, ..., S_{\sqrt{k} - 1}$.
-% TODO(matalek) maybe add ceil or floor
+Otherwise, we split $S$ into $\sqrt{k}$
+equal subsets based on $x$ coordinate: $S_0, S_1, ..., S_{\sqrt{k} - 1}$
+\footnote{More precisely, we split into $O(\sqrt k)$ sets. In our implementation for $k \geq 4$ we split into $2^w$ sets, where $w$ is the highest number such that $2^{2w} \leq k$ (for $k = 2$ we split into 2 sets).}.
 We then compute recursively convex hull for each subset, which results in having hull trees $HT_i$ corresponding to convex hulls $C_i$ of these subsets.
 For each recursive call we assign $\sqrt{k}$ processors to compute this convex hull.
 
 In order to merge $HT_0, HT_1, ..., HT_{\sqrt{k} - 1}$ we perform computations similar to these described in the section \ref{sec:simple-parallel}.
 Using $\sqrt{k}^2 = k$ processors we compute for each pair $HT_i$ $HT_j$ ($i \neq j$) common tangent line (for each pair we assign one processor).
-It is possible to perform this step efficiently, because our data structure enables us to quickly access neighboring points.
+It is possible to perform this step efficiently, because our data structure enables us to quickly access neighboring points, as well as middle points of given interval of points.
 Later, we compute the intersection of resulting intervals which results in the intervals of taken points.
 If $q_1$ and $q_2$ are the beginning and the end of one of these intervals, we split hull tree first by $q_1.x$ and discard left convex hull, later by $q_2.x$ and discard right resulting convex hull.
 We are left then with hull tree representing only taken points.
 We merge these hull trees in a tree-like way (similar to described in the section \ref{sec:parallel-general} and pairwise merge of hull trees.
 These operations are performed in parallel by $\sqrt{k}$ processors and take $O(h + k)$ time.
-% TODO(matalek): is this correct time?
+Finally, using parallel prefix computation we copy points from the resulting hull tree into the resulting array.
+
+The time complexity for this algorithm, as shown in \cite{HullTree}, for $k \leq \frac{n}{\log n}$ is equal $O(\frac{n}{k})$ and is optimal.
 
 \iffalse
 Now comes the ``beef'' of the report, where you explain what you
