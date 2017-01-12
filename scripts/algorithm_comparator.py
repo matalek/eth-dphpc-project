@@ -2,15 +2,14 @@
 import subprocess
 import csv
 import sys
-import numpy as np
-import matplotlib.pyplot as plt
 
 # Usage ./algorithm_comparator.py
 # -c <number of different combinations of number of points> 
-# -w <width of steps>
+# -w <width of steps> or -m <base of the magnitude comparison (ex 10 for 100, 1000, 10000 ...)>
 # -s <starting number of points>
 # -r <range of points coordinates>
 # -R <number of repetition for each number of points>
+# -S <shape (circle, square, disk)>
 # -a <algorithms to compare in the format <algo1:num_of_threads algo2:num_of_threads algo3:num_of_threads ...>>
 
 
@@ -29,60 +28,120 @@ def compare_function(cgal, alg):
     return True
 
 
-# Check user input correctness
-if int(sys.argv[10]) <= 0 or len(sys.argv) <= 11:
-    print 'ERROR in usage, provide int number of repetition for each value (ex. -R 20)'
-    exit
-if int(sys.argv[8]) <= 0 or len(sys.argv) <= 9:
-    print 'ERROR in usage, provide int range of points coordinates (ex. -r 20)'
-    exit   
-if int(sys.argv[6]) <= 0 or len(sys.argv) <= 7:
-    print 'ERROR in usage, provide int starting number of points (ex. -s 100)'
-    exit
-if int(sys.argv[4]) <= 0 or len(sys.argv) <= 5:
-    print 'ERROR in usage, provide int width in steps (ex. -w 50)'
-    exit
-if int(sys.argv[2]) <= 0 or len(sys.argv) <= 3:
-    print 'ERROR in usage, provide int number of different combinations (ex. -c 20)'
-    exit
+# Create the map for algorithms
+def algorithms_map():
+    key_val = {}
+    # Generate empty CSVs for eveery algorithm tested
+    for key in range(0, len(sys.argv) - 14):
+        algorithm = sys.argv[14 + key]
+        key_val[algorithm] = []
+        for suffix in CONST_CSV_SUFFIXES:
+            # create and open a csv file to store results
+            ofile = open('log_files/' + algorithm.replace(':', '_') + '_' + CONST_SHAPE + suffix + '.csv', "wb")
+            writer = csv.writer(ofile)
+            writer.writerow(['#Input Points', '', 'Exec_Time [us]'])
+            ofile.close()
+            key_val[algorithm].append([])
+    return key_val
 
+
+# Find if desired linear or exponential width
+def chosen_width_type():
+    if '-w' in sys.argv:
+        return '-w'
+    print 'no'
+    return '-m'
+
+
+# Insert function check_output if not present
+if "check_output" not in dir(subprocess ):
+    def f(*popenargs, **kwargs):
+        if 'stdout' in kwargs:
+            raise ValueError('stdout argument not allowed, it will be overridden.')
+        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
+        output, unused_err = process.communicate()
+        retcode = process.poll()
+        if retcode:
+            cmd = kwargs.get("args")
+            if cmd is None:
+                cmd = popenargs[0]
+            raise subprocess.CalledProcessError(retcode, cmd)
+        return output
+    subprocess.check_output = f
+
+
+# Check user input correctness
+def check_input_correctness():
+    if len(sys.argv) <= 15:
+        print 'ERROR in usage, provide all the required arguments'
+        return False
+    if '-R' not in sys.argv:
+        print 'ERROR in usage, provide int number of repetition for each value (ex. -R 20)'
+        return False
+    if '-r' not in sys.argv:
+        print 'ERROR in usage, provide int range of points coordinates (ex. -r 20)'
+        return False
+    if '-s' not in sys.argv:
+        print 'ERROR in usage, provide int starting number of points (ex. -s 100)'
+        return False
+    if '-S' not in sys.argv:
+        print 'ERROR in usage, provide shape (ex. -S square)'
+        return False
+    if '-w' not in sys.argv and '-m' not in sys.argv:
+        print 'ERROR in usage, provide int width in steps or magnitude base (ex. -w 500 or -m 10)'
+        return False
+    if '-c' not in sys.argv:
+        print 'ERROR in usage, provide int number of different combinations (ex. -c 20)'
+        return False
+    if '-a' not in sys.argv:
+        print 'ERROR in usage, provide at least one algorithm (ex. -a Sequential:1)'
+        return False
+    if sys.argv.index('-a') != 14:
+        print 'ERROR in usage, please provide algorithms at the end of arguments'
+        return False
+    return True
+
+
+# Start program
+if not check_input_correctness():
+    exit
 
 # Store parameters passed by user
-CONST_REP_NUMBER = int(sys.argv[10])
-CONST_COORDINATE_RANGE = int(sys.argv[8])
-CONST_STARTING_VALUE = int(sys.argv[6])
-CONST_STEP_WIDTH = int(sys.argv[4])
-CONST_COMB_NUMBER = int(sys.argv[2])
-
-# Initialize a map to contain temporary values
-key_value = {}
+CONST_SHAPE = sys.argv[sys.argv.index('-S') + 1]
+CONST_REP_NUMBER = int(sys.argv[sys.argv.index('-R') + 1])
+CONST_COORDINATE_RANGE = int(sys.argv[sys.argv.index('-r') + 1])
+CONST_STARTING_VALUE = int(sys.argv[sys.argv.index('-s') + 1])
+CONST_STEP_WIDTH = int(sys.argv[sys.argv.index(chosen_width_type()) + 1])
+CONST_COMB_NUMBER = int(sys.argv[sys.argv.index('-c') + 1])
+CONST_CSV_SUFFIXES = ['', '_mid', '_end']
 
 # Build executables
 subprocess.call('make clean', shell=True)
 subprocess.call('make', shell=True)
 subprocess.call('make -C generator/', shell=True)
 subprocess.call('mkdir -p log_files', shell=True)
-subprocess.call('mkdir -p logs_plots', shell=True)
 subprocess.call('(cd cgal && cmake .)', shell=True)
 subprocess.call('(cd cgal && make)', shell=True)
 
-# Generate empty CSVs for eveery algorithm tested
-for key in range(0, len(sys.argv) - 12):
-    algorithm = sys.argv[12 + key]
-    # create and open a csv file to store results
-    ofile = open('log_files/log_results_' + algorithm.replace('/', '_').replace(':', '_t_') + '.csv', "wb")
-    writer = csv.writer(ofile)
-    writer.writerow(['#Input Points', 'Exec_Time [us]'])
-    ofile.close()
-    key_value[algorithm] = 0
+# Initialize the algorithms_map containing temp execution times
+key_value = algorithms_map()
+
+# Create array of points
+points = []
+if chosen_width_type() == '-w':
+    for n in range(CONST_STARTING_VALUE, CONST_STEP_WIDTH * CONST_COMB_NUMBER + CONST_STARTING_VALUE,
+                       CONST_STEP_WIDTH):
+        points.append(n)
+else:
+    for val in range(0, CONST_COMB_NUMBER):
+        points.append(CONST_STARTING_VALUE * (CONST_STEP_WIDTH ** val))
 
 # Start tests
-for num_of_points in range(
-        CONST_STARTING_VALUE, CONST_STEP_WIDTH*CONST_COMB_NUMBER + CONST_STARTING_VALUE, CONST_STEP_WIDTH):
+for num_of_points in points:
 
     # Print progress information to screen
     print ('\n-----------------------------------------\nBEGINNING STEP: ' +
-           str(((num_of_points-CONST_STARTING_VALUE)/CONST_STEP_WIDTH)+1) +
+           str(points.index(num_of_points) + 1) +
            ', POINTS:' + str(num_of_points) + '\n-----------------------------------------'
            )
 
@@ -95,24 +154,21 @@ for num_of_points in range(
         # Generate input points
         subprocess.call(
             'echo "' + str(num_of_points) + ' ' + str(CONST_COORDINATE_RANGE)
-            + '" | ./generator/generator > tmp.log', shell=True)
+            + '" | ./generator/generator ' + CONST_SHAPE + ' > tmp.log', shell=True)
 
         # Apply CGAL_algorithm to compare our result to
         cgal_result = subprocess.check_output(
             'cat tmp.log | ./cgal/cgal_graham_andrew', shell=True)
 
         # Apply every given algorithm to the set of points
-        for key in range(0, len(sys.argv) - 12):
-            algorithm = sys.argv[12 + key]
-            algorithm_name = algorithm.split(":")[0]
-            concurrency = algorithm.split(":")[1]
+        for algorithm in key_value:
 
             # Print progress information to screen
             print(algorithm + ' REP ' + str(repetition + 1))
 
             # Apply given algorithm. Output of algorithm: time\n resulting_points
             alg_result = subprocess.check_output(
-                'cat tmp.log | ./tester ' + algorithm_name + ':' + concurrency + ' 1', shell=True)
+                'cat tmp.log | ./tester ' + algorithm, shell=True)
 
             # evaluate correctness on points array
             if not compare_function(cgal_result, alg_result):
@@ -122,24 +178,23 @@ for num_of_points in range(
                 sys.exit()
 
             # Update tmp store
-            key_value[algorithm] += int(alg_result.split('\n')[0].split(' ')[1]) + \
-                                    int(alg_result.split('\n')[0].split(' ')[2])
-
-    # Delete tmp file containing the points
-    subprocess.call('rm tmp.log', shell=True)
+            key_value[algorithm][0].append(int(alg_result.split('\n')[0].split(' ')[1]) + 
+                                    int(alg_result.split('\n')[0].split(' ')[2]))
+            for i in (1, 2):
+                key_value[algorithm][i].append(int(alg_result.split('\n')[0].split(' ')[i]))
 
     # Write a new row in every CSV with this step's result
     for algorithm in key_value:
-        ofile = open('log_files/log_results_' + algorithm.replace('/', '_').replace(':', '_t_') + '.csv', "a")
-        writer = csv.writer(ofile)
-        writer.writerow([num_of_points, key_value[algorithm] / CONST_REP_NUMBER])
-        key_value[algorithm] = 0
-        ofile.close()
+        pos = 0
+        for suffix in CONST_CSV_SUFFIXES:
+            ofile = open('log_files/' + algorithm.replace(':', '_') + '_' + CONST_SHAPE + suffix + '.csv', "a")
+            writer = csv.writer(ofile)
+            writer.writerow([num_of_points] + [''] + key_value[algorithm][pos])
+            key_value[algorithm][pos] = []
+            ofile.close()
+            pos += 1
 
 # Print progress information to screen
 print('\n--------------------------------------\n| ----------------------------------- |\n'
       '| |COMPARISON COMPLETED SUCCESSFULLY| |'
       '\n| ----------------------------------- |\n--------------------------------------\n')
-
-# Call plotter to plot results
-subprocess.call('./scripts/plotter.py -a ' + (" ".join(sys.argv[12:])), shell=True)
