@@ -205,15 +205,20 @@ We can notice that that point is shifted to a higher number of threads when the 
   \includegraphics[scale=0.33]{./plots/speedup_xeon_square_10000000.eps}
   \caption{Speedup of the algorithms with the given number of threads for an input set of 10M points in a square\label{Threads time}}
 \end{figure}
+
 For circle the situation is again more complicated, since the HullTree algorithm has a very bad performance.
-The other algorithms still have decent speedups but not as good as the square.
-The more memory accesses needed and the parallel overhead are now more present.
+The other algorithms still have decent speedups but not as good as with the square.
+The more memory accesses needed and the parallel overhead are make the algorithms scale worse.
+
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/speedup_xeon_square_10000000.eps}
   \caption{Speedup of the algorithms with the given number of threads for an input set of 10M points in a square\label{Threads time}}
 \end{figure}
-\subsection{Euler vs Xeon}
-\begin{figure}[!h]\centering
+
+We can notice that for X threads the algorithms stop scaling.
+
+\subsection{Euler vs Xeon???}
+\begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{dft-performance.eps}
   \caption{Execution times of the algorithms with the given number of threads for an input set of 10M points in a square on Xeon Phi and Euler\label{fftperf}}
 \end{figure}
