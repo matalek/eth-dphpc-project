@@ -17,17 +17,14 @@ $ ./scripts/algorithm_comparator.py
 # -s <starting number of points>
 # -r <range of points coordinates>
 # -R <number of repetition for each number of points>
+# -S <shape (circle, square or disk)>
 # -a <algorithms to compare in the format <algo1:num_of_threads algo2:num_of_threads algo3:num_of_threads ...>>
 ```
 For example:
 ```sh
-./scripts/algorithm_comparator.py -c 10 -w 100000 -s 100000 -r 1000000 -R 2 -a SimpleParallel:4 SimpleParallel:8 Sequential:1 ...
+./scripts/algorithm_comparator.py -c 10 -w 10000 -s 10000 -r 10000000 -R 2 -S disk -a SimpleParallel:4 SimpleParallel:8 Sequential:1 ...
 ```
 REMEMBER to also provide a sequential version when needed, with 1 as num_of_threads
-
-## Algorithms Comparator script for benchmarking
-
-The algorithm_comparator_benchmark.py script works similarly to the normal comparator, but it stores all the recorded times in csv. To execute it call it as u would call the normal comparator.
 
 ## Plotter script
 
