@@ -101,7 +101,6 @@ table below.
 | Algorithm name | Type | Implementation |
 |---|---|---|
 | Sequential | Sequential | [AndrewAlgorithm](sequential/andrew_algorithm.hh) |
-| SequentialGraham | Sequential | [GrahamAlgorithm](sequential/graham_algorithm.hh) |
 | SimpleParallel | Parallel | [SimpleParallelAlgorithm](simple_parallel/simple_parallel_algorithm.hh) |
 | NaiveParallel | Parallel | [NaiveParallelAlgorithm](naive_parallel/naive_parallel_algorithm.hh) |
 | HullTree | Parallel | [HullTreeAlgorithm](hull_tree/hull_tree_algorithm.hh) |
