@@ -35,7 +35,7 @@ This script prints the results of the given algorithms in term of execution time
 
 Execute from prompt command:
 ```sh
-$ chmod u+x scripts/plotter_script.py
+$ chmod u+x scripts/plotter.py
 ```
 and then
 
