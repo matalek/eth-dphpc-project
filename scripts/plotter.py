@@ -14,10 +14,10 @@ import math
 CONST_COLORS = ['b', 'r', 'g', 'k', 'b', 'r', 'g', 'k']
 
 CONST_ALGORITHMS_NAMES = ['SimpleParallel', 'NaiveParallel', 'HullTree']
-CONST_POINTS = 1000000
+CONST_POINTS = 10000000
 CONST_THREADS = [2, 4, 8, 16, 32, 64, 128, 256]
 CONST_X_AXIS = np.arange(1, len(CONST_THREADS) + 1)
-CONST_SHAPE = 'circle'
+CONST_SHAPE = 'square'
 CONST_MACHINE = 'xeon'
 
 CONST_SOURCE_FILE = ('./log_files/log_files_' + CONST_MACHINE + '/' + CONST_MACHINE + '_' + CONST_SHAPE + '/' +
@@ -352,6 +352,55 @@ def plot_box_time_fixed_points(algorithms, sequential_algorithm):
         plt.clf()
 
 
+# Plot execution time for fixed num of points, num of threads on x axis BOXPLOTS all algos ------------------------------
+def plot_box_all(algorithms, sequential_algorithm):
+    
+    colors = ['b', 'r', 'g']
+    
+    count = 0
+    fig, ax = plt.subplots()
+    plt.title('Performance comparison')
+    for algorithm_name in CONST_ALGORITHMS_NAMES:
+
+
+        plt.ylabel('Execution Time [s]')
+        plt.xlabel('Number of threads')
+
+        mean_execution_time = []
+        stdv = []
+        datas = []
+        my_label = algorithm_name
+        for n_threads in CONST_THREADS:
+            curr_algorithm = algorithms[algorithm_name + ':' + str(n_threads)]
+            measured_execution_time = curr_algorithm.execution_time[CONST_POINTS]
+            datas.append(np.array(measured_execution_time) / (10 ** 6))
+
+        boxplot_dict = ax.boxplot(
+            datas,
+            positions=(CONST_X_AXIS * len(CONST_ALGORITHMS_NAMES) + count -1),
+            notch=True,
+            widths=0.25)
+
+
+        i = 0
+        for b in boxplot_dict['boxes']:
+            b.set_color(colors[count])
+            if i == 0:
+                b.set_label(algorithm_name)
+            i += 1
+
+        count += 1
+
+    plt.xticks(np.arange(0, (len(CONST_THREADS) + 1) * len(CONST_ALGORITHMS_NAMES), len(CONST_ALGORITHMS_NAMES)),
+               [0] + CONST_THREADS)
+    plt.grid(True)
+    plt.ylim(ymax=2)
+    plt.legend(loc=1)
+    plt.savefig('logs_plots/boxes.eps', format='eps')
+    plt.show()
+    plt.clf()
+
+
 # Plot speedup for every algorithms for fixed num of points, nthreads on x axis with theoretical boundary --------------
 def plot_theoretical_boundaries(algorithms, sequential_algorithm):
 
@@ -408,3 +457,7 @@ plot_theoretical_boundaries(algorithms_map, seq_algorithm)
 
 # Box Plots for fixed points
 plot_box_time_fixed_points(algorithms_map, seq_algorithm)
+
+# Box Plots for fixed points all algos
+plot_box_all(algorithms_map, seq_algorithm)
+
