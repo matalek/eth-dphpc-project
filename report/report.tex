@@ -173,32 +173,53 @@ This whole process was done for 10K, 100K, 1M and 10M points generated in a rang
 
 Next divide the experiments into classes, one paragraph for each. In each class of experiments you typically pursue one questions that then is answered by a suitable plot or plots. For example, first you may want to investigate the performance behavior with changing input size, then how your code compares to external benchmarks.
 
-\subsection{Change input size}
+\mypar{General results & reliability}
+
+Put BOXPLOTS HERE
+
+\mypar{Change input size}
+
 For the sequential versions, as expected, the growth in execution time when increasing the number of input points is linear for all the selected shapes.
 For the parallel algorithms, instead, the situation slightly differs.
 
 For square and disk they all behave similarly: the effeciency grows when incrementing the input size for less than 1M input points. With a higher number of points ($\geq$ 1M) the execution time grows linearly and it's very similar for all the considered algorithms.
+
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/SimpleParallel_8&NaiveParallel_8&HullTree_8&Sequential_1.eps}
   \caption{Comparison of the three algorithms for 8 threads and the sequential version for square\label{Input size}}
 \end{figure}
-Regarding circle, instead, \textit{Pairwise} and \textit{Naive} algorithms have a performance comparable to the one on the square, while \textit{HullTree}'s performance is much worse.
-This is due to the creation of the data structure that for a high number of resulting points (recall that for circle every generated point is part of the final convex hull) needs a lot of time.
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/SimpleParallel_8&NaiveParallel_8&HullTree_8&Sequential_1.eps}
   \caption{Comparison of the three algorithms for 8 threads and the sequential version for circle\label{Input size}}
 \end{figure}
-\subsection{Change Threads num}
-For square and disk we obtained very good results when changing the number of working threads: for 2, 4 and 8 threads we even obtained superlinear speedup with the HullTree algorithm.
+
+PUT THESE SIDE BY SIDE
+
+Regarding circle, instead, \textit{Pairwise} and \textit{Naive} algorithms have a performance comparable to the one on the square, while \textit{HullTree}'s performance is much worse.
+This is due to the creation of the data structure that for a high number of resulting points (recall that for circle every generated point is part of the final convex hull) needs a lot of time.
+
+\mypar{Change Threads num}
+
+Considering an input set of 1M and 10M points, for square and disk we obtained very good results when changing the number of working threads: for 2 and 4 threads we even obtained superlinear speedup with the HullTree algorithm.
 A good speedup is still visible over 8 threads but we lose efficiency over a certain limit, past that the overhead added by parallelism cannot overweights the benefits introduced by reducing the problem's size.
+
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/xeon_square_1000000.eps}
   \caption{Execution times of the algorithms with the given number of threads for an input set of 1M points in a square\label{Threads time}}
 \end{figure}
-We can notice that that point is shifted to a higher number of threads when the input set is bigger. Clearly the lower the number of points the lesser the efficiency obtained by splitting the point set among threads.
+
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/xeon_square_10000000.eps}
   \caption{Execution times of the algorithms with the given number of threads for an input set of 10M points in a square\label{Threads time}}
+\end{figure}
+
+PUT THESE PICS SIDE BY SIDE
+
+We can notice that that point is shifted to a higher number of threads when the input set is bigger. Clearly the lower the number of points the lesser the efficiency obtained by splitting the point set among threads.
+
+\begin{figure}[!ht]\centering
+  \includegraphics[scale=0.33]{./plots/speedup_xeon_square_10000000.eps}
+  \caption{Speedup of the algorithms with the given number of threads for an input set of 10M points in a square\label{Threads time}}
 \end{figure}
 
 \begin{figure}[!ht]\centering
@@ -206,22 +227,25 @@ We can notice that that point is shifted to a higher number of threads when the 
   \caption{Speedup of the algorithms with the given number of threads for an input set of 1M points in a square\label{Threads time}}
 \end{figure}
 
+PUT THESE PICS SIDE BY SIDE
 For circle the situation is again more complicated, since the HullTree algorithm has a very bad performance.
 The other algorithms still have decent speedups but not as good as with the square.
 The more memory accesses needed and the parallel overhead are make the algorithms scale worse.
 
-\begin{figure}[!ht]\centering
-  \includegraphics[scale=0.33]{./plots/speedup_xeon_square_10000000.eps}
-  \caption{Speedup of the algorithms with the given number of threads for an input set of 10M points in a square\label{Threads time}}
-\end{figure}
+
 
 We can notice that for X threads the algorithms stop scaling.
 
-\subsection{Euler vs Xeon???}
+\mypar{Behavior with unoptimal number of threads}
+
+Here we show the behavior of HullTree and Simple algirthms with a number of threads which is sot a power of two. Unfortunately, Naive algorithm cannot work with these numbers of threads.
+
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{dft-performance.eps}
   \caption{Execution times of the algorithms with the given number of threads for an input set of 10M points in a square on Xeon Phi and Euler\label{fftperf}}
 \end{figure}
+
+The algorithms behave in some way lol, that way is a way for Simple, whereas for HullTree we have a different way.
 
 For some tips on benchmarking including how to create a decent viewgraph see pages 22--27 in \cite{Pueschel:10}.
 
