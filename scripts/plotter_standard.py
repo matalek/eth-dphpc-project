@@ -122,7 +122,8 @@ def build_algorithms(shape):
 
 # Standard execution Time plotter --------------------------------------------------------------------------------------
 def plot_execution_time():
-    plt.figure(num=None, figsize=(10, 6), facecolor='w', edgecolor='k')
+    plt.figure(num=None, figsize=(10, 4), facecolor='w', edgecolor='k')
+    plt.gcf().subplots_adjust(bottom=0.15)
     plt.suptitle("Execution times")
 
     plt.subplot(121)
@@ -182,7 +183,8 @@ def plot_execution_time():
 
 # Standard speedup plotter ---------------------------------------------------------------------------------------------
 def plot_speedup():
-    plt.figure(num=None, figsize=(10, 6), facecolor='w', edgecolor='k')
+    plt.figure(num=None, figsize=(10, 4), facecolor='w', edgecolor='k')
+    plt.gcf().subplots_adjust(bottom=0.15)
     plt.suptitle("Speedup")
     plt.subplot(121)
     plt.title('Square')
