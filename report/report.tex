@@ -204,11 +204,16 @@ It must be noticed that the parallel algorithms have a better speedup when the n
 Considering an input set of 1M and 10M points, for square and disk we obtained very good results when changing the number of working threads: for 2 and 4 threads we even obtained superlinear speedup with the HullTree algorithm.
 A good speedup is still visible over 8 threads but we lose efficiency over a certain limit, past that the overhead added by parallelism cannot overweights the benefits introduced by reducing the problem's size.
 
+\begin{figure}[!ht]\centering
+  \includegraphics[scale=0.33]{./plots/speedup_xeon_square_fixed_points.eps}
+  \caption{Speedup of the algorithms with the given number of threads with a square for 1M and 10M points\label{Threads time}}
+\end{figure}
+
 We can notice that that point is shifted to a higher number of threads when the input set is bigger. Clearly the lower the number of points the lesser the efficiency obtained by splitting the point set among threads.
 
 \begin{figure}[!ht]\centering
-  \includegraphics[scale=0.33]{./plots/speedup_xeon_square_10000000.eps}
-  \caption{Speedup of the algorithms with the given number of threads with a square for 1M and 10M points\label{Threads time}}
+  \includegraphics[scale=0.33]{./plots/speedup_xeon_circle_fixed_points.eps}
+  \caption{Speedup of the algorithms with the given number of threads with a circle for 1M and 10M points\label{Threads time}}
 \end{figure}
 
 For circle the situation is again more complicated, since the HullTree algorithm has a very bad performance.
