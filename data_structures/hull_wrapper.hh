@@ -27,7 +27,7 @@ shared_ptr<vector<POINT*> > create_complet_hull(shared_ptr<vector<POINT*>> lower
 class HullWrapper{
 
 public:
-	HullWrapper(shared_ptr<ConvexHullRepresentation> upper_hull, shared_ptr<VectorConvexHullRepresentation> lower_hull) :
+	HullWrapper(shared_ptr<ConvexHullRepresentation> upper_hull, shared_ptr<ConvexHullRepresentation> lower_hull) :
 		upper_hull(upper_hull), lower_hull(lower_hull) {};
 	// it might be done parallel
 	void merge(shared_ptr<HullWrapper> other) {

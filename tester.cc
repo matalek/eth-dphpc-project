@@ -25,7 +25,8 @@
 using namespace std;
 using namespace std::chrono;
 
-high_resolution_clock::time_point ConvexHullAlgorithm::middle_time;
+// high_resolution_clock::time_point ConvexHullAlgorithm::middle_time;
+LL ConvexHullAlgorithm::sequential_time;
 
 // In order to add a new algorithm:
 // - create a class subtyping ConveHullAlgorithm providing implementation
@@ -71,29 +72,10 @@ ConvexHullAlgorithm* load_algorithm(char* argv[]) {
 }
 
 int main(int argc, char* argv[]) {
+	std::ios_base::sync_with_stdio(false);
 	// Number of points.
-
-	bool standard_input = false;
-	if (argc == 3) {
-		standard_input = true;
-	}
-
 	int n;
-
-	ifstream input_file;
-	if (!standard_input) {
-		input_file = ifstream("/mnt/hostfs/team08/tmp.log");
-		if (!input_file.is_open()) {
-		    cout << "Unable to open file\n";
-		    return 1;
-		}
-	}
-
-	if (standard_input) {
-		cin >> n;
-	} else {
-		input_file >> n;
-	}
+	cin >> n;
 
 	// Reading points.
 	vector<POINT> points(n);
@@ -101,18 +83,10 @@ int main(int argc, char* argv[]) {
 
 	for (int i = 0; i < n; i++) {
 		LL x, y;
-		if (standard_input) {
-			cin >> x >> y;
-		} else {
-        	input_file >> x >> y;
-        }
+		cin >> x >> y;
         points[i] = POINT(x, y);
 		points_pointers[i] = &points[i];
     }
-
-    if (!standard_input) {
-	    input_file.close();
-	}
 
 	ConvexHullAlgorithm* algorithm;
 	algorithm = load_algorithm(argv);
@@ -126,8 +100,8 @@ int main(int argc, char* argv[]) {
 	if (is_sequential) {
 		cout << duration_cast<microseconds>( t2 - t1 ).count() << " " << 0 << "\n";
 	} else {
-		cout << duration_cast<microseconds>( ConvexHullAlgorithm::middle_time - t1 ).count() << " "
-				<< duration_cast<microseconds>( t2 - ConvexHullAlgorithm::middle_time ).count() << "\n";
+		cout << ConvexHullAlgorithm::sequential_time << " "
+				<< duration_cast<microseconds>( t2 - t1 ).count() - ConvexHullAlgorithm::sequential_time << "\n";
 	}
     shared_ptr<vector<POINT*>> result = convex_hull_points->get_points();
     cout << result->size() << "\n";
