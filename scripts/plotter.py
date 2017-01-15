@@ -33,9 +33,9 @@ def build_algorithms():
         for num_of_threads in CONST_THREADS:
             algorithm = Algorithm.Algorithm(algorithm_name + ':' + str(num_of_threads))
             
-	    # Overall time
+            # Overall time
             with open(CONST_SOURCE_FILE + algorithm.name.replace("/", "_").replace(":", "_") + '.csv', 'rb') as f:
-		first_row = True
+                first_row = True
                 reader = csv.reader(f)
                 for row in reader:
                     # skip first row
@@ -52,9 +52,9 @@ def build_algorithms():
 
                     algorithm.execution_time[num_of_input_points] = measured_execution_times
 
-	    # Mid time
-	    with open(CONST_SOURCE_FILE + algorithm.name.replace("/", "_").replace(":", "_") + '_mid.csv', 'rb') as f:
-		first_row = True
+            # Mid time
+            with open(CONST_SOURCE_FILE + algorithm.name.replace("/", "_").replace(":", "_") + '_mid.csv', 'rb') as f:
+                first_row = True
                 reader = csv.reader(f)
                 for row in reader:
                     # skip first row
@@ -71,9 +71,9 @@ def build_algorithms():
 
                     algorithm.mid_execution_time[num_of_input_points] = measured_execution_times
 
-	    # End time
-	    with open(CONST_SOURCE_FILE + algorithm.name.replace("/", "_").replace(":", "_") + '_end.csv', 'rb') as f:
-		first_row = True
+            # End time
+            with open(CONST_SOURCE_FILE + algorithm.name.replace("/", "_").replace(":", "_") + '_end.csv', 'rb') as f:
+                first_row = True
                 reader = csv.reader(f)
                 for row in reader:
                     # skip first row
@@ -253,13 +253,13 @@ def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
         for n_threads in CONST_THREADS:
             curr_algorithm = algorithms[algorithm_name + ':' + str(n_threads)]
             measured_execution_time = curr_algorithm.execution_time[CONST_POINTS]
-	    start_execution_time = curr_algorithm.mid_execution_time[CONST_POINTS]
-	    end_execution_time = curr_algorithm.end_execution_time[CONST_POINTS]
+            start_execution_time = curr_algorithm.mid_execution_time[CONST_POINTS]
+            end_execution_time = curr_algorithm.end_execution_time[CONST_POINTS]
 
             mean_execution_time.append(float(np.average(measured_execution_time) / (10 ** 6)))
             stdv.append(float(np.std(measured_execution_time) / (10 ** 6)))
 
-	    print(algorithm_name + ' ' + str(n_threads) + ' ' + CONST_SHAPE + ': ' + str(float(np.average(start_execution_time) / (10 ** 6))) + ' ' + str(float(np.average(end_execution_time) / (10 ** 6))))
+            print(algorithm_name + ' ' + str(n_threads) + ' ' + CONST_SHAPE + ': ' + str(float(np.average(start_execution_time) / (10 ** 6))) + ' ' + str(float(np.average(end_execution_time) / (10 ** 6))))
 
         plt.plot(CONST_X_AXIS, mean_execution_time, CONST_COLORS[count] + 'o--', label=my_label)
         plt.errorbar(CONST_X_AXIS, mean_execution_time, stdv, fmt='|', ecolor='k')
@@ -306,7 +306,7 @@ def plot_speedup_fixed_points(algorithms, sequential_algorithm):
             curr_algorithm = algorithms[algorithm_name + ':' + str(n_threads)]
             measured_execution_time = curr_algorithm.execution_time[CONST_POINTS]
 
-	    speedup.append(mean_sequential_exec_time / float(np.average(measured_execution_time) / (10 ** 6)))
+            speedup.append(mean_sequential_exec_time / float(np.average(measured_execution_time) / (10 ** 6)))
 
         #plt.semilogy(CONST_X_AXIS, speedup, CONST_COLORS[count] + 'o--', label=my_label, basey=2)
         plt.plot(CONST_X_AXIS, speedup, CONST_COLORS[count] + 'o--', label=my_label)
