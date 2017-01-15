@@ -207,6 +207,11 @@ A good speedup is still visible over 8 threads but we lose efficiency over a cer
 We can notice that that point is shifted to a higher number of threads when the input set is bigger. Clearly the lower the number of points the lesser the efficiency obtained by splitting the point set among threads.
 
 \begin{figure}[!ht]\centering
+  \includegraphics[scale=0.2]{./plots/speedup_xeon_square_10000000.eps}
+  \caption{Speedup of the algorithms with the given number of threads with a square for 1M and 10M points\label{Threads time}}
+\end{figure}
+
+\begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/speedup_xeon_square_fixed_points.eps}
   \caption{Speedup of the algorithms with the given number of threads with a square for 1M and 10M points\label{Threads time}}
 \end{figure}
