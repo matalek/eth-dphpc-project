@@ -369,8 +369,8 @@ The platform we tested our algorithms with mounts Intel$^{(R)}$ Xeon Phi process
 \caption{Xeon Phi cluster specifications}
 \end{table}
 
-Our implementations are written in \textit{C++11} and make use of \textit{OpenMP} \footnote{http://www.openmp.org/} for shared-memory multithreading.
-Our applications were compiled using \textit{icc} with the flag \textit{-O2} using also the -mmic flag to fit the architecture.
+Our implementations are written in \textit{C++11} and make use of \textit{OpenMP} ver 4.0 \footnote{http://www.openmp.org/} for shared-memory multithreading.
+Our applications were compiled using \textit{icc} version 15.0.0 with the flag \textit{-O2} using also the -mmic flag to fit the architecture.
 
 This is roughly how our experiments worked:
 first of all we fixed a shape and a number of points to be generated. Then we randomly generated the chosen point set and executed each algorithm with each desired number of threads on that point set, collecting results in logfiles, measuring two time intervals: \textit{mid} (the time needed for the first part of the algorithms that is the separated computing of convex hulls) and \textit{end} (the time needed for merging results).
