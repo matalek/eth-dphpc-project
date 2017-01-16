@@ -216,7 +216,7 @@ For square and disk we notice similar trends [Plot \ref{Threads speedup square}]
 We can notice that that point is shifted to a higher number of threads when the input set is bigger. Clearly the lower the number of points the lesser the efficiency obtained by splitting the point set among threads.
 After that point, the overhead added by parallelism overweights the benefits introduced by having more processing units.
 
-This overhead is related both to the OS, that has to create, allocate and manage a high number of threads, and to the algorithms themselves:
+This overhead is related both to the Operating System, that has to create, allocate and manage a high number of threads, and to the algorithms themselves:
 in fact for a high number of threads, while the first part of the algorithms (separately compute convex hull on split point sets) becomes very fast, the merging itself takes more time and the two processes start becoming unbalanced.
 
 \begin{figure}[!ht]\centering
