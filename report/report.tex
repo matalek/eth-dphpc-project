@@ -68,51 +68,39 @@ should write the abstract last.
 
 \section{Introduction}\label{sec:intro}
 
-Do not start the introduction with the abstract or a slightly modified
-version. It follows a possible structure of the introduction. 
-Note that the structure can be modified, but the
-content should be the same. Introduction and abstract should fill at most the first page, better less.
+In this paper, we study the two-dimensional convex hull problem. Convex hull algorithm is a fundamental algorithm in computation geometry, on which are many algorithms in computation geometry based. The problem of finding convex hulls finds its practical applications in pattern recognition, image processing, statistics, geographic information system, game theory. 
 
-\mypar{Motivation} The first task is to motivate what you do.  You can
-start general and zoom in one the specific problem you consider.  In
-the process you should have explained to the reader: what you are doing,
-why you are doing, why it is important (order is usually reversed).
+There are many well known sequential algorithms, but not that many parallel ones. That was our motivation to focus on this problem. In this paper, we want to investigate parallel algorithms for sorted input, implement them and compare them. Our implementation is based on already known algorithms. We want to explore performance of each algorithm using up to 64 processors and different shapes for input data, then compare results with theoretical boundary related to algorithm and shape.
 
-For example, if my result is the fastest sorting implementation ever, one
-could roughly go as follows. First explain why sorting is important
-(used everywhere with a few examples) and why performance matters (large datasets,
-realtime). Then explain that fast implementations are very hard and
-expensive to get (memory hierarchy, vector, parallel). 
+Existing algorithms are optimal for specific number of threads, but we are interested in real performance including hidden constants and overhead caused by different data structures and computation models.
 
-Now you state what you do in this paper. In our example: 
-presenting a sorting implementation that is
-faster for some sizes as all the other ones.
+\mypar{Related work} Most of the papers related to this topic are theoretical and only prove that suggested solution is for chosen problem optimal. They miss implementation details and performance measurements.  
 
-\mypar{Related work} Next, you have to give a brief overview of
-related work. For a report like this, anywhere between 2 and 8
-references. Briefly explain what they do. In the end contrast to what
-you do to make now precisely clear what your contribution is.
+We will take a look at Simple Parallel Convex Hulls Algorithm \cite{SimpleParallel} and Hull Tree Algorithm \cite{HullTree}, both designed to solved Convex hull problem for sorted input. 
 
 \section{Background: Whatever the Background is}\label{sec:background}
 
-Give a short, self-contained summary of necessary
-background information. For example, assume you present an
-implementation of sorting algorithms. You could organize into sorting
-definition, algorithms considered, and asymptotic runtime statements. The goal of the
-background section is to make the paper self-contained for an audience
-as large as possible. As in every section
-you start with a very brief overview of the section. Here it could be as follows: In this section 
-we formally define the sorting problem we consider and introduce the algorithms we use
-including a cost analysis.
+\mypar{Convex hull}
+Convex hull	 of a finite point set S in the plane is the small-
+est convex polygon containing the set.
 
-\mypar{Sorting}
-Precisely define sorting problem you consider.
+\mypar{Convex hull problem}
+We assume that the problem of computing the convex hull is
+a problem to list all convex hull points that constitute the
+border of the convex hull. 
 
-\mypar{Sorting algorithms}
-Explain the algorithm you use including their costs.
+\mypar{Upper (Lower) hull}
+The convex hull is partitioned, using the leftmost and the rightmost points, into the upper
+hull and the lower hull. Clearly, by computing the upper hull and the lower hull and combining them, we can obtain the convex hull. Also, any algorithm to compute the upper hull can compute the lower hull.
 
-As an aside, don't talk about "the complexity of the algorithm.'' It's incorrect,
-problems have a complexity, not algorithms.
+\mypar{Sorted input} 
+Set of input points ordered by x-coordinate
+
+\mypar{Tangent} 
+A 2D line $L$ is tangent to a polygon $P$ when $L$ touches $P$ it without crossing its boundary.
+
+\mypar{Common tangent} 
+A 2D line $L$ is common tangent to polygons $P1, P2$ when $L$ is tangent to both of them. For both pairs of upper/lower hulls exists a common tangent line.
 
 \section{Your Proposed Method}\label{sec:yourmethod}
 
@@ -121,6 +109,23 @@ The purpose of this section is to review a convex hull sequential algorithm for 
 \subsection{Sequential algorithm}
 
 \subsection{Common tangent line algorithm}
+
+Our generator guaranties unique x-coordinate therefore all convex hulls are distinct and common tangent always exist between them. There is a straightforward linear $O(n+m)$ Common tangent algorithm, where $n,m$ are sizes of hulls. The idea of this algorithm is to alternate searching for tangent endpoints between the two polygons, until both ends of the line segment simultaneous satisfy the tangency condition. 
+
+Firstly, we find the upper tangent:
+
+	\begin{enumerate}
+		\item Start with the rightmost point of the left hull and the leftmost point of the right hull and join them assuming this line is the upper tangent.
+		\item While the line is not tangent to both left and right halves do:
+		\begin{enumerate}
+			\item If the line is not upper tangent to the left, move to the next counter-clockwise point on the left convex hull and check.
+			\item Else if the line is not upper tangent to the right, move to the next clockwise point on the right hull and check
+		\end{enumerate}
+	\end{enumerate}
+	 
+	 We can find lower tangent in same way as the upper one.\\ 
+
+For big hulls is better to replace linear iterative search in step 2 with binary search. We implemented both, but number of points was too small or searched point was very close to the beginning, so binary search was slower. 
 
 \subsection{Parallel algorithms}
 
