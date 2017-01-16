@@ -4,7 +4,9 @@
 % --------------------------------------------------------------------------
 
 \documentclass[letterpaper]{article}
+
 \usepackage{spconf,amsmath,amssymb,graphicx,amsthm,newlfont,program,caption,subcaption}
+
 
 % Example definitions.
 % --------------------
@@ -12,13 +14,16 @@
 %\newcommand{\R}[0]{\mathbb{R}}
 %\newcommand{\C}[0]{\mathbb{C}}
 
+
 % bold paragraph titles
 \newcommand{\mypar}[1]{{\bf #1.}}
+
 
 \theoremstyle{definition}
 \newtheorem{observation}{Observation}
 
 \newtheorem{algorithm}{Algorithm}
+
 
 % Title.
 % ------
@@ -113,6 +118,7 @@ Explain the algorithm you use including their costs.
 
 As an aside, don't talk about "the complexity of the algorithm.'' It's incorrect,
 problems have a complexity, not algorithms.
+
 
 \section{Your Proposed Method}\label{sec:yourmethod}
 
@@ -337,38 +343,124 @@ Mention and cite any external resources that you used including libraries or oth
 \fi
 
 \section{Experimental Results}\label{sec:exp}
+%TODO (matalek) say why naive is good hull is bad
+In order to evaluate the efficiency of our proposed algorithms, we tested them on sets of randomly generated points with different geometric shapes: square, disk and circle.
 
-Here you evaluate your work using experiments. You start again with a
-very short summary of the section. The typical structure follows.
+Regarding scalability we tested both weak and strong scaling, changing the input size and the number of operating threads.
 
-\mypar{Experimental setup} Specify the platform (processor, frequency, maybe OS, maybe cache sizes)
-as well as the compiler, version, and flags used. If your work is about performance, 
-I strongly recommend that you play with optimization flags and consider also icc for additional potential speedup.
+Concerning correctness we compared our results with the ones obtained using th \textit{Convex Hull} implementation available in the library \textit{CGAL} \footnote{http://www.cgal.org/}.
 
-Then explain what kind of benchmarks you ran. The idea is to give enough information so the experiments are reproducible by somebody else on his or her code.
-For sorting you would talk about the input sizes. For a tool that performs NUMA optimization, you would specify the programs you ran.
+\subsection{Experimental setup}
 
-\mypar{Results}
-Next divide the experiments into classes, one paragraph for each. In each class of experiments you typically pursue one questions that then is answered by a suitable plot or plots. For example, first you may want to investigate the performance behavior with changing input size, then how your code compares to external benchmarks.
+%TODO
+The platform we tested our algorithms with mounts Intel$^{(R)}$ Xeon Phi processors. They are based on the Intel$^{(R)}$ Many Integrated Core (MIC) architecture.
 
-For some tips on benchmarking including how to create a decent viewgraph see pages 22--27 in \cite{Pueschel:10}.
+\begin{table}[!ht]
+\begin{tabular}{|c|c|}
+\hline Number of cores			& 61\\
+\hline Threads					& 244\\
+\hline Model name				& Intel(R) Xeon Phi 7100\\
+\hline CPU Frequency [MHz]		& 1238.094\\
+\hline Cache size [KB]			& 512\\
+\hline Peak Performance [GFlops]	& 1208\\
+\hline Peak memory bandwidth [GB/s]		& 352\\
+\hline
+\end{tabular}
+\caption{Xeon Phi cluster specifications}
+\end{table}
 
-{\bf Comments:}
-\begin{itemize}
-\item Create very readable, attractive plots (do 1 column, not 2 column plots
-for this report) with readable font size. However, the font size should also not be too large; typically it is smaller than the text font size.
-An example is in Fig.~\ref{fftperf} (of course you can have a different style).
-\item Every plot answers a question. You state this question and extract the
-answer from the plot in its discussion.
-\item Every plot should be referenced and discussed.
-\end{itemize}
+Our implementations are written in \textit{C++11} and make use of \textit{OpenMP} \footnote{http://www.openmp.org/} for shared-memory multithreading.
+Our applications were compiled using \textit{icc} with the flag \textit{-O2} using also the -mmic flag to fit the architecture.
 
-\begin{figure}\centering
-  \includegraphics[scale=0.33]{dft-performance.eps}
-  \caption{Performance of four single precision implementations of the
-  discrete Fourier transform. The operations count is roughly the
-  same. The labels in this plot are maybe a little bit too small.\label{fftperf}}
+This is roughly how our experiments worked:
+first of all we fixed a shape and a number of points to be generated. Then we randomly generated the chosen point set and executed each algorithm with each desired number of threads on that point set, collecting results in logfiles, measuring two time intervals: \textit{mid} (the time needed for the first part of the algorithms that is the separated computing of convex hulls) and \textit{end} (the time needed for merging results).
+
+In order to have reliable experiments we repeated this process 100 times for each chosen combination of number of input points and shape.
+
+This whole process was done for 10$^4$, 10$^5$, 10$^6$ and 10$^7$ points with integral coordinates and different $x$ coordinates generated in a range R of 10$^9$ and as shapes we used square, disk and circle in the following way:
+
+\mypar{Square}: Randomly generated points with coordinates in the range [-R,R]
+
+\mypar{Disk}: Randomly generated points with coordinates in the range [-R,R]. Points not included in the disk with radius R and center (0,0) were removed and regenerated.
+
+\mypar{Circle}: Randomly generated angles $\theta_n$ and created the points ($\frac{R}{2}cos(\theta_n)$, $\frac{R}{2}sin(\theta_n)$).
+
+These shapes were chosen because of the difference in the resulting hulls.
+With square, in fact, resulting hulls are very small, while with the circle almost every input point is part of the final hull (some point will be excluded because of approximation of integers) and for disk resulting hulls have intermidiate size.
+
+\subsection{Results}
+
+Here we show how our algorithms perform under different configurations and with weak and strong scaling.
+The results plotted are the arithmetic averages of the 100 different repetitions performed for each configuration (Input shape, input size, algorithm and number of processing threads).
+
+Results obtained with disks as input are not shown because close to identical to the squares' ones.
+
+The sequential version considered is the \textit{Andrew's Monotone Chain} algorithm that's used inside our parallel algorithms. \textit{Andrew's Monotone Chain} is also used as base case for speedup plots.
+
+\subsubsection{General results and reliability}
+
+Put BOXPLOTS HERE???
+
+\subsubsection{Changing input size for fixed number of threads}
+
+Here we analyze the results of our algorithms when changing input size from 10$^4$ to 10$^7$ points. We show performance with 8 processing threads to represent the trends of the algorithms, which is generally the same (with different speedups) for the tested number of threads.
+
+\begin{figure}[!ht]\centering
+  \includegraphics[scale=0.33]{./plots/time_points.eps}
+  \caption{Comparison of the execution times three algorithms for 8 threads and the sequential version changing input size for square and circle\label{Input size time}}
 \end{figure}
+
+For the sequential versions the growth in execution time when increasing the number of input points is linear for all the selected shapes.
+Concerning the parallel algorithms they have similar trends except for \textit{HullTree}, that performs significantly worse for small input sets [Plot \ref{Input size time}], expecially with the circle: \textit{HullTree}'s performance is even worse than the sequential one.
+This is due to the creation of the data structure that for a high number of resulting points (recall that for circle almost every generated point is part of the final convex hull) needs a lot of time.
+
+\begin{figure}[!ht]\centering
+  \includegraphics[scale=0.33]{./plots/speedup_points.eps}
+  \caption{Speedup comparison of the three algorithms for 8 threads changing input size for square and circle\label{Input size speedup}}
+\end{figure}
+
+Looking at the speedup plots [Plot \ref{Input size speedup}] the general trend is a general growth in efficiency when increasing the size of the input set for the two shapes.
+
+We notice a superlinear speedup around 10$^6$ points (around 9 for \textit{Naive} and 8.5 for \textit{Simple}) and 10$^7$ points (slightly above 8 for both \textit{Simple} and \textit{HullTree}.
+We obtained superlinear speedup thanks to caching: splitting the input set into smaller subsets assigned to processors makes the subset fit better into cache, allowing faster accesses to the points.
+
+\subsubsection{Change number of threads for fixed input}
+
+Here we analyze the performance of our algorithms with the different number of processing threads under a fixed input size of 10$^6$ and 10$^7$ points.
+
+\begin{figure}[!ht]\centering
+  \includegraphics[scale=0.33]{./plots/speedup_xeon_square_fixed_points.eps}
+  \caption{Speedup of the algorithms with the given number of threads with a square for 10$^6$ [Sequential execution time: 0.3s] and 10$^7$ [sequential execution time: 3s] points\label{Threads speedup square}}
+\end{figure}
+
+For square and disk we notice similar trends [Plot \ref{Threads speedup square}] speedup close to linear or even superlinear until around 16 threads for 10$^6$ points and 32 for 10$^7$ points then a general decrease in efficiency growth up to a point where our algorithms stop scaling and the speedup starts decreasing.
+
+We can notice that that point is shifted to a higher number of threads when the input set is bigger. Clearly the lower the number of points the lesser the efficiency obtained by splitting the point set among threads.
+After that point, the overhead added by parallelism overweights the benefits introduced by having more processing units.
+
+This overhead is related both to the Operating System, that has to create, allocate and manage a high number of threads, and to the algorithms themselves:
+in fact for a high number of threads, while the first part of the algorithms (separately compute convex hull on split point sets) becomes very fast, the merging itself takes more time and the two processes start becoming unbalanced.
+
+\begin{figure}[!ht]\centering
+  \includegraphics[scale=0.33]{./plots/speedup_xeon_circle_fixed_points.eps}
+  \caption{Speedup of the algorithms with the given number of threads with a circle for 10$^6$ [sequential execution time: 0.3s] and 10$^7$ [sequential execution time: 3s] points\label{Threads speedup circle}}
+\end{figure}
+
+For circle [Plot \ref{Threads speedup circle}] the situation is again more complicated, since the HullTree algorithm has a very bad performance, but the trend is very simlar with a fast increase in efficiency followed by a close-to-steady state and a decrease in efficiency for a high number of threads.
+Quantitatively the overall efficiency of the parallel algorithms is lower than the one obtained with the square and that's probably because the more memory accesses needed and the parallel overhead make the algorithms behave worse.
+
+\subsubsection{Behavior with unoptimal number of threads}
+
+For a number of threads that is not a power of 2, because of their implementations, Naive and HullTree algorithm behave like the closest lower power of two (i.e. with 35 threads they behave like they had 32).
+
+\textit{Simple} algorithm, instead, is not correlated to powers of two and the performance for any number of threads is ?????????????????????????????.
+
+\begin{figure}[!ht]\centering
+  \includegraphics[scale=0.33]{./plots/total.eps}
+  \caption{Execution time of Simple algorithm for a square of 10$^7$ points\label{SimpleParallel Total}}
+\end{figure}
+
+
 
 \section{Conclusions}
 

@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# Debug tool used to print the resulting convex hull of cgal and the given algorithm.
+# Usage: ./scripts/alg_result_printer.py -a <Algorithm:num_of_threads>
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
@@ -7,7 +9,7 @@ import subprocess
 my_alg = sys.argv[1]
 
 alg = []
-alg.append(subprocess.check_output('cat tmp.log | ./tester ' + ' '.join(my_alg.split(':')), shell=True))
+alg.append(subprocess.check_output('cat tmp.log | ./tester ' + my_alg + ' 1', shell=True))
 alg.append(subprocess.check_output('cat tmp.log | ./cgal/cgal_graham_andrew', shell=True))
 
 i = 0
