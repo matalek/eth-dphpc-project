@@ -121,7 +121,7 @@ In this section, structure is very important so one can follow the technical con
 Mention and cite any external resources that you used including libraries or other code.
 
 \section{Experimental Results}\label{sec:exp}
-
+%TODO (matalek) say why naive is good hull is bad
 In order to evaluate the efficiency of our proposed algorithms, we tested them on sets of randomly generated points with different geometric shapes: square, disk and circle.
 
 Regarding scalability we tested both weak and strong scaling, changing the input size and the number of operating threads.
@@ -151,7 +151,7 @@ Our implementations are written in \textit{C++11} and make use of \textit{OpenMP
 Our applications were compiled using \textit{icc} with the flag \textit{-O2} using also the -mmic flag to fit the architecture.
 
 This is roughly how our experiments worked:
-First of all we fixed a shape and a number of points to be generated. Then we randomly generated the chosen point set and executed each algorithm with each desired number of threads on that point set, collecting results in logfiles, measuring two time intervals: \textit{mid} (the time needed for the first part of the algorithms that is the separated computing of convex hulls) and \textit{end} (the time needed for merging results).
+first of all we fixed a shape and a number of points to be generated. Then we randomly generated the chosen point set and executed each algorithm with each desired number of threads on that point set, collecting results in logfiles, measuring two time intervals: \textit{mid} (the time needed for the first part of the algorithms that is the separated computing of convex hulls) and \textit{end} (the time needed for merging results).
 
 In order to have reliable experiments we repeated this process 100 times for each chosen combination of number of input points and shape.
 
