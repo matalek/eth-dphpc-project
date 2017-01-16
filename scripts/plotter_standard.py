@@ -128,7 +128,7 @@ def plot_execution_time():
 
     plt.subplot(121)
     plt.title('Square')
-    plt.ylabel('Execution time')
+    plt.ylabel('Execution time [s]')
     plt.subplot(122)
     plt.title('Circle')
     for i in [121, 122]:

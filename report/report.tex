@@ -128,7 +128,7 @@ Regarding scalability we tested both weak and strong scaling, changing the input
 
 Concerning correctness we compared our results with the ones obtained using th \textit{Convex Hull} implementation available in the library \textit{CGAL}.
 
-\mypar{Experimental setup}
+\subsection{Experimental setup}
 
 Xeon Phi (momentarily my pc lol)
 %TODO
@@ -156,7 +156,7 @@ I strongly recommend that you play with optimization flags and consider also icc
 \caption{Xeon Phi cluster specifications}
 \end{table}
 
-Our implementations are written in \textit{C++} and make use of \textit{OpenMP} for shared-memory multithreading.
+Our implementations are written in \textit{C++11} and make use of \textit{OpenMP} for shared-memory multithreading.
 Our applications were compiled using \textit{icc} with the flag \textit{-O2}.
 
 This is roughly how our experiments worked:
@@ -164,12 +164,15 @@ First of all we fixed a shape and a number of points to be generated. Then we ra
 
 In order to have reliable experiments we repeated this process 100 times for each chosen combination of number of input points and shape.
 
-This whole process was done for 10K, 100K, 1M and 10M points generated in a range R of 1B and as shapes we used a square, a disk and a circumference in the following way:
+This whole process was done for 10$^4$, 10$^5$, 10$^6$ and 10$^7$ points with integral coordinates and different x coordinates generated in a range R of 10$^9$ and as shapes we used square, disk and circle in the following way:
+
 \mypar{Square}: Randomly generated points with coordinates in the range [-R,R]
+
 \mypar{Disk}: Randomly generated points with coordinates in the range [-R,R]. Points not included in the disk with radius R and center (0,0) were removed and regenerated.
+
 \mypar{Circle}: Randomly generated angles $\theta_n$ and created the points ($\frac{R}{2}cos(\theta_n)$, $\frac{R}{2}sin(\theta_n)$).
 
-\mypar{Results}
+\subsection{Results}
 
 Here we show how our algorithms perform under both weak and strong scaling and with the different shapes. The results shown are the arithmetic averages of the 100 repetitions performed for each configuration.
 
@@ -177,13 +180,13 @@ The results for the disk are not shown because close to identical to the square'
 
 The sequential version considered is the \textit{Andrew's Monotone Chain} algorithm that's used inside our parallel algorithms.
 
-\mypar{General results and reliability}
+\subsubsection{General results and reliability}
 
-Put BOXPLOTS HERE
+Put BOXPLOTS HERE???
 
-\mypar{Change input size for fixed number of threads}
+\subsubsection{Changing input size for fixed number of threads}
 
-Here we analyze the results of our algorithms when changing input size from 10K to 10M points. We show performance with 8 processing threads to represent the trends of the algorithms, which is generally the same (with different speedups) for the tested number of threads.
+Here we analyze the results of our algorithms when changing input size from 10$^4$ to 10$^7$ points. We show performance with 8 processing threads to represent the trends of the algorithms, which is generally the same (with different speedups) for the tested number of threads.
 
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/time_points.eps}
@@ -201,31 +204,31 @@ This is due to the creation of the data structure that for a high number of resu
 
 Looking at the speedup plots [Plot \ref{Input size speedup}] the general trend is a general growth in efficiency when increasing the size of the input set for the two shapes.
 
-We notice a superlinear speedup around 1M points (around 9 for \textit{Naive} and 8.5 for \textit{Simple}) and 10M points (slightly above 8 for both \textit{Simple} and \textit{HullTree}.
+We notice a superlinear speedup around 10$^6$ points (around 9 for \textit{Naive} and 8.5 for \textit{Simple}) and 10$^7$ points (slightly above 8 for both \textit{Simple} and \textit{HullTree}.
 
-\mypar{Change number of threads for fixed input}
+\subsubsection{Change number of threads for fixed input}
 
-Here we analyze the performance of our algorithms with the different number of processing threads under a fixed input size of 1M and 10M points.
+Here we analyze the performance of our algorithms with the different number of processing threads under a fixed input size of 10$^6$ and 10$^7$ points.
 
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/speedup_xeon_square_fixed_points.eps}
-  \caption{Speedup of the algorithms with the given number of threads with a square for 1M [Sequential execution time: 0.3s] and 10M [sequential execution time: 3s] points\label{Threads speedup square}}
+  \caption{Speedup of the algorithms with the given number of threads with a square for 10$^6$ [Sequential execution time: 0.3s] and 10$^7$ [sequential execution time: 3s] points\label{Threads speedup square}}
 \end{figure}
 
-For square and disk we notice similar trends [Plot \ref{Threads speedup square}] speedup close to linear or even superlinear until around 16 threads for 1M points and 32 for 10M points then a general decrease in efficiency growth up to a point where our algorithms stop scaling and the speedup starts decreasing.
+For square and disk we notice similar trends [Plot \ref{Threads speedup square}] speedup close to linear or even superlinear until around 16 threads for 10$^6$ points and 32 for 10$^7$ points then a general decrease in efficiency growth up to a point where our algorithms stop scaling and the speedup starts decreasing.
 There, the overhead added by parallelism overweights the benefits introduced by having more processing units.
 
 We can notice that that point is shifted to a higher number of threads when the input set is bigger. Clearly the lower the number of points the lesser the efficiency obtained by splitting the point set among threads.
 
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/speedup_xeon_circle_fixed_points.eps}
-  \caption{Speedup of the algorithms with the given number of threads with a circle for 1M [sequential execution time: 0.3s] and 10M [sequential execution time: 3s] points\label{Threads speedup circle}}
+  \caption{Speedup of the algorithms with the given number of threads with a circle for 10$^6$ [sequential execution time: 0.3s] and 10$^7$ [sequential execution time: 3s] points\label{Threads speedup circle}}
 \end{figure}
 
 For circle [Plot \ref{Threads speedup circle}] the situation is again more complicated, since the HullTree algorithm has a very bad performance, but the trend is very simlar with a fast increase in efficiency followed by a close-to-steady state and a decrease in efficiency for a high number of threads.
-Quantitatively the overall efficiency of the parallel algorithms is lower than the one obtained with the square and that's probabilly because the more memory accesses needed and the parallel overhead make the algorithms behave worse.
+Quantitatively the overall efficiency of the parallel algorithms is lower than the one obtained with the square and that's probabily because the more memory accesses needed and the parallel overhead make the algorithms behave worse.
 
-\mypar{Behavior with unoptimal number of threads}
+\subsubsection{Behavior with unoptimal number of threads}
 
 For a number of threads that is not a power of 2, because of their implementations, Naive and HullTree algorithm behave like the closest lower power of two (i.e. with 35 threads they behave like they had 32).
 
@@ -233,7 +236,7 @@ For a number of threads that is not a power of 2, because of their implementatio
 
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/total.eps}
-  \caption{Execution time of Simple algorithm for a square of 10M points\label{SimpleParallel Total}}
+  \caption{Execution time of Simple algorithm for a square of 10$^7$ points\label{SimpleParallel Total}}
 \end{figure}
 
 
