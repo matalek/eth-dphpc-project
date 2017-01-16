@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# Debug tool used to print the generated points
+
 import matplotlib.pyplot as plt
 import numpy as np
 import subprocess
