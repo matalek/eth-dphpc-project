@@ -171,25 +171,27 @@ This whole process was done for 10K, 100K, 1M and 10M points generated in a rang
 
 \mypar{Results}
 
-Next divide the experiments into classes, one paragraph for each. In each class of experiments you typically pursue one questions that then is answered by a suitable plot or plots. For example, first you may want to investigate the performance behavior with changing input size, then how your code compares to external benchmarks.
+Here we show how our algorithms perform under both weak and strong scaling and with the different shapes. The results shown are the arithmetic averages of the 100 repetitions performed for each configuration.
+
+The results for the disk are not shown because close to identical to the square's ones.
+
+The sequential version considered is the \textit{Andrew's Monotone Chain} algorithm that's used inside our parallel algorithms.
 
 \mypar{General results and reliability}
 
 Put BOXPLOTS HERE
 
-\mypar{Change input size}
+\mypar{Change input size for fixed number of threads}
 
-For the sequential versions, as expected, the growth in execution time when increasing the number of input points is linear for all the selected shapes.
-For the parallel algorithms, instead, the situation slightly differs.
-
-For square and disk they all behave similarly: the effeciency grows when incrementing the input size for less than 1M input points. With a higher number of points ($\geq$ 1M) the execution time grows linearly and it's very similar for all the considered algorithms.
+Here we analyze the results of our algorithms when changing input size from 10K to 10M points. We show performance with 8 processing threads to represent the trends of the algorithms, which is generally the same (with different speedups) for the tested number of threads.
 
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/time_points.eps}
   \caption{Comparison of the execution times three algorithms for 8 threads and the sequential version changing input size for square and circle\label{Input size time}}
 \end{figure}
 
-Regarding circle, instead, \textit{Pairwise} and \textit{Naive} algorithms have a performance comparable to the one on the square, while \textit{HullTree}'s performance is much worse.
+For the sequential versions the growth in execution time when increasing the number of input points is linear for all the selected shapes.
+Concerning the parallel algorithms they have similar trends except for \textit{HullTree}, that performs significantly worse for small input sets [Plot \ref{Input size time}], expecially with the circle: \textit{HullTree}'s performance is even worse than the sequential one.
 This is due to the creation of the data structure that for a high number of resulting points (recall that for circle every generated point is part of the final convex hull) needs a lot of time.
 
 \begin{figure}[!ht]\centering
@@ -197,55 +199,43 @@ This is due to the creation of the data structure that for a high number of resu
   \caption{Speedup comparison of the three algorithms for 8 threads changing input size for square and circle\label{Input size speedup}}
 \end{figure}
 
-It must be noticed that the parallel algorithms have a better speedup when the number of points increases, meaning that the bigger the input set, the better the performance optimization introduced by the parallelization.
+Looking at the speedup plots [Plot \ref{Input size speedup}] the general trend is a general growth in efficiency when increasing the size of the input set for the two shapes.
 
-\mypar{Change Threads num}
+We notice a superlinear speedup around 1M points (around 9 for \textit{Naive} and 8.5 for \textit{Simple}) and 10M points (slightly above 8 for both \textit{Simple} and \textit{HullTree}.
 
-Considering an input set of 1M and 10M points, for square and disk we obtained very good results when changing the number of working threads: for 2 and 4 threads we even obtained superlinear speedup with the HullTree algorithm.
-A good speedup is still visible over 8 threads but we lose efficiency over a certain limit, past that the overhead added by parallelism cannot overweights the benefits introduced by reducing the problem's size.
+\mypar{Change number of threads for fixed input}
+
+Here we analyze the performance of our algorithms with the different number of processing threads under a fixed input size of 1M and 10M points.
 
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/speedup_xeon_square_fixed_points.eps}
-  \caption{Speedup of the algorithms with the given number of threads with a square for 1M and 10M points\label{Threads time}}
+  \caption{Speedup of the algorithms with the given number of threads with a square for 1M [Sequential execution time: 0.3s] and 10M [sequential execution time: 3s] points\label{Threads speedup square}}
 \end{figure}
+
+For square and disk we notice similar trends [Plot \ref{Threads speedup square}] speedup close to linear or even superlinear until around 16 threads for 1M points and 32 for 10M points then a general decrease in efficiency growth up to a point where our algorithms stop scaling and the speedup starts decreasing.
+There, the overhead added by parallelism overweights the benefits introduced by having more processing units.
 
 We can notice that that point is shifted to a higher number of threads when the input set is bigger. Clearly the lower the number of points the lesser the efficiency obtained by splitting the point set among threads.
 
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/speedup_xeon_circle_fixed_points.eps}
-  \caption{Speedup of the algorithms with the given number of threads with a circle for 1M and 10M points\label{Threads time}}
+  \caption{Speedup of the algorithms with the given number of threads with a circle for 1M [sequential execution time: 0.3s] and 10M [sequential execution time: 3s] points\label{Threads speedup circle}}
 \end{figure}
 
-For circle the situation is again more complicated, since the HullTree algorithm has a very bad performance.
-The other algorithms still have decent speedups but not as good as with the square.
-The more memory accesses needed and the parallel overhead are make the algorithms scale worse.
-
-
-
-We can notice that for X threads the algorithms stop scaling.
+For circle [Plot \ref{Threads speedup circle}] the situation is again more complicated, since the HullTree algorithm has a very bad performance, but the trend is very simlar with a fast increase in efficiency followed by a close-to-steady state and a decrease in efficiency for a high number of threads.
+Quantitatively the overall efficiency of the parallel algorithms is lower than the one obtained with the square and that's probabilly because the more memory accesses needed and the parallel overhead make the algorithms behave worse.
 
 \mypar{Behavior with unoptimal number of threads}
 
-Here we show the behavior of HullTree and Simple algirthms with a number of threads which is sot a power of two. Unfortunately, Naive algorithm cannot work with these numbers of threads.
+For a number of threads that is not a power of 2, because of their implementations, Naive and HullTree algorithm behave like the closest lower power of two (i.e. with 35 threads they behave like they had 32).
+
+\textit{Simple} algorithm, instead, is not correlated to powers of two and the performance for any number of threads is ?????????????????????????????.
 
 \begin{figure}[!ht]\centering
-  \includegraphics[scale=0.33]{dft-performance.eps}
-  \caption{Execution times of the algorithms with the given number of threads for an input set of 10M points in a square on Xeon Phi and Euler\label{fftperf}}
+  \includegraphics[scale=0.33]{./plots/total.eps}
+  \caption{Execution time of Simple algorithm for a square of 10M points\label{SimpleParallel Total}}
 \end{figure}
 
-The algorithms behave in some way lol, that way is a way for Simple, whereas for HullTree we have a different way.
-
-For some tips on benchmarking including how to create a decent viewgraph see pages 22--27 in \cite{Pueschel:10}.
-
-{\bf Comments:}
-\begin{itemize}
-\item Create very readable, attractive plots (do 1 column, not 2 column plots
-for this report) with readable font size. However, the font size should also not be too large; typically it is smaller than the text font size.
-An example is in Fig.~\ref{fftperf} (of course you can have a different style).
-\item Every plot answers a question. You state this question and extract the
-answer from the plot in its discussion.
-\item Every plot should be referenced and discussed.
-\end{itemize}
 
 \section{Conclusions}
 
