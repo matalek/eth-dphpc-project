@@ -126,7 +126,7 @@ In order to evaluate the efficiency of our proposed algorithms, we tested them o
 
 Regarding scalability we tested both weak and strong scaling, changing the input size and the number of operating threads.
 
-Concerning correctness we compared our results with the ones obtained using th \textit{Convex Hull} implementation available in the library \textit{CGAL}.
+Concerning correctness we compared our results with the ones obtained using th \textit{Convex Hull} implementation available in the library \textit{CGAL} \footnote{http://www.cgal.org/}.
 
 \subsection{Experimental setup}
 
@@ -156,7 +156,7 @@ I strongly recommend that you play with optimization flags and consider also icc
 \caption{Xeon Phi cluster specifications}
 \end{table}
 
-Our implementations are written in \textit{C++11} and make use of \textit{OpenMP} for shared-memory multithreading.
+Our implementations are written in \textit{C++11} and make use of \textit{OpenMP} \footnote{http://www.openmp.org/} for shared-memory multithreading.
 Our applications were compiled using \textit{icc} with the flag \textit{-O2}.
 
 This is roughly how our experiments worked:
@@ -164,7 +164,7 @@ First of all we fixed a shape and a number of points to be generated. Then we ra
 
 In order to have reliable experiments we repeated this process 100 times for each chosen combination of number of input points and shape.
 
-This whole process was done for 10$^4$, 10$^5$, 10$^6$ and 10$^7$ points with integral coordinates and different x coordinates generated in a range R of 10$^9$ and as shapes we used square, disk and circle in the following way:
+This whole process was done for 10$^4$, 10$^5$, 10$^6$ and 10$^7$ points with integral coordinates and different $x$ coordinates generated in a range R of 10$^9$ and as shapes we used square, disk and circle in the following way:
 
 \mypar{Square}: Randomly generated points with coordinates in the range [-R,R]
 
@@ -172,13 +172,17 @@ This whole process was done for 10$^4$, 10$^5$, 10$^6$ and 10$^7$ points with in
 
 \mypar{Circle}: Randomly generated angles $\theta_n$ and created the points ($\frac{R}{2}cos(\theta_n)$, $\frac{R}{2}sin(\theta_n)$).
 
+These shapes were chosen because of the difference in the resulting hulls.
+With square, in fact, resulting hulls are very small, while with the circle almost every input point is part of the final hull (some point will be excluded because of approximation of integers) and for disk resulting hulls have intermidiate size.
+
 \subsection{Results}
 
-Here we show how our algorithms perform under both weak and strong scaling and with the different shapes. The results shown are the arithmetic averages of the 100 repetitions performed for each configuration.
+Here we show how our algorithms perform under different configurations and with weak and strong scaling.
+The results plotted are the arithmetic averages of the 100 different repetitions performed for each configuration (Input shape, input size, algorithm and number of processing threads).
 
-The results for the disk are not shown because close to identical to the square's ones.
+Results obtained with disks as input are not shown because close to identical to the squares' ones.
 
-The sequential version considered is the \textit{Andrew's Monotone Chain} algorithm that's used inside our parallel algorithms.
+The sequential version considered is the \textit{Andrew's Monotone Chain} algorithm that's used inside our parallel algorithms. \textit{Andrew's Monotone Chain} is also used as base case for speedup plots.
 
 \subsubsection{General results and reliability}
 
@@ -195,7 +199,7 @@ Here we analyze the results of our algorithms when changing input size from 10$^
 
 For the sequential versions the growth in execution time when increasing the number of input points is linear for all the selected shapes.
 Concerning the parallel algorithms they have similar trends except for \textit{HullTree}, that performs significantly worse for small input sets [Plot \ref{Input size time}], expecially with the circle: \textit{HullTree}'s performance is even worse than the sequential one.
-This is due to the creation of the data structure that for a high number of resulting points (recall that for circle every generated point is part of the final convex hull) needs a lot of time.
+This is due to the creation of the data structure that for a high number of resulting points (recall that for circle almost every generated point is part of the final convex hull) needs a lot of time.
 
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/speedup_points.eps}
