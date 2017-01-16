@@ -148,7 +148,7 @@ The platform we tested our algorithms with mounts Intel$^{(R)}$ Xeon Phi process
 \end{table}
 
 Our implementations are written in \textit{C++11} and make use of \textit{OpenMP} \footnote{http://www.openmp.org/} for shared-memory multithreading.
-Our applications were compiled using \textit{icc} with the flag \textit{-O2}.
+Our applications were compiled using \textit{icc} with the flag \textit{-O2} using also the -mmic flag to fit the architecture.
 
 This is roughly how our experiments worked:
 First of all we fixed a shape and a number of points to be generated. Then we randomly generated the chosen point set and executed each algorithm with each desired number of threads on that point set, collecting results in logfiles, measuring two time intervals: mid and end.
@@ -200,6 +200,7 @@ This is due to the creation of the data structure that for a high number of resu
 Looking at the speedup plots [Plot \ref{Input size speedup}] the general trend is a general growth in efficiency when increasing the size of the input set for the two shapes.
 
 We notice a superlinear speedup around 10$^6$ points (around 9 for \textit{Naive} and 8.5 for \textit{Simple}) and 10$^7$ points (slightly above 8 for both \textit{Simple} and \textit{HullTree}.
+We obtained superlinear speedup thanks to caching: splitting the input set into smaller subsets assigned to processors makes the subset fit better into cache, allowing faster accesses to the points.
 
 \subsubsection{Change number of threads for fixed input}
 
@@ -211,9 +212,12 @@ Here we analyze the performance of our algorithms with the different number of p
 \end{figure}
 
 For square and disk we notice similar trends [Plot \ref{Threads speedup square}] speedup close to linear or even superlinear until around 16 threads for 10$^6$ points and 32 for 10$^7$ points then a general decrease in efficiency growth up to a point where our algorithms stop scaling and the speedup starts decreasing.
-There, the overhead added by parallelism overweights the benefits introduced by having more processing units.
 
 We can notice that that point is shifted to a higher number of threads when the input set is bigger. Clearly the lower the number of points the lesser the efficiency obtained by splitting the point set among threads.
+After that point, the overhead added by parallelism overweights the benefits introduced by having more processing units.
+
+This overhead is related both to the OS, that has to create, allocate and manage a high number of threads, and to the algorithms themselves:
+in fact for a high number of threads, while the first part of the algorithms (separately compute convex hull on split point sets) becomes very fast, the merging itself takes more time and the two processes start becoming unbalanced.
 
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/speedup_xeon_circle_fixed_points.eps}
@@ -221,7 +225,7 @@ We can notice that that point is shifted to a higher number of threads when the 
 \end{figure}
 
 For circle [Plot \ref{Threads speedup circle}] the situation is again more complicated, since the HullTree algorithm has a very bad performance, but the trend is very simlar with a fast increase in efficiency followed by a close-to-steady state and a decrease in efficiency for a high number of threads.
-Quantitatively the overall efficiency of the parallel algorithms is lower than the one obtained with the square and that's probabily because the more memory accesses needed and the parallel overhead make the algorithms behave worse.
+Quantitatively the overall efficiency of the parallel algorithms is lower than the one obtained with the square and that's probabily because the more memory accesses needed and the parallel overhead (that is ) make the algorithms behave worse.
 
 \subsubsection{Behavior with unoptimal number of threads}
 
