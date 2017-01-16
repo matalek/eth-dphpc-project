@@ -16,7 +16,7 @@ x = []
 for i in range(2, 257):
     x.append(i)
 CONST_THREADS = x
-CONST_X_AXIS = np.arange(1, len(CONST_THREADS) + 1)
+CONST_X_AXIS = np.arange(2, len(CONST_THREADS) + 2)
 CONST_SHAPE = 'square'
 CONST_MACHINE = 'xeon'
 
@@ -162,7 +162,7 @@ def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
 
     #plt.plot(CONST_X_AXIS, mean_execution_time, CONST_COLORS[count] + 'o--', label=my_label)
     #plt.errorbar(CONST_X_AXIS, mean_execution_time, stdv, fmt='|', ecolor='k')
-    ticks = [2,4,8,16,32,64,128,256]
+    ticks = [2, 4, 8, 16, 32, 61, 64, 122, 128, 183, 244, 256]
     plt.xlim([0,256])
     plt.xticks(ticks, ticks)
     #plt.legend(loc=1)
@@ -201,7 +201,7 @@ def plot_speedup_fixed_points(algorithms, sequential_algorithm):
 
     plt.plot(CONST_X_AXIS, CONST_THREADS, 'k-', label='n_threads')
     #plt.semilogy(CONST_X_AXIS, CONST_THREADS, 'k-', label='n_threads', basey=2)
-    ticks = [2, 4, 8, 16, 32, 64, 128, 256]
+    ticks = [2, 4, 8, 16, 32, 61, 64, 122, 128, 183, 244, 256]
     plt.xlim([0, 256])
     plt.xticks(ticks, ticks)
     #plt.yticks(CONST_X_AXIS, CONST_THREADS)
