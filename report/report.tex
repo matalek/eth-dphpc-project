@@ -464,15 +464,15 @@ For a number of threads that is not a power of 2, because of their implementatio
 
 \section{Conclusions}
 
-Here you need to summarize what you did and why this is
-important. {\em Do not take the abstract} and put it in the past
-tense. Remember, now the reader has (hopefully) read the report, so it
-is a very different situation from the abstract. Try to highlight
-important results and say the things you really want to get across
-such as high-level statements (e.g., we believe that .... is the right
-approach to .... Even though we only considered x, the
-.... technique should be applicable ....) You can also formulate next
-steps if you want. Be brief. After the conclusions there are only the references.
+We implemented three parallel algorithms for solving the convex hull problem and as a general remark we believe that all the considered algorithms are valid and allow good performance under different conditions (input size, shape and number of processing threads).
+One of the algorithms (\textit{HullTree}), however, doesn't work nicely with very large resulting hulls (like with circles as input sets).
+
+We were able to obtain superlinear speedup using randomly generated points in a squared interval %TODO more accurate world%
+and close to linear with two of the three algorithms using a circle as input.
+
+Generally speaking, we could say the parallelization of the convex hull problem allows significant improvements in performance with bigger input sets and with a not-too-large number of processing threads.
+
+Even though we oly considered square, disk and circle as shapes for the input set, these algorithms can be used for any ordered input set with distinct $x$ coordinate and their performance should be similar to the one we had with the analyzed shapes (i.e. similar to circle's one if most of the points in the input set takes part to the final hull, else similar to disk and square's ones).
 
 \section{Further comments}
 
