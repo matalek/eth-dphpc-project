@@ -122,7 +122,7 @@ The purpose of this section is to review a convex hull sequential algorithm for 
 
 \subsection{Common tangent line algorithm}
 
-Our generator guaranties unique x-coordinate therefore all convex hulls are disjoint. There is a straightforward linear $O(n+m)$ common tangent algorithm, where $n,m$ are sizes of hulls. The idea of this algorithm is to alternate searching for tangent endpoints between the two polygons, until both ends of the line segment simultaneously satisfy the tangency condition. 
+Our generator guaranties unique x-coordinate for input data, therefore all convex hulls are disjoint and 2 outer common tangents exist. There is a straightforward linear $O(n+m)$ common tangent algorithm, where $n,m$ are sizes of hulls. The idea of this algorithm is to alternate searching for tangent endpoints between the two polygons, until both ends of the line segment simultaneously satisfy the tangency condition. 
 
 Lets assume two disjoint convex hulls: left and right. Left hull contains only points having x-coordinate lower than every point in right hull. We can find common tangents this way:
  
