@@ -5,7 +5,8 @@
 
 \documentclass[letterpaper]{article}
 
-\usepackage{spconf,amsmath,amssymb,graphicx,amsthm,newlfont,program,caption,subcaption}
+\usepackage{spconf,amsmath,amssymb,graphicx,amsthm,newlfont,program,caption,subcaption,hyperref}
+\usepackage[nodayofweek,level]{datetime}
 
 % Example definitions.
 % --------------------
@@ -73,6 +74,8 @@ In this paper, we study the two-dimensional convex hull problem. Convex hull alg
 We want to investigate parallel algorithms for sorted input, implement them and compare them. It is important to distinguish between Convex hull problem with or without sorted input, because they have different sequential complexity $O(n)$ (Sorted) vs $O(n\log n)$ (Unsorted). 
 
 Our implementation is based on already known algorithms. We want to explore performance of each algorithm using up to 256 processors and different shapes for input data. Existing algorithms are optimal for specific number of threads, but we are interested in real performance including hidden constants and overhead caused by different data structures and computation models.
+
+Our implementation is available online as an open-source project\footnote{\url{https://github.com/matalek/dphpc-project} (Retrieved: \formatdate{18}{1}{2017})}.
 
 \mypar{Related work} Most of the papers related to this topic are theoretical and mainly prove that suggested solution is for chosen problem optimal. They miss implementation details or performance measurements.
 
