@@ -48,8 +48,7 @@ int right_upper_tangent(shared_ptr<RepresentationIterator> iterator, POINT *a) {
 }
 
 shared_ptr<RepresentationIterator>
-binary_right_upper_tangent(ConvexHullRepresentation &hull, shared_ptr<RepresentationIterator> right_iter, int to,
-                           POINT *P) {
+binary_right_upper_tangent(ConvexHullRepresentation &hull, shared_ptr<RepresentationIterator> right_iter, int to, POINT *P) {
     int a, b, c;
     int dnC;
 
@@ -76,8 +75,7 @@ binary_right_upper_tangent(ConvexHullRepresentation &hull, shared_ptr<Representa
 }
 
 shared_ptr<RepresentationIterator>
-binary_left_upper_tangent(ConvexHullRepresentation &hull, shared_ptr<RepresentationIterator> left_iter, int to,
-                          POINT *P) {
+binary_left_upper_tangent(ConvexHullRepresentation &hull, shared_ptr<RepresentationIterator> left_iter, int to, POINT *P) {
     int a, b, c;
     int dnC;
 
@@ -116,7 +114,7 @@ void find_right_upper_tangent(shared_ptr<RepresentationIterator> iterator, POINT
 }
 
 pair<int, int> findLowerT(ConvexHullRepresentation &left_hull, ConvexHullRepresentation &right_hull) {
-    pair<int, int> returnValues;
+    pair<int, int> return_values;
     shared_ptr<RepresentationIterator> left_iter = left_hull.get_iterator(left_hull.find_rightmost_point());
     shared_ptr<RepresentationIterator> right_iter = right_hull.get_iterator(right_hull.find_leftmost_point());
 
@@ -126,13 +124,13 @@ pair<int, int> findLowerT(ConvexHullRepresentation &left_hull, ConvexHullReprese
         find_left_upper_tangent(right_iter, left_iter->get_point());
     }
 
-    returnValues.first = left_iter->get_index();
-    returnValues.second = right_iter->get_index();
-    return returnValues;
+    return_values.first = left_iter->get_index();
+    return_values.second = right_iter->get_index();
+    return return_values;
 }
 
 pair<int, int> findUpperT(ConvexHullRepresentation &left_hull, ConvexHullRepresentation &right_hull) {
-    pair<int, int> returnValues;
+    pair<int, int> return_values;
     shared_ptr<RepresentationIterator> left_iter = left_hull.get_iterator(left_hull.find_rightmost_point());
     shared_ptr<RepresentationIterator> right_iter = right_hull.get_iterator(right_hull.find_leftmost_point());
 
@@ -142,9 +140,9 @@ pair<int, int> findUpperT(ConvexHullRepresentation &left_hull, ConvexHullReprese
         find_right_upper_tangent(right_iter, left_iter->get_point());
     }
 
-    returnValues.first = left_iter->get_index();
-    returnValues.second = right_iter->get_index();
-    return returnValues;
+    return_values.first = left_iter->get_index();
+    return_values.second = right_iter->get_index();
+    return return_values;
 }
 
 #endif // MERGE_HULL
