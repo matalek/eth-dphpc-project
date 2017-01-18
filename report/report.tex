@@ -25,12 +25,12 @@
 
 % Title.
 % ------
-\title{A Descriptive Title, not too general, not too long}
+% TODO: think about it
+\title{Parallel algorithms for finding the convex hull of a sorted point set}
 %
 % Single address.
 % ---------------
-\name{Markus P\"uschel\thanks{The author thanks Jelena Kovacevic. This paper
-is a modified version of the template she used in her class.}} 
+\name{ A. Marek \v Cerv\'ak B. Lorenzo Martini, C. Aleksander Matusiak} 
 \address{Department of Computer Science\\ ETH Z\"urich\\Z\"urich, Switzerland}
 
 % For example:
@@ -42,25 +42,21 @@ is a modified version of the template she used in her class.}}
 % Two addresses (uncomment and modify for two-address case).
 % ----------------------------------------------------------
 %\twoauthors
-%  {A. Author-one, B. Author-two\sthanks{Thanks to XYZ agency for funding.}}
+%  {A. Marek \v Cerv\'ak, B. Lorenzo Martini}
 %		 {School A-B\\
 %		 Department A-B\\
 %		 Address A-B}
-%  {C. Author-three, D. Author-four\sthanks{The fourth author performed the work
-%		 while at ...}}
+%  {C. Aleksander Matusiak}
 %		 {School C-D\\
 %		 Department C-D\\
 %		 Address C-D}
-%
+
 
 \begin{document}
 %\ninept
 %
 \maketitle
 %
-
-The hard page limit is 6 pages in this style. Do not reduce font size
-or use other tricks to squeeze. This pdf is formatted in the American letter format, so the spacing may look a bit strange when printed out.
 
 \begin{abstract}
 Describe in concise words what you do, why you do it (not necessarily
@@ -88,7 +84,7 @@ The second is Simple Parallel. \cite{SimpleParallel}  There are published result
  
 The third is Hull Tree algorithm \cite{HullTree}. We have not found implementation nor results, so there is our contribution most significant.
   
-\section{Background: Whatever the Background is}\label{sec:background}
+\section{Background: Convex hull problem}\label{sec:background}
 
 \mypar{Convex polygon} Convex polygon is defined as a polygon with all its interior angles less than 180°.
 
@@ -118,11 +114,11 @@ A 2D line $L$ is common tangent to polygons $P1, P2$ when $L$ is tangent to both
 \mypar{Upper (Lower) Tangent}
 is a common tangent between Upper (Lower) hulls. 
 
-\section{Your Proposed Method}\label{sec:yourmethod}
+% TODO: add info about used sequential algorithm
 
-The purpose of this section is to review a convex hull sequential algorithm for sorted input set and common tangent line algorithm. We also present parallel algorithms for computing a convex hull of a sorted set of points.
+\section{Parallel Algorithms}\label{sec:yourmethod}
 
-\subsection{Sequential algorithm}
+The purpose of this section is to review a common tangent line algorithm and present parallel algorithms for computing a convex hull of a sorted set of points.
 
 \subsection{Common tangent line algorithm}
 
@@ -151,10 +147,7 @@ Computing lower hull can be done in a similar way and for simplicity its descrip
 Therefore, in this section, whenever we write ''convex hull'' we are referring to the upper hull.
 However, our implementation computes the entire convex hull (upper and lower).  
 
-\subsubsection{General scheme}
-\label{sec:parallel-general}
-
-
+\mypar{General scheme}
 Let $k$ denote the number of processors used and $n$ - number of points in the input set.
 For simplicity in all algorithms we will assume that $k$ is the power of 2. 
 Let $P = \{p_0, p_1, ..., p_{n-1} \}$ be the set of sorted (by $x$ coordinate) input points.
@@ -166,7 +159,6 @@ $$P_0 = \{p_0, p_1, ..., p_{\lceil{\frac{n}{k}}\rceil - 1}\}$$
 $$P_1 = \{p_{\lceil{\frac{n}{k}}\rceil}, p_{\lceil{\frac{n}{k}}\rceil + 1}, ..., p_{\lceil{2 * \frac{n}{k}}\rceil - 1}\}$$
 $$...$$
 $$P_{k-1} = \{p_{(k-1)\lceil{\frac{n}{k}}\rceil}, p_{(k-1)\lceil{\frac{n}{k}}\rceil + 1}, ..., p_{n- 1} \}$$
-
 
 
 Then, we execute sequential version of the convex hull algorithm (Andrew's monotone chain) for each of these sets in parallel, using $k$ threads.
@@ -189,8 +181,7 @@ This is the step, where our algorithms differ.
 Each of the algorithm presents different ways of merging partial convex hulls.
 All of them are, however, based on the common tangent line algorithm.
 
-\subsubsection{Naive Parallel algorithm}
-
+\mypar{Naive Parallel algorithm}
 So called Naive Parallel algorithm is based on merging two convex hulls into one convex hull.
 It uses common tangent line algorithm, but the overall concept was developed by us.
 % TODO(matalek): phrase above maybe somehow better
@@ -254,9 +245,7 @@ $$O(\frac{n}{k}) + O(2\frac{n}{k}) + O(4\frac{n}{k}) + ... + O(k\frac{n}{k}) = O
 We can see that asymptotically this algorithm in the worst case scenario does not provide any speedup when using more threads.
 However, as shown and explained in next sections, this algorithm proved to be quite efficient.
 
-\subsubsection{Simple Parallel algorithm}
-\label{sec:simple-parallel}
-
+\mypar{Simple Parallel algorithm}
 This algorithm was originally presented in \cite{SimpleParallel}.
 It is based on computing what part of $C_i$ is also a part of $R$.
 The computations are based on the following observation:
@@ -312,8 +301,7 @@ We later copy taken points to the resulting array in parallel - each processor c
 
 The time complexity for this algorithm, as shown in \cite{SimpleParallel}, is equal $O(\frac{n}{k} + k(\log \frac{n}{k})^2)$ and is optimal for $k \leq \frac{\sqrt{n}}{\log n}$.
 
-\subsubsection{Hull Tree algorithm}
-
+\mypar{Hull Tree algorithm}
 This algorithm was originally presented in \cite{HullTree}.
 It is based on a special tree-like structure for keeping points of the convex hull.
 Let $n$ denote the number of points in the convex hull.
@@ -337,13 +325,13 @@ equal subsets based on $x$ coordinate: $S_0, S_1, ..., S_{\sqrt{k} - 1}$
 We then compute recursively convex hull for each subset, which results in having hull trees $HT_i$ corresponding to convex hulls $C_i$ of these subsets.
 For each recursive call we assign $\sqrt{k}$ processors to compute this convex hull.
 
-In order to merge $HT_0, HT_1, ..., HT_{\sqrt{k} - 1}$ we perform computations similar to these described in the section \ref{sec:simple-parallel}.
+In order to merge $HT_0, HT_1, ..., HT_{\sqrt{k} - 1}$ we perform computations similar to these described performed in the Simple Parallel algorithm.
 Using $\sqrt{k}^2 = k$ processors we compute for each pair $HT_i$ $HT_j$ ($i \neq j$) common tangent line (for each pair we assign one processor).
 It is possible to perform this step efficiently, because our data structure enables us to quickly access neighboring points, as well as middle points of given interval of points.
 Later, we compute the intersection of resulting intervals which results in the intervals of taken points.
 If $q_1$ and $q_2$ are the beginning and the end of one of these intervals, we split hull tree first by $q_1.x$ and discard left convex hull, later by $q_2.x$ and discard right resulting convex hull.
 We are left then with hull tree representing only taken points.
-We merge these hull trees in a tree-like way (similar to described in the section \ref{sec:parallel-general} and pairwise merge of hull trees.
+We merge these hull trees in a tree-like way (with pairwise merge of hull trees).
 These operations are performed in parallel by $\sqrt{k}$ processors and take $O(h + k)$ time.
 Finally, using parallel prefix computation we copy points from the resulting hull tree into the resulting array.
 
@@ -414,12 +402,11 @@ Results obtained with disks as input are not shown because close to identical to
 
 The sequential version considered is the \textit{Andrew's Monotone Chain} algorithm that's used inside our parallel algorithms. \textit{Andrew's Monotone Chain} is also used as base case for speedup plots.
 
-\subsubsection{General results and reliability}
+\mypar{General results and reliability}
 
 Put BOXPLOTS HERE???
 
-\subsubsection{Changing input size for fixed number of threads}
-
+\mypar{Changing input size for fixed number of threads}
 Here we analyze the results of our algorithms when changing input size from 10$^4$ to 10$^7$ points. We show performance with 8 processing threads to represent the trends of the algorithms, which is generally the same (with different speedups) for the tested number of threads.
 
 \begin{figure}[!ht]\centering
@@ -441,8 +428,7 @@ Looking at the speedup plots [Plot \ref{Input size speedup}] the general trend i
 We notice a superlinear speedup around 10$^6$ points (around 9 for \textit{Naive} and 8.5 for \textit{Simple}) and 10$^7$ points (slightly above 8 for both \textit{Simple} and \textit{HullTree}.
 We obtained superlinear speedup thanks to caching: splitting the input set into smaller subsets assigned to processors makes the subset fit better into cache, allowing faster accesses to the points.
 
-\subsubsection{Change number of threads for fixed input}
-
+\mypar{Change number of threads for fixed input}
 Here we analyze the performance of our algorithms with the different number of processing threads under a fixed input size of 10$^6$ and 10$^7$ points.
 
 \begin{figure}[!ht]\centering
@@ -466,8 +452,7 @@ in fact for a high number of threads, while the first part of the algorithms (se
 For circle [Plot \ref{Threads speedup circle}] the situation is again more complicated, since the HullTree algorithm has a very bad performance, but the trend is very simlar with a fast increase in efficiency followed by a close-to-steady state and a decrease in efficiency for a high number of threads.
 Quantitatively the overall efficiency of the parallel algorithms is lower than the one obtained with the square and that's probably because the more memory accesses needed and the parallel overhead make the algorithms behave worse.
 
-\subsubsection{Behavior with unoptimal number of threads}
-
+\mypar{Behavior with unoptimal number of threads}
 For a number of threads that is not a power of 2, because of their implementations, Naive and HullTree algorithm behave like the closest lower power of two (i.e. with 35 threads they behave like they had 32).
 
 \textit{Simple} algorithm, instead, is not correlated to powers of two and the performance for any number of threads is ?????????????????????????????.
@@ -492,6 +477,7 @@ Generally speaking, we could say the parallelization of the convex hull problem 
 Even though we oly considered square, disk and circle as shapes for the input set, these algorithms can be used for any ordered input set with distinct $x$ coordinate and their performance should be similar to the one we had with the analyzed shapes (i.e. similar to circle's one if most of the points in the input set takes part to the final hull, else similar to disk and square's ones).
 
 \section{Further comments}
+\iffalse
 
 Here we provide some further tips.
 
@@ -540,6 +526,7 @@ from Matlab, you can export to eps.
 The format pdf is also fine for plots (you need pdflatex then), but only if the plot was never before in the format 
 jpeg, gif, bmp, tif.
 
+\fi
 
 % References should be produced using the bibtex program from suitable
 % BiBTeX files (here: bibl_conf). The IEEEbib.bst bibliography
