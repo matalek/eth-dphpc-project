@@ -39,10 +39,9 @@ bool is_sequential;
 // Loads an appropriate algorithm based on command line params.
 ConvexHullAlgorithm* load_algorithm(char* argv[]) {
 	ConvexHullAlgorithm* algorithm;
-	// TODO(matalek): provide nicer way to create an appropriate algorithm.
 	string arg = (string) argv[1];
 
-	int threads;
+	int threads = 1;
 	string name;
 	size_t split_point = arg.find(':');
 

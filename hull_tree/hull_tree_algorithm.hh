@@ -66,16 +66,8 @@ private:
 			return shared_ptr<HullTreeConvexHullRepresentation>(new HullTreeConvexHullRepresentation(convex_hull_points, is_upper));
 		}
 
-
 		int N = ceil((double) n / d);
-		int sqrt_N = sqrt(N);
-		// TODO(matalek): make it more general and pretty.
-		if (N == 32) {
-			sqrt_N = 4;
-		}
-		if (sqrt_N == 1) {
-			sqrt_N++;
-		}
+		int sqrt_N = proper_sqrt(N);
 
 		shared_ptr<HullTreeConvexHullRepresentation>*
 				partial_results = new shared_ptr<HullTreeConvexHullRepresentation>[sqrt_N];
@@ -112,6 +104,16 @@ private:
 		delete [] cut_hulls;
 
 		return res;
+	}
+
+	// Calculates approximate square root n, which is the power of 2.
+	int proper_sqrt(int n) {
+		int cur = 2;
+		while (4 * cur * cur <= n) {
+			cur <<= 1;
+		}
+
+		return cur;
 	}
 
 	// Calculates parts of the convex hull taken to the result, based on other hulls.
@@ -173,7 +175,6 @@ private:
 		}
 
 		// Calculating power of 2 greater or equal than m.
-		// TODO(matalek): think whether we can get rid of it.
 		int m_rounded = 2;
 		while (m_rounded < m) {
 			m_rounded <<= 1;
@@ -195,7 +196,6 @@ private:
 			pair<int,int> tangent =
 					is_upper
 					? findUpperT(*hulls[left_hull], *hulls[right_hull])
-					// ? findUpperT(l, r)
 					: findLowerT(*hulls[left_hull], *hulls[right_hull]);
 
 			double m = angular_coefficient(tangent, *hulls[left_hull], *hulls[right_hull]);

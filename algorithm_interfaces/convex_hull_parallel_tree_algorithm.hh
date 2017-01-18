@@ -24,19 +24,36 @@ public:
 
 		int n = points.size();
 
-		shared_ptr<HullWrapper> partial_results[2 * threads];
+		int threads_rounded = 1;
+		while (threads_rounded < threads) {
+			threads_rounded <<= 1;
+		}
+
+		shared_ptr<HullWrapper> partial_results[2 * threads_rounded];
 		#pragma omp parallel num_threads(threads)
 		{
 			int id = omp_get_thread_num();
 			// Calculating part of points for the given thread.
 			pair<int, int> range = ParallelHelper::get_range(n, threads, id);
 			// Calculating convex hull of the appropriate part of points.
-            partial_results[threads + id] =  sequential_algorithm->convex_hull(points, range.first, range.second);
+			partial_results[threads_rounded + id] =  sequential_algorithm->convex_hull(points, range.first, range.second);
 		}
+
+		// Creating dummy nodes.
+		if (threads_rounded > threads) {
+			#pragma omp parallel num_threads(threads_rounded - threads)
+			{
+				int id = threads + omp_get_thread_num();
+				auto upper_hull = shared_ptr<ConvexHullRepresentation>(new VectorConvexHullRepresentation(shared_ptr<POINTS>(new POINTS()), true));
+				auto lower_hull = shared_ptr<ConvexHullRepresentation>(new VectorConvexHullRepresentation(shared_ptr<POINTS>(new POINTS()), false));
+				partial_results[threads_rounded + id] =  shared_ptr<HullWrapper>(new HullWrapper(upper_hull, lower_hull));
+			}
+		}
+
 
 		ConvexHullAlgorithm::sequential_time =  duration_cast<microseconds>( high_resolution_clock::now() - start_time).count();
 
-		int level = threads >> 1;
+		int level = threads_rounded >> 1;
 		while (level > 0) {
 			#pragma omp parallel num_threads(level)
 			{

@@ -24,7 +24,6 @@ public:
 	virtual vector<POINT> generate_points(int n) = 0;
 
 protected:
-	// TODO(matalek):
 	static const int range = 1000000000;
 
 	struct points_compare {

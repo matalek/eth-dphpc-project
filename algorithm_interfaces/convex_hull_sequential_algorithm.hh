@@ -7,8 +7,6 @@
 
 using namespace std;
 
-class ConvexHullSequentialAlgorithm : public ConvexHullAlgorithm {
-
-};
+class ConvexHullSequentialAlgorithm : public ConvexHullAlgorithm { };
 
 #endif // CONVEX_HULL_SEQUENTIAL_ALGORITHM

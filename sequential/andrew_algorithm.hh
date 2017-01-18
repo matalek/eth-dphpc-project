@@ -14,7 +14,6 @@ using namespace std;
 class AndrewAlgorithm : public ConvexHullSequentialAlgorithm {
 
 public:
-
 	~AndrewAlgorithm() override { }
 
 	// Function which calculates a convex hull of given points set.
@@ -23,17 +22,20 @@ public:
 	}
 
 	shared_ptr<HullWrapper> convex_hull(vector<POINT*>& points, int start, int end) {
-		shared_ptr<VectorConvexHullRepresentation> lower_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(lower_convex_hull(points, start, end), false));
-		shared_ptr<VectorConvexHullRepresentation> upper_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(upper_convex_hull(points, start, end), true));
+		shared_ptr<VectorConvexHullRepresentation> lower_hull =
+				shared_ptr<VectorConvexHullRepresentation>(
+						new VectorConvexHullRepresentation(lower_convex_hull(points, start, end), false));
+		shared_ptr<VectorConvexHullRepresentation> upper_hull =
+				shared_ptr<VectorConvexHullRepresentation>(
+						new VectorConvexHullRepresentation(upper_convex_hull(points, start, end), true));
 		shared_ptr<HullWrapper> ret = shared_ptr<HullWrapper>(new HullWrapper(upper_hull, lower_hull));
 		return ret;
 	}
 
 	shared_ptr<vector<POINT*> > lower_convex_hull(vector<POINT*>& points, int start, int end) {
-		// Vector of pointer to points to be sorted.
 		shared_ptr<vector<POINT*> > result_points = shared_ptr<vector<POINT*> >(new vector<POINT*>());
 
-		// Calculate first lower part of convex hull, connecting most left-bottom
+		// Calculate lower part of convex hull, connecting most left-bottom
 		// point with most right-top point.
 		unsigned int size_lower_limit = 1;
 		for (int i = start; i <= end; ++i) {
@@ -44,11 +46,10 @@ public:
 	}
 
 	shared_ptr<vector<POINT*> > upper_convex_hull(vector<POINT*>& points, int start, int end) {
-		// Vector of pointer to points to be sorted.
 		shared_ptr<vector<POINT*> > result_points = shared_ptr<vector<POINT*> >(new vector<POINT*>());
 
-		// Calculate first lower part of convex hull, connecting most left-bottom
-		// point with most right-top point.
+		// Calculate upper part of convex hull, connecting most right-top
+		// point with most left-bottom point.
 		unsigned int size_lower_limit = 1;
 		for (int i = end; i >= start; --i) {
 			add_point_to_convex_hull(result_points, points[i], size_lower_limit);
@@ -58,7 +59,6 @@ public:
 	}
 
 private:
-
 	void add_point_to_convex_hull(shared_ptr<vector<POINT*> > result_points, POINT* point,
 			unsigned int size_lower_limit) {
 		while (result_points->size() > size_lower_limit

@@ -15,18 +15,18 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-	// Number of points.
 	int n;
 	cin >> n;
 
 	string shape;
 	if (argc < 2) {
+		// Default shape.
 		shape = "square";
 	} else {
 		shape = argv[1];
 	}
 
-	Generator* generator = load_generator(shape);
+	Generator *generator = load_generator(shape);
 	vector<POINT> points = generator->generate_points(n);
 	delete(generator);
 

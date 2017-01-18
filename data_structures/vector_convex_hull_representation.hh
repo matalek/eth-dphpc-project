@@ -17,7 +17,7 @@ class VectorConvexHullRepresentation : public ConvexHullRepresentation {
 public:
 
     VectorConvexHullRepresentation(shared_ptr<vector<POINT*>> hull, bool upper)
-            :  ConvexHullRepresentation(upper),hull(hull){};
+            :  ConvexHullRepresentation(upper), hull(hull) { }
 
 	void merge(shared_ptr<ConvexHullRepresentation> hull) {
 		shared_ptr<VectorConvexHullRepresentation> other_hull = std::static_pointer_cast<VectorConvexHullRepresentation>(hull);
@@ -64,6 +64,9 @@ public:
     }
 
 	void merge_lower_hull(VectorConvexHullRepresentation &other_hull) {
+        if (!other_hull.hull->size()) {
+            return;
+        }
 		pair <int, int> low_tangent = findLowerT((*this), other_hull);
         vector<POINT*> mergedVector;
         mergedVector.reserve(low_tangent.first + 1 + other_hull.get_hull()->size()-low_tangent.second); // preallocate memory
@@ -73,6 +76,9 @@ public:
 	}
 
 	void merge_upper_hull(VectorConvexHullRepresentation &other_hull) {
+        if (!other_hull.hull->size()) {
+            return;
+        }
         pair <int, int> upper_tangent = findUpperT((*this), other_hull);
         vector<POINT*> mergedVector;
         mergedVector.reserve(upper_tangent.first + 1 + upper_tangent.second + 1); // preallocate memory
@@ -96,7 +102,7 @@ private:
 
     public:
         VectorHullIterator(shared_ptr<vector<POINT*>> hull, int index):
-                hull(hull),index(index) { }
+                hull(hull), index(index) { }
 
         POINT* get_point() {
             return hull->at(index);
@@ -132,8 +138,8 @@ private:
             return (index + 1) % hull->size();
         }
 
-        int index;
         shared_ptr<vector<POINT*>> hull;
+        int index;
     };
 };
 
