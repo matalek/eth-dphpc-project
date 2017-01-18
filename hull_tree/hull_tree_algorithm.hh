@@ -27,22 +27,24 @@ public:
 	shared_ptr<HullWrapper> convex_hull(vector<POINT*>& points) override {
 		omp_set_nested(1);
 
-		shared_ptr<vector<POINT*> > upper_points = convex_points(points, 1);
-		shared_ptr<vector<POINT*> > lower_points = convex_points(points, 0);
+		ConvexHullAlgorithm::sequential_time = 0;
+		start_time = high_resolution_clock::now();
+		shared_ptr<HullTreeConvexHullRepresentation> upper_hull = convex_points(points, true);
+		start_time = high_resolution_clock::now();
+		shared_ptr<HullTreeConvexHullRepresentation> lower_hull = convex_points(points, false);
 
-		shared_ptr<VectorConvexHullRepresentation> lower_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(lower_points, false));
-		shared_ptr<VectorConvexHullRepresentation> upper_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(upper_points, true));
-		shared_ptr<HullWrapper> ret = shared_ptr<HullWrapper>(new HullWrapper(upper_hull, lower_hull));
-		return ret;
+		return shared_ptr<HullWrapper>(new HullWrapper(upper_hull, lower_hull));
 	}
 
 private:
-	shared_ptr<vector<POINT*> > convex_points(vector<POINT*>& points, bool is_upper) {
+	high_resolution_clock::time_point start_time;
+
+	shared_ptr<HullTreeConvexHullRepresentation> convex_points(vector<POINT*>& points, bool is_upper) {
 		int n = points.size();
 		d = ceil((float) n / threads);
 
 		shared_ptr<HullTreeConvexHullRepresentation> res = convex_points_rec(points, 0, n - 1, is_upper);
-		return res->get_hull();
+		return res;
 	}
 
 	shared_ptr<HullTreeConvexHullRepresentation> convex_points_rec(vector<POINT*>& points, int start, int end, bool is_upper) {
@@ -50,34 +52,22 @@ private:
 		if (n <= d) {
 			// Executing sequential version.
 			shared_ptr<POINTS> convex_hull_points;
-			vector<POINT*> working_points;
-			for (int i = start; i <= end; i++) {
-				working_points.push_back(points[i]);
-			}
 			if (is_upper) {
-				convex_hull_points = sequential_algorithm->upper_convex_hull(working_points);
+				convex_hull_points = sequential_algorithm->upper_convex_hull(points, start, end);
 			}
 			else {
-				convex_hull_points = sequential_algorithm->lower_convex_hull(working_points);
+				convex_hull_points = sequential_algorithm->lower_convex_hull(points, start, end);
 			}
 
 			if (start == 0) {
-				ConvexHullAlgorithm::middle_time = high_resolution_clock::now();
+				ConvexHullAlgorithm::sequential_time += duration_cast<microseconds>( high_resolution_clock::now() - start_time ).count();
 			}
 
 			return shared_ptr<HullTreeConvexHullRepresentation>(new HullTreeConvexHullRepresentation(convex_hull_points, is_upper));
 		}
 
-
 		int N = ceil((double) n / d);
-		int sqrt_N = sqrt(N);
-		// TODO(matalek): make it more general and pretty.
-		if (N == 32) {
-			sqrt_N = 4;
-		}
-		if (sqrt_N == 1) {
-			sqrt_N++;
-		}
+		int sqrt_N = proper_sqrt(N);
 
 		shared_ptr<HullTreeConvexHullRepresentation>*
 				partial_results = new shared_ptr<HullTreeConvexHullRepresentation>[sqrt_N];
@@ -114,6 +104,16 @@ private:
 		delete [] cut_hulls;
 
 		return res;
+	}
+
+	// Calculates approximate square root n, which is the power of 2.
+	int proper_sqrt(int n) {
+		int cur = 2;
+		while (4 * cur * cur <= n) {
+			cur <<= 1;
+		}
+
+		return cur;
 	}
 
 	// Calculates parts of the convex hull taken to the result, based on other hulls.

@@ -10,34 +10,28 @@
 #include <iostream>
 #include "../geometric_helpers.hh"
 
+#include "generator_loader.hh"
+
 using namespace std;
 
-struct points_compare {
-	bool operator() (const POINT a, const POINT b) {
-		return a.x == b.x ? 0 : a.x < b.x;
-	}
-};
-
-int rand_coordinate(int range) {
-	return (rand() % (2 * range + 1)) - range;
-}
-
-int main() {
-	srand(time(NULL));
-
+int main(int argc, char* argv[]) {
 	// Number of points.
-	int n, range;
-	cin >> n >> range;
+	int n;
+	cin >> n;
 
-	set<POINT, points_compare> points;
-	// Range should be big enough so we can easily generate points that will not
-	// conflict (i.e. be the same) with others.
-	while (points.size() < n) {
-		 points.insert(POINT(rand_coordinate(range), rand_coordinate(range)));
+	string shape;
+	if (argc < 2) {
+		shape = "square";
+	} else {
+		shape = argv[1];
 	}
+
+	Generator* generator = load_generator(shape);
+	vector<POINT> points = generator->generate_points(n);
+	delete(generator);
 
 	cout << n << "\n";
-	for (set<POINT, points_compare>::iterator it = points.begin(); it != points.end(); ++it) {
+	for (vector<POINT>::iterator it = points.begin(); it != points.end(); ++it) {
 		it->print();
 	}
 

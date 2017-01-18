@@ -7,7 +7,7 @@ CXX = g++-6
 else
 CXX = g++
 endif
-CXXFLAGS = -std=c++11 -Wall -fopenmp
+CXXFLAGS = -std=c++11 -Wall -fopenmp -O2
 LINKFLAGS = -fopenmp
 
 EXEC = tester
