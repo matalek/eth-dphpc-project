@@ -1,4 +1,4 @@
-% IEEE standard conference template; to be used with:
+    % IEEE standard conference template; to be used with:
 %   spconf.sty  - LaTeX style file, and
 %   IEEEbib.bst - IEEE bibliography style file.
 % --------------------------------------------------------------------------
@@ -108,13 +108,14 @@ Set of input points ordered by $x$-coordinate
 A 2D line $L$ is common tangent to polygons $P1, P2$ when $L$ is tangent to both of them. 
 
 \mypar{Outer common tangent}
- A common tangent is an outer common tangent if polygons $P1$ and $P2$ are on the same side of the tangent, and otherwise the tangent is separating.
- There are exactly two outer common tangents if $P1$ and $P2$ are disjoint. \cite{DBLP:journals/corr/Abrahamsen15}  
+A common tangent is an outer common tangent if polygons $P1$ and $P2$ are on the same side of the tangent, and otherwise the tangent is separating.
+There are exactly two outer common tangents if $P1$ and $P2$ are disjoint. \cite{DBLP:journals/corr/Abrahamsen15}  
 
-\mypar{Upper (Lower) Tangent}
-is a common tangent between Upper (Lower) hulls. 
+\mypar{Upper (lower) Tangent}
+Upper (lower) tangent is a common tangent between Upper (Lower) hulls. 
 
-% TODO: add info about used sequential algorithm
+\mypar{Sequential algorithm}
+Sequential algorithm represents \textit{Andrew's monotone chain convex hull algorithm}. It constructs upper and lower hulls of sorted input in $O(n)$ steps. \cite{DBLP:journals/ipl/Andrew79} 
 
 \section{Parallel Algorithms}\label{sec:yourmethod}
 
