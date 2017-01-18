@@ -60,9 +60,9 @@
 %
 
 \begin{abstract}
-The problem of computing the 2-D convex hull of a set of points finds practical applications in many different fields, like pattern recognition, image processing, statistics and many others.
-The main contribution of this paper is to review some available parallel algorithms for computing the convex hull of a sorted set of points in the plane and research how they scale with high numbers of threads.
-We implement them and evaluate their performance on a system mounting Intel Xeon Phi coprocessors.
+The problem of computing the 2D convex hull of a set of points finds practical applications in many different fields, like pattern recognition, image processing, statistics and many others.
+The main contribution of this paper is to review some available parallel algorithms for computing in the PRAM model the convex hull of a sorted set of points in the plane.
+We provide their implementation and evaluate their performance using high number of threads on a system mounting Intel Xeon Phi coprocessors.
 Experimental results show that speedup for our implementations increases up to 128 processors.
 For lower number of threads (up to 16) we also achieved superlinear speedup.
 
@@ -74,24 +74,24 @@ For lower number of threads (up to 16) we also achieved superlinear speedup.
 
 In this paper, we study the two-dimensional convex hull problem, fundamental in computation geometry.
 
-We want to investigate parallel algorithms for sorted input in PRAM, implement them and compare them. It is important to distinguish between Convex hull problem with or without sorted input, because they have different sequential complexity $O(n)$ (Sorted) vs $O(n\log n)$ (Unsorted).
+We want to investigate parallel algorithms for sorted input in PRAM (Parallel Random Access Machine), implement them and compare them. It is important to distinguish between a convex hull problem with or without sorted input, because they have different sequential complexity: $O(n)$ and $O(n\log n)$ respectively.
 
 Our implementations are based on already existing algorithms.
 We want to explore the performance of the algorithms using up to 256 processors and different shapes for input data.
-These algorithms are optimal for specific number of threads in PRAM.
-We are interested in real performance including hidden constants and overhead caused by different data structures and computation models.
+We are interested in real performance including hidden constants and overhead caused by different data structures and structure of computations.
 
 Our implementation is available online as an open-source project\footnote{\url{https://github.com/matalek/dphpc-project} (Retrieved: \formatdate{18}{1}{2017})}.
 
-\mypar{Related work} We took inspiration from papers published in the past to build our algorithms.
+\mypar{Related work} In order to build our algorithms we took inspiration from previously published papers.
 
-We chose 3 algorithms that meet our requirements: work with sorted input and use shared memory. We used a sufficient number of processors for the first two algorithms to reach their optimality theoretical boundary. 
+We chose 3 algorithms that meet our requirements: work with sorted input and use shared memory.
+The number of processors that we used met the boundary for the second and third algorithms to be optimal. 
 
-The first algorithm we decided to implement is inspired by \textit{Generic Divide-and-Conquer Solution to the Convex Hull Problem} \cite{NaiveParallel} and we are gonna call it \textit{Naive} for the naivety of the concept behind it.
+The first algorithm we decided to implement is inspired by \cite{NaiveParallel}, further referred to as \textit{Naive} for the naivety of the concept behind it.
 
-The second one is derived from [MISSING REF] \cite{SimpleParallel} and we are gonna call it \textit{Simple} according to the title of the paper we derived it from.   
+The second one is derived from \cite{SimpleParallel}, further referred to as \textit{Simple} according to the title of the paper we derived it from.   
  
-The third one appears in [MISSING REF] \cite{HullTree} and we are gonna call it \textit{HullTree} in relation to the data structure it's based on.
+The third one appears in \cite{HullTree}, further referred to as \textit{HullTree} in relation to the data structure it is based on.
      
 \section{Background: Convex hull problem}\label{sec:background}
 
@@ -100,11 +100,13 @@ The third one appears in [MISSING REF] \cite{HullTree} and we are gonna call it 
 The convex hull of a finite point set S in the plane is the smallest convex polygon containing the set.\\
 \mypar{Convex hull problem}
 We assume that the problem of computing the convex hull is a problem to list all convex hull points that constitute the border of the convex hull.\\
-\mypar{Upper (Lower) hull}
-The convex hull is partitioned, using the leftmost and the rightmost points, into the upper
-hull and the lower hull. Clearly, by computing the upper hull and the lower hull and combining them, we can obtain the convex hull. Also, any algorithm to compute the upper hull can easily be adapted to compute the lower hull.\\
+\mypar{Upper (lower) hull}
+The convex hull is partitioned, using the leftmost and the rightmost points, into the upper hull and the lower hull. 
+Clearly, by computing the upper hull and the lower hull and combining them, we can obtain the convex hull. 
+Also, any algorithm to compute the upper hull can easily be adapted to compute the lower hull.\\
 \mypar{Sorted input} 
-Set of input points ordered by $x$-coordinate\\
+Set of input points ordered by $x$-coordinate. 
+For simplicity we assume that $x$-coordinates of the input set are unique.\\
 \mypar{Tangent} 
  A 2D line $L$ is tangent to a polygon $P$ when it touches $P$ without crossing $P'$ boundary.\\
 \mypar{Common tangent} 
@@ -113,60 +115,59 @@ A 2D line $L$ is common tangent to polygons $P1, P2$ when $L$ is tangent to both
 A common tangent is an outer common tangent if polygons $P1$ and $P2$ are on the same side of the tangent.
 Otherwise the tangent is separating.
 There are exactly two outer common tangents if $P1$ and $P2$ are disjoint. \cite{DBLP:journals/corr/Abrahamsen15}  \\
-\mypar{Upper (lower) Tangent}
-The upper (lower) tangent is a common tangent between upper (Lower) hulls. \\
+\mypar{Upper (lower) tangent}
+The upper (lower) tangent is a common tangent between upper (lower) hulls. \\
 \mypar{Sequential algorithm}
 Sequential algorithm represents \textit{Andrew's monotone chain convex hull algorithm}. It constructs upper and lower hulls of sorted input in $O(n)$ steps. \cite{DBLP:journals/ipl/Andrew79} 
 
-\section{Parallel Algorithms}\label{sec:yourmethod}
+\section{Parallel Algorithms}
 
-The purpose of this section is to review a common tangent line algorithm and present parallel algorithms for computing a convex hull of a sorted set of points.
+The purpose of this section is to review the common tangent line algorithm and present parallel algorithms for computing a convex hull of a sorted set of points.
 
-\subsection{Common tangent line algorithm}
+\mypar{Common tangent line algorithm}
+Let us consider convex hulls $A$ and $B$ so that every point from $A$ has $x$-coordinate lower than each point from $B$. 
+These convex hulls are disjoint and 2 outer common tangents exist. 
+The idea of the algorithm for computing them is to alternate searching for tangent endpoints between the two polygons, until both ends of the line segment simultaneously satisfy the tangency condition. 
 
-Our generator guarantees unique x-coordinate for input data, therefore all convex hulls are disjoint and 2 outer common tangents exist. There is a straightforward linear $O(n+m)$ common tangent algorithm, where $n,m$ are sizes of hulls. The idea of this algorithm is to alternate searching for tangent endpoints between the two polygons, until both ends of the line segment simultaneously satisfy the tangency condition. 
-
-Let's assume two disjoint convex hulls: left and right. Left hull contains only points having x-coordinate lower than every point in right hull. We can find common tangents this way:
- 
 Firstly, we find the upper tangent:
 	\begin{enumerate}
-		\item Start with the rightmost point of the left hull and the leftmost point of the right hull and join them taking it as a candidate for the upper tangent.
+		\item Start with the rightmost point of $A$ and the leftmost point of $B$ and consider a line passing through them as a candidate for the upper tangent line.
 		\item While the line is not tangent to both left and right halves do:
 		\begin{enumerate}
-			\item If the line is not upper tangent to the left, move to the next counter-clockwise point on the left convex hull and check.
-			\item Else if the line is not upper tangent to the right, move to the next clockwise point on the right hull and check.
+			\item If the line is not tangent to $A$ then move to the next counter-clockwise point from $A$ and check.
+			\item Else if the line is not tangent to $B$ then move to the next clockwise point on the $B$ and check.
 		\end{enumerate}
 	\end{enumerate}
-	 We can find lower tangent in same way as the upper one.\\ 
+	
+We can find lower tangent in same way as the upper one. 
+The whole algorithm has $O(n+m)$ time complexity, where $n,m$ are sizes of hulls. 
 
-For big hulls it's better to replace the linear iterative search in step 2 with a binary search. Then we can find a candidate from possible range in a logarithmic number of steps.       
+For convex hulls consisting of big number of points it is better to replace the linear iterative search in step 2 with a binary search, improving time complexity to $O(\log n*\log m)$.
+Then we can find a candidate from possible range in a logarithmic number of steps.       
 We implemented both approaches and the difference in performance was not notable.
 Possible explanations are that the number of input points was too small or that the searched point was very close to the beginning to appreciate the benefits of binary search.
 
-\subsection{Parallel algorithms}
-
+\mypar{General scheme}
 Algorithms presented here enable computing the upper hull of the input set. 
 Computing the lower hull can be done in a similar way and for simplicity its description is omitted in this report. 
 Therefore, in this section, whenever we write ''convex hull'' we are referring to the upper hull.
-However, our implementation computes the entire convex hull (upper and lower).  
+However, our implementation computes the entire convex hull.
 
-\mypar{General scheme}
 Let $k$ denote the number of processors used and $n$ - number of points in the input set.
-For simplicity in all the algorithms we will assume that $k$ is a power of 2. 
-Let $P = \{p_0, p_1, ..., p_{n-1} \}$ be the set of sorted (by $x$ coordinate) input points.
-Finally, let $CH(S)$ denote the convex hull of $S$ set and $R=CH(P)$.
+For simplicity in descriptions of the algorithms we will assume that $k$ is a power of 2. 
+Let $P = \{p_0, p_1, ..., p_{n-1} \}$ be the set of sorted (by $x$-coordinate) input points.
+Further let $CH(S)$ denote the convex hull of $S$ set and $R=CH(P)$.
 All the presented algorithms share a common approach.
 
-Firstly, we divide the input set into $k$ equal sets ($\pm 1$ elements) based on the $x$ coordinate:
+Firstly, we divide the input set into $k$ equal sets ($\pm 1$ elements) based on the $x$-coordinate:
 $$P_0 = \{p_0, p_1, ..., p_{\lceil{\frac{n}{k}}\rceil - 1}\}$$
 $$P_1 = \{p_{\lceil{\frac{n}{k}}\rceil}, p_{\lceil{\frac{n}{k}}\rceil + 1}, ..., p_{\lceil{2 * \frac{n}{k}}\rceil - 1}\}$$
 $$...$$
 $$P_{k-1} = \{p_{(k-1)\lceil{\frac{n}{k}}\rceil}, p_{(k-1)\lceil{\frac{n}{k}}\rceil + 1}, ..., p_{n- 1} \}$$
 
-Then, we execute the sequential version of the convex hull algorithm (Andrew's monotone chain) for each of these sets in parallel, using $k$ threads.
-As a result we have the convex hull for each of the sets:
+Then, we execute the sequential version of the convex hull algorithm for each of these sets in parallel, using $k$ threads.
+As a result we have the convex hull for each set:
 $$C_i = CH(P_i) \textrm{\;\;\; for \;} i \in \{0, 1, ..., k - 1\}$$
-
 For the next step we need the following simple observation:
 \begin{observation}
 If $p \in P_i$ for some $i \in \{0, 1, ..., k - 1\}$, but $p \notin C_i$, then $p \notin R$.
@@ -174,24 +175,21 @@ If $p \in P_i$ for some $i \in \{0, 1, ..., k - 1\}$, but $p \notin C_i$, then $
 
 The immediate conclusion follows:
 \begin{observation}
-$$R = CH(C_0 \cup C_1 \cup ... \cup C_{k - 1})$$
+$R = CH(C_0 \cup C_1 \cup ... \cup C_{k - 1})$
 \end{observation}
 
 This observation enables us to perform the last step of the algorithm.
-It consists in merging partial convex hulls $C_0, C_1, ..., C_{k - 1}$ into one convex hull $R$.
-This is the step where our algorithms differ.
-Each of the algorithms presents different ways of merging partial convex hulls.
-All of them are, however, based on the common tangent line algorithm.
+It consists of creating final convex hull $R$ based on $C_0, C_1, ..., C_{k - 1}$.
+This is the step where our algorithms present different ways of conducting this step.
+However, all of them are based on the common tangent line algorithm.
 
 \mypar{Naive algorithm}
 The so-called \textit{Naive} algorithm is based on merging two convex hulls into one convex hull.
-It uses common tangent line algorithm, but the underlying concept was developed by us.
-% TODO(matalek): phrase above maybe somehow better
 
 Let $A$ and $B$ be two convex hulls so that for every $p \in A, q \in B$ we have $p.x < q.x$, where $r.x$ denotes the $x$ coordinate of the point $r$.
 Further, let $p_0, p_1, ..., p_{n-1}$ and $q_0, q_1, ... q_{m-1}$ be the points of $A$ and $B$ respectively (sorted by $x$ coordinate).
-Let $p_i \in A$ and $q_j \in B$ be such points that $\overline{p_iq_j}$ is a common tangent line for $A$ and $B$.
-Then we know that points $p_{i+1}, p_{i + 2}, ..., p_{n - 1}$ and $q_{j + 1}, q_{j + 2}, ..., q_{m - 1}$ are not going to be in the resulting convex hull.
+Let $p_i \in A$ and $q_j \in B$ be such points that $\overline{p_iq_j}$ is an upper common tangent line for $A$ and $B$.
+Then we know that points $p_{i+1}, p_{i + 2}, ..., p_{n - 1}$ and $q_0, q_1, ..., q_{j -1}$ are not going to be in the resulting convex hull.
 Therefore, we have:
 $$CH(A \cup B) = \{ p_0, p_1, ..., p_{i - 1}, p_i, q_j, q_{j + 1}, ..., q_{m - 1} \}$$
 For performing this merge we can use an array-like data structure.
@@ -203,7 +201,6 @@ We start with $C_0, C_1, ..., C_{k-1}$ convex hulls.
 In each step we are merging convex hulls which were pairs of resulting convex hulls from the previous step. 
 If $I_0, I_1, ..., I_{2l - 1}$ is the input for the step, then we compute the output: $O_0, O_1, ..., O_{l - 1}$ using $l$ processors. 
 $i$-th processor computes $O_i = CH(I_{2i} \cup I_{2i+1})$ using merge algorithm presented above.
-Example scheme for 4 processors is presented on figure \ref{fig:naive-parallel-scheme}.
 Pseudocode for this algorithm is presented as algorithm \ref{alg:naive-parallel}.
 
 \begin{algorithm}
@@ -232,11 +229,13 @@ Pseudocode for this algorithm is presented as algorithm \ref{alg:naive-parallel}
 \end{program}
 \end{algorithm}
 
+\iffalse
 \begin{figure}\centering
   \includegraphics[scale=0.5]{img/naive-parallel}
   \caption{Scheme of merging convex hulls for $k=4$}
   \label{fig:naive-parallel-scheme}
 \end{figure}
+\fi
 
 The time complexity of this algorithm depends on the size of intermediate convex hulls.
 In the worst case scenario the size of the convex hull will be linear to the size of the input.
@@ -246,19 +245,17 @@ We can see that asymptotically this algorithm in the worst case scenario does no
 However, as shown and explained in next sections, this algorithm proved to be quite efficient.
 
 \mypar{Simple algorithm}
-This algorithm was originally presented in \cite{SimpleParallel}.
-It is based on computing what part of $C_i$ is also a part of $R$.
+This algorithm is based on computing what part of $C_i$ is also a part of $R$.
 The computations are based on the following observation:
 \begin{observation}
 Let $C_i = \{q_0, q_1, ..., q_{l-1} \},$ where  $q_{j_1}.x < q_{j_2}.x$ for $0 \leq j_1 < j_2 < l$. 
-We have, that for every $0 \leq j_1 < j_2 < j_3 < l$, if $q_{j_1}, q_{j_3} \in R$, then $q_{j_2} \in R$.
+We have that for every $0 \leq j_1 < j_2 < j_3 < l$, if $q_{j_1}, q_{j_3} \in R$, then $q_{j_2} \in R$.
 \end{observation}
-We will call a point $p$ {\it\bf taken} if and only if $p \in C_i \land p \in R$ for some $i$. 
+We will call a point $p$ {\it taken} if and only if $p \in C_i \land p \in R$ for some $i$. 
 The above observation means that the points taken from one convex hull form an interval (with regards to their indices).
 
-Computing these intervals can be done by computing the common tangent line of each pair $C_i$ and $C_j$.
-For these pairs we know how to compute intervals of taken points (see previous section). 
-For given $i$ we can then compute intersection of the intervals computed for $C_i$ and $C_j$ for every $i \neq j$.
+Computing these intervals can be done by computing the common tangent line of each pair $C_i$ and $C_j$, using the same approach as used in {\it Naive} algorithm. 
+For given $i$ we can then compute intersection of the intervals computed for $C_i$ and $C_j$ for every $j \neq i$.
 Let $[j_1, j_2]$ be the interval of indices corresponding to the calculated intersection.
 If $j_1 < j_2$ then this interval corresponds also to the interval of taken points.
 However, when $j_1 = j_2$ there might be two possible cases.
@@ -267,7 +264,7 @@ In the first case we have that the appropriate point is taken, in the second one
 The difference between these cases is the angle that common tangents lines are forming.
 In the first case, when going from left to right the angle between two steepest common lines is less than $\pi$, in the second case it is greater or equal $\pi$.
 This means that in the algorithm we need to keep track also of the steepest common tangent lines and use this information for this special case.
-Solution for this special case was not presented in $\cite{SimpleParallel}$ and it's originally developed by us.
+Solution for this special case was not presented in $\cite{SimpleParallel}$ and is originally developed by us.
 
 \begin{figure}
 \centering
@@ -340,8 +337,7 @@ Regarding scalability we tested both weak and strong scaling, changing the input
 
 Concerning correctness we compared our results with the ones obtained using th \textit{Convex Hull} implementation available in the library \textit{CGAL} \footnote{http://www.cgal.org/}.
 
-\subsection{Experimental setup}
-
+\mypar{Experimental setup}
 %TODO
 The platform we tested our algorithms with mounts Intel$^{(R)}$ Xeon Phi processors. They are based on the Intel$^{(R)}$ Many Integrated Core (MIC) architecture.
 
@@ -369,17 +365,16 @@ In order to have reliable experiments we repeated this process 100 times for eac
 
 This whole process was done for 10$^4$, 10$^5$, 10$^6$ and 10$^7$ points with integral coordinates and different $x$ coordinates generated in a range R of 10$^9$ and as shapes we used square, disk and circle in the following way:
 
-\mypar{Square}: Randomly generated points with coordinates in the range [-R,R]
+{\bf Square}: Randomly generated points with coordinates in the range [-R,R]
 
-\mypar{Disk}: Randomly generated points with coordinates in the range [-R,R]. Points not included in the disk with radius R and center (0,0) were removed and regenerated.
+{\bf Disk}: Randomly generated points with coordinates in the range [-R,R]. Points not included in the disk with radius R and center (0,0) were removed and regenerated.
 
-\mypar{Circle}: Randomly generated angles $\theta_n$ and created the points ($\frac{R}{2}cos(\theta_n)$, $\frac{R}{2}sin(\theta_n)$).
+{\bf Circle}: Randomly generated angles $\theta_n$ and created the points ($\frac{R}{2}cos(\theta_n)$, $\frac{R}{2}sin(\theta_n)$).
 
 These shapes were chosen because of the difference in the resulting hulls.
 With square, in fact, resulting hulls are very small, while with the circle almost every input point is part of the final hull (some of the points will be excluded because of approximation of integers) and for disk resulting hulls have intermidiate size.
 
-\subsection{Results}
-
+\mypar{Results}
 Here we show how our algorithms perform under different configurations and with weak and strong scaling.
 The results plotted are the arithmetic averages of the 100 different repetitions performed for each configuration (Input shape, input size, algorithm and number of processing threads).
 
@@ -463,11 +458,11 @@ Generally speaking, we could say the parallelization of the convex hull problem 
 
 Even though we oly considered square, disk and circle as shapes for the input set, these algorithms can be used for any ordered input set with distinct $x$ coordinate and their performance should be similar to the one we had with the analyzed shapes (i.e. similar to circle's one if most of the points in the input set takes part to the final hull, else similar to disk and square's ones).
 
-Regarding applications to different dimensions, we believe that the concept of \textit{Naive} algorithm can be adapted to a 3-D space.
-The other two algorithms, however, have a 2-D-specific approach and cannot be easily adapted to a higher number of dimensions.
+Regarding applications to different dimensions, we believe that the concept of \textit{Naive} algorithm can be adapted to a 3D space.
+The other two algorithms, however, have a 2D-specific approach and cannot be easily adapted to a higher number of dimensions.
 
-\section{Further comments}
 \iffalse
+\section{Further comments}
 
 Here we provide some further tips.
 
