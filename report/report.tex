@@ -60,13 +60,11 @@
 %
 
 \begin{abstract}
-The problem of computing the 2-D convex hull of a set of points finds practical applications in many different fields, like pattern recognition, image processing and statistics.
-
+The problem of computing the 2-D convex hull of a set of points finds practical applications in many different fields, like pattern recognition, image processing, statistics and many others.
 The main contribution of this paper is to review some available parallel algorithms for computing the convex hull of a sorted set of points in the plane and research how they scale with high numbers of threads.
 We implement them and evaluate their performance on a system mounting Intel Xeon Phi coprocessors.
-
 Experimental results show that speedup for our implementations increases up to 128 processors.
-For lower number of threads, up to 16, we also achieved superlinear speedup.
+For lower number of threads (up to 16) we also achieved superlinear speedup.
 
 \textbf{Keywords:} Parallel Convex Hull, Xeon Phi.
 
@@ -74,11 +72,11 @@ For lower number of threads, up to 16, we also achieved superlinear speedup.
 
 \section{Introduction}\label{sec:intro}
 
-In this paper, we study the two-dimensional convex hull problem. Convex hull algorithm is a fundamental algorithm in computation geometry.
+In this paper, we study the two-dimensional convex hull problem, fundamental in computation geometry.
 
-We want to investigate parallel algorithms for sorted input in PRAM, implement them and compare them, studying how they scale. It is important to distinguish between Convex hull problem with or without sorted input, because they have different sequential complexity $O(n)$ (Sorted) vs $O(n\log n)$ (Unsorted).
+We want to investigate parallel algorithms for sorted input in PRAM, implement them and compare them. It is important to distinguish between Convex hull problem with or without sorted input, because they have different sequential complexity $O(n)$ (Sorted) vs $O(n\log n)$ (Unsorted).
 
-Our implementation is based on already existing algorithms.
+Our implementations are based on already existing algorithms.
 We want to explore the performance of the algorithms using up to 256 processors and different shapes for input data.
 These algorithms are optimal for specific number of threads in PRAM.
 We are interested in real performance including hidden constants and overhead caused by different data structures and computation models.
@@ -87,7 +85,7 @@ Our implementation is available online as an open-source project\footnote{\url{h
 
 \mypar{Related work} We took inspiration from papers published in the past to build our algorithms.
 
-We chose 3 algorithms that meet our requirements to work well with sorted input and use shared memory. We used sufficient number of processors that first two algorithms reach theoretical boundary to be optimal. 
+We chose 3 algorithms that meet our requirements: work with sorted input and use shared memory. We used a sufficient number of processors for the first two algorithms to reach their optimality theoretical boundary. 
 
 The first algorithm we decided to implement is inspired by \textit{Generic Divide-and-Conquer Solution to the Convex Hull Problem} \cite{NaiveParallel} and we are gonna call it \textit{Naive} for the naivety of the concept behind it.
 
@@ -97,35 +95,26 @@ The third one appears in [MISSING REF] \cite{HullTree} and we are gonna call it 
      
 \section{Background: Convex hull problem}\label{sec:background}
 
-\mypar{Convex polygon} A convex polygon is defined as a polygon with all its interior angles less than 180°.
-
+\mypar{Convex polygon} A convex polygon is defined as a polygon with all its interior angles less than $\pi$.\\
 \mypar{Convex hull}
-The convex hull of a finite point set S in the plane is the smallest convex polygon containing the set.
-
+The convex hull of a finite point set S in the plane is the smallest convex polygon containing the set.\\
 \mypar{Convex hull problem}
-We assume that the problem of computing the convex hull is a problem to list all convex hull points that constitute the border of the convex hull. 
-
+We assume that the problem of computing the convex hull is a problem to list all convex hull points that constitute the border of the convex hull.\\
 \mypar{Upper (Lower) hull}
 The convex hull is partitioned, using the leftmost and the rightmost points, into the upper
-hull and the lower hull. Clearly, by computing the upper hull and the lower hull and combining them, we can obtain the convex hull. Also, any algorithm to compute the upper hull can easily be adapted to compute the lower hull.
-
+hull and the lower hull. Clearly, by computing the upper hull and the lower hull and combining them, we can obtain the convex hull. Also, any algorithm to compute the upper hull can easily be adapted to compute the lower hull.\\
 \mypar{Sorted input} 
-Set of input points ordered by $x$-coordinate
-
+Set of input points ordered by $x$-coordinate\\
 \mypar{Tangent} 
- A 2D line $L$ is tangent to a polygon $P$ when it touches $P$ without crossing $P'$ boundary.
-
+ A 2D line $L$ is tangent to a polygon $P$ when it touches $P$ without crossing $P'$ boundary.\\
 \mypar{Common tangent} 
-A 2D line $L$ is common tangent to polygons $P1, P2$ when $L$ is tangent to both of them. 
-
+A 2D line $L$ is common tangent to polygons $P1, P2$ when $L$ is tangent to both of them.\\
 \mypar{Outer common tangent}
 A common tangent is an outer common tangent if polygons $P1$ and $P2$ are on the same side of the tangent.
 Otherwise the tangent is separating.
-There are exactly two outer common tangents if $P1$ and $P2$ are disjoint. \cite{DBLP:journals/corr/Abrahamsen15}  
-
+There are exactly two outer common tangents if $P1$ and $P2$ are disjoint. \cite{DBLP:journals/corr/Abrahamsen15}  \\
 \mypar{Upper (lower) Tangent}
-The upper (lower) tangent is a common tangent between upper (Lower) hulls. 
-
+The upper (lower) tangent is a common tangent between upper (Lower) hulls. \\
 \mypar{Sequential algorithm}
 Sequential algorithm represents \textit{Andrew's monotone chain convex hull algorithm}. It constructs upper and lower hulls of sorted input in $O(n)$ steps. \cite{DBLP:journals/ipl/Andrew79} 
 
@@ -150,20 +139,20 @@ Firstly, we find the upper tangent:
 	\end{enumerate}
 	 We can find lower tangent in same way as the upper one.\\ 
 
-For big hulls is better to replace linear iterative search in step 2 with binary search. Then we can find a candidate from possible range in a logarithmic number of steps.       
+For big hulls it's better to replace the linear iterative search in step 2 with a binary search. Then we can find a candidate from possible range in a logarithmic number of steps.       
 We implemented both approaches and the difference in performance was not notable.
 Possible explanations are that the number of input points was too small or that the searched point was very close to the beginning to appreciate the benefits of binary search.
 
 \subsection{Parallel algorithms}
 
 Algorithms presented here enable computing the upper hull of the input set. 
-Computing lower hull can be done in a similar way and for simplicity its description is omitted in this report. 
+Computing the lower hull can be done in a similar way and for simplicity its description is omitted in this report. 
 Therefore, in this section, whenever we write ''convex hull'' we are referring to the upper hull.
 However, our implementation computes the entire convex hull (upper and lower).  
 
 \mypar{General scheme}
 Let $k$ denote the number of processors used and $n$ - number of points in the input set.
-For simplicity in all algorithms we will assume that $k$ is a power of 2. 
+For simplicity in all the algorithms we will assume that $k$ is a power of 2. 
 Let $P = \{p_0, p_1, ..., p_{n-1} \}$ be the set of sorted (by $x$ coordinate) input points.
 Finally, let $CH(S)$ denote the convex hull of $S$ set and $R=CH(P)$.
 All the presented algorithms share a common approach.
@@ -191,10 +180,10 @@ $$R = CH(C_0 \cup C_1 \cup ... \cup C_{k - 1})$$
 This observation enables us to perform the last step of the algorithm.
 It consists in merging partial convex hulls $C_0, C_1, ..., C_{k - 1}$ into one convex hull $R$.
 This is the step where our algorithms differ.
-Each of the algorithm presents different ways of merging partial convex hulls.
+Each of the algorithms presents different ways of merging partial convex hulls.
 All of them are, however, based on the common tangent line algorithm.
 
-\mypar{Naive Parallel algorithm}
+\mypar{Naive algorithm}
 The so-called \textit{Naive} algorithm is based on merging two convex hulls into one convex hull.
 It uses common tangent line algorithm, but the underlying concept was developed by us.
 % TODO(matalek): phrase above maybe somehow better
@@ -205,7 +194,7 @@ Let $p_i \in A$ and $q_j \in B$ be such points that $\overline{p_iq_j}$ is a com
 Then we know that points $p_{i+1}, p_{i + 2}, ..., p_{n - 1}$ and $q_{j + 1}, q_{j + 2}, ..., q_{m - 1}$ are not going to be in the resulting convex hull.
 Therefore, we have:
 $$CH(A \cup B) = \{ p_0, p_1, ..., p_{i - 1}, p_i, q_j, q_{j + 1}, ..., q_{m - 1} \}$$
-For performing this merge we can use array-like data structure.
+For performing this merge we can use an array-like data structure.
 The time complexity of this is equal to $O(n + m)$.
 
 Using this merge algorithm we can compute the convex hull of the entire set in the form of the tree.
@@ -256,7 +245,7 @@ $$O(\frac{n}{k}) + O(2\frac{n}{k}) + O(4\frac{n}{k}) + ... + O(k\frac{n}{k}) = O
 We can see that asymptotically this algorithm in the worst case scenario does not provide any speedup when using more threads.
 However, as shown and explained in next sections, this algorithm proved to be quite efficient.
 
-\mypar{Simple Parallel algorithm}
+\mypar{Simple algorithm}
 This algorithm was originally presented in \cite{SimpleParallel}.
 It is based on computing what part of $C_i$ is also a part of $R$.
 The computations are based on the following observation:
@@ -299,7 +288,7 @@ Solution for this special case was not presented in $\cite{SimpleParallel}$ and 
 These computations are done in parallel.
 Processor $i$ computes all intervals for $C_i$ and $C_j$, where $j = 0, 1, ..., i -1, i+ 1, ..., k - 1$ and then computes their intersection.
 
-The last steps consist of moving all taken points to one resulting array.
+The last step consist of moving all taken points to one resulting array.
 Firstly, we compute how many points from each convex hull $C_i$ are taken.
 Let the result of this computation be: $l_1, l_2, ..., l_{k-1}$.
 We can then compute starting positions in the resulting array for each taken points set from one convex hull.
