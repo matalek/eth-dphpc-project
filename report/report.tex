@@ -7,7 +7,6 @@
 
 \usepackage{spconf,amsmath,amssymb,graphicx,amsthm,newlfont,program,caption,subcaption}
 
-
 % Example definitions.
 % --------------------
 % nice symbols for real and complex numbers
@@ -17,7 +16,6 @@
 
 % bold paragraph titles
 \newcommand{\mypar}[1]{{\bf #1.}}
-
 
 \theoremstyle{definition}
 \newtheorem{observation}{Observation}
@@ -73,61 +71,78 @@ should write the abstract last.
 
 \section{Introduction}\label{sec:intro}
 
-Do not start the introduction with the abstract or a slightly modified
-version. It follows a possible structure of the introduction. 
-Note that the structure can be modified, but the
-content should be the same. Introduction and abstract should fill at most the first page, better less.
 
-\mypar{Motivation} The first task is to motivate what you do.  You can
-start general and zoom in one the specific problem you consider.  In
-the process you should have explained to the reader: what you are doing,
-why you are doing, why it is important (order is usually reversed).
+In this paper, we study the two-dimensional convex hull problem. Convex hull algorithm is a fundamental algorithm in computation geometry, on which are many algorithms in computation geometry based. The problem of finding convex hulls finds its practical applications in pattern recognition, image processing, statistics, geographic information system, game theory. 
 
-For example, if my result is the fastest sorting implementation ever, one
-could roughly go as follows. First explain why sorting is important
-(used everywhere with a few examples) and why performance matters (large datasets,
-realtime). Then explain that fast implementations are very hard and
-expensive to get (memory hierarchy, vector, parallel). 
+We want to investigate parallel algorithms for sorted input, implement them and compare them. It is important to distinguish between Convex hull problem with or without sorted input, because they have different sequential complexity $O(n)$ (Sorted) vs $O(n\log n)$ (Unsorted). 
 
-Now you state what you do in this paper. In our example: 
-presenting a sorting implementation that is
-faster for some sizes as all the other ones.
+Our implementation is based on already known algorithms. We want to explore performance of each algorithm using up to 256 processors and different shapes for input data. Existing algorithms are optimal for specific number of threads, but we are interested in real performance including hidden constants and overhead caused by different data structures and computation models.
 
-\mypar{Related work} Next, you have to give a brief overview of
-related work. For a report like this, anywhere between 2 and 8
-references. Briefly explain what they do. In the end contrast to what
-you do to make now precisely clear what your contribution is.
+\mypar{Related work} Most of the papers related to this topic are theoretical and mainly prove that suggested solution is for chosen problem optimal. They miss implementation details or performance measurements.
 
+We chose 3 algorithms that meet our requirements to work well with sorted input.
+
+The first algorithm we decided to implement is Naive Parallel algorithm inspired by \textit{Generic Divide-and-Conquer Solution to the Convex Hull Problem} \cite{NaiveParallel} 
+
+The second is Simple Parallel. \cite{SimpleParallel}  There are published results for different shapes, but only up to 8 processors.   
+ 
+The third is Hull Tree algorithm \cite{HullTree}. We have not found implementation nor results, so there is our contribution most significant.
+  
 \section{Background: Whatever the Background is}\label{sec:background}
 
-Give a short, self-contained summary of necessary
-background information. For example, assume you present an
-implementation of sorting algorithms. You could organize into sorting
-definition, algorithms considered, and asymptotic runtime statements. The goal of the
-background section is to make the paper self-contained for an audience
-as large as possible. As in every section
-you start with a very brief overview of the section. Here it could be as follows: In this section 
-we formally define the sorting problem we consider and introduce the algorithms we use
-including a cost analysis.
+\mypar{Convex polygon} Convex polygon is defined as a polygon with all its interior angles less than 180°.
 
-\mypar{Sorting}
-Precisely define sorting problem you consider.
+\mypar{Convex hull}
+Convex hull of a finite point set S in the plane is the smallest convex polygon containing the set.
 
-\mypar{Sorting algorithms}
-Explain the algorithm you use including their costs.
+\mypar{Convex hull problem}
+We assume that the problem of computing the convex hull is a problem to list all convex hull points that constitute the border of the convex hull. 
 
-As an aside, don't talk about "the complexity of the algorithm.'' It's incorrect,
-problems have a complexity, not algorithms.
+\mypar{Upper (Lower) hull}
+The convex hull is partitioned, using the leftmost and the rightmost points, into the upper
+hull and the lower hull. Clearly, by computing the upper hull and the lower hull and combining them, we can obtain the convex hull. Also, any algorithm to compute the upper hull can easily be adapted to compute the lower hull.
 
+\mypar{Sorted input} 
+Set of input points ordered by $x$-coordinate
+
+\mypar{Tangent} 
+ A 2D line $L$ is tangent to a polygon $P$ when touches $P$ without crossing $P'$ boundary.
+
+\mypar{Common tangent} 
+A 2D line $L$ is common tangent to polygons $P1, P2$ when $L$ is tangent to both of them. 
+
+\mypar{Outer common tangent}
+ A common tangent is an outer common tangent if polygons $P1$ and $P2$ are on the same side of the tangent, and otherwise the tangent is separating.
+ There are exactly two outer common tangents if $P1$ and $P2$ are disjoint. \cite{DBLP:journals/corr/Abrahamsen15}  
+
+\mypar{Upper (Lower) Tangent}
+is a common tangent between Upper (Lower) hulls. 
 
 \section{Your Proposed Method}\label{sec:yourmethod}
 
-The purpose of this section is to review a convex hull sequential algorithm for a sorted input set and common tangent line algorithm. We also present parallel algorithms for computing a convex hull for such input.
+The purpose of this section is to review a convex hull sequential algorithm for sorted input set and common tangent line algorithm. We also present parallel algorithms for computing a convex hull of a sorted set of points.
 
 \subsection{Sequential algorithm}
-% TODO(matalek): do we want to include that?
 
 \subsection{Common tangent line algorithm}
+
+Our generator guaranties unique x-coordinate for input data, therefore all convex hulls are disjoint and 2 outer common tangents exist. There is a straightforward linear $O(n+m)$ common tangent algorithm, where $n,m$ are sizes of hulls. The idea of this algorithm is to alternate searching for tangent endpoints between the two polygons, until both ends of the line segment simultaneously satisfy the tangency condition. 
+
+Lets assume two disjoint convex hulls: left and right. Left hull contains only points having x-coordinate lower than every point in right hull. We can find common tangents this way:
+ 
+Firstly, we find the upper tangent:
+	\begin{enumerate}
+		\item Start with the rightmost point of the left hull and the leftmost point of the right hull and join them taking it as a candidate for the upper tangent.
+		\item While the line is not tangent to both left and right halves do:
+		\begin{enumerate}
+			\item If the line is not upper tangent to the left, move to the next counter-clockwise point on the left convex hull and check.
+			\item Else if the line is not upper tangent to the right, move to the next clockwise point on the right hull and check.
+		\end{enumerate}
+	\end{enumerate}
+	 We can find lower tangent in same way as the upper one.\\ 
+
+For big hulls is better to replace linear iterative search in step 2 with binary search. Then we can find a candidate from possible range in a logarithmic number of steps.       
+We implemented both approaches and binary search was slower. Possible explanations are that number of points was too small or searched point was very close to the beginning.  . 
 
 \subsection{Parallel algorithms}
 
@@ -138,6 +153,7 @@ However, our implementation computes the entire convex hull (upper and lower).
 
 \subsubsection{General scheme}
 \label{sec:parallel-general}
+
 
 Let $k$ denote the number of processors used and $n$ - number of points in the input set.
 For simplicity in all algorithms we will assume that $k$ is the power of 2. 
@@ -150,6 +166,7 @@ $$P_0 = \{p_0, p_1, ..., p_{\lceil{\frac{n}{k}}\rceil - 1}\}$$
 $$P_1 = \{p_{\lceil{\frac{n}{k}}\rceil}, p_{\lceil{\frac{n}{k}}\rceil + 1}, ..., p_{\lceil{2 * \frac{n}{k}}\rceil - 1}\}$$
 $$...$$
 $$P_{k-1} = \{p_{(k-1)\lceil{\frac{n}{k}}\rceil}, p_{(k-1)\lceil{\frac{n}{k}}\rceil + 1}, ..., p_{n- 1} \}$$
+
 
 
 Then, we execute sequential version of the convex hull algorithm (Andrew's monotone chain) for each of these sets in parallel, using $k$ threads.
