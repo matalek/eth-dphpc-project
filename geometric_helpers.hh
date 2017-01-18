@@ -41,5 +41,4 @@ bool OrderXY(const POINT* a, const POINT* b) {
 	return a->x == b->x ? a->y < b->y : a->x < b->x;
 }
 
-
 #endif // GEOMETRIC_HELPERS_HH

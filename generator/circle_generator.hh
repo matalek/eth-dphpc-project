@@ -44,7 +44,6 @@ private:
 	double rand_angle(int range) {
 		return double((rand() % (2 * range + 1)) - range);
 	}
-
 };
 
 #endif // CIRCLE_GENERATOR

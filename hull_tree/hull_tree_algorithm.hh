@@ -175,7 +175,6 @@ private:
 		}
 
 		// Calculating power of 2 greater or equal than m.
-		// TODO(matalek): think whether we can get rid of it.
 		int m_rounded = 2;
 		while (m_rounded < m) {
 			m_rounded <<= 1;
@@ -197,7 +196,6 @@ private:
 			pair<int,int> tangent =
 					is_upper
 					? findUpperT(*hulls[left_hull], *hulls[right_hull])
-					// ? findUpperT(l, r)
 					: findLowerT(*hulls[left_hull], *hulls[right_hull]);
 
 			double m = angular_coefficient(tangent, *hulls[left_hull], *hulls[right_hull]);

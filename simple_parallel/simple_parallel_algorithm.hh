@@ -26,9 +26,13 @@ public:
 	shared_ptr<HullWrapper> convex_hull(vector<POINT*>& points) override {
 		ConvexHullAlgorithm::sequential_time = 0;
 		start_time = high_resolution_clock::now();
-		shared_ptr<VectorConvexHullRepresentation> lower_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(convex_points(points,0),false));
+		shared_ptr<VectorConvexHullRepresentation> lower_hull =
+				shared_ptr<VectorConvexHullRepresentation>(
+						new VectorConvexHullRepresentation(convex_points(points,0),false));
 		start_time = high_resolution_clock::now();
-		shared_ptr<VectorConvexHullRepresentation> upper_hull = shared_ptr<VectorConvexHullRepresentation>(new VectorConvexHullRepresentation(convex_points(points,1),true));
+		shared_ptr<VectorConvexHullRepresentation> upper_hull =
+				shared_ptr<VectorConvexHullRepresentation>(
+						new VectorConvexHullRepresentation(convex_points(points,1),true));
 		shared_ptr<HullWrapper> ret = shared_ptr<HullWrapper>(new HullWrapper(upper_hull, lower_hull));
 		return ret;
 	}
@@ -114,7 +118,7 @@ private:
 		final_position_array = ParallelHelper::prefix_sum(position_array, threads);
 		int total_size = final_position_array[threads - 1];
 
-		//Declare points array for final result
+		// Declare points array for final result
 		// We could theoretically create dynamic array here so that it would be faster,
 		// but it won't probably affect the speed much.
 		shared_ptr<vector<POINT*> > result_points = shared_ptr<vector<POINT*> >(new vector<POINT*>(total_size));

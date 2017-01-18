@@ -3,6 +3,7 @@
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef K::Point_2 Point_2;
 using namespace std;
+
 int main() {
 	int n;
 	cin >> n;
@@ -17,7 +18,7 @@ int main() {
 
 	vector<Point_2> result;
 	CGAL::ch_graham_andrew( points.begin(), points.end(), std::back_inserter(result));
-	printf("\n%lu\n", result.size());
+	cout << "\n" << result.size() << "\n";
 
 	for (Point_2 point : result) {
         cout << (long long int) point.x() << " " << (long long int) point.y() << "\n";

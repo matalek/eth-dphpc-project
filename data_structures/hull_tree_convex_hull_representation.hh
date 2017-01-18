@@ -24,7 +24,6 @@ public:
             : ConvexHullRepresentation(upper) {
 
         if (upper) {
-            // TODO(matalek): maybe think about something more efficient.
             reverse(points->begin(), points->end());
         }
 
@@ -55,7 +54,7 @@ public:
         return res;
     }
 
-    /*methods for commont tangent alg*/
+    // Methods for commont tangent algorithm.
 
     int find_rightmost_point() override {
         return upper ? 0 : size() - 1;
@@ -90,9 +89,11 @@ public:
         return shared_ptr<RepresentationIterator>(new HullTreeIterator(tree, index, size(), upper));
     }
 
+    // -----------------------
+
     void print() const {
         if (empty()) {
-            printf("empty\n");
+            cout << "empty\n";
         } else {
             tree->print();
         }
@@ -111,7 +112,6 @@ public:
 
         auto first_split = split(right_p->x);
 
-        // TODO(matalek): very ugly, think about something different
         auto second_split = first_split.first->split(left_p->x - 1);
 
         return second_split.second;
@@ -337,7 +337,6 @@ private:
 
         void print() {
             if ((!left) && (!right)) {
-                // TODO(matalek): delete when measuring performance.
                 assert(!!point);
                 point->print();
             } else {
@@ -490,9 +489,6 @@ public:
         return shared_ptr<HullTreeConvexHullRepresentation>(
                 new HullTreeConvexHullRepresentation((shared_ptr<HullTreeNode>) nullptr, upper));
     }
-
-
 };
-
 
 #endif // HULL_TREE_CONVEX_HULL_REPRESENTATION

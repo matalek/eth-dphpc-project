@@ -45,7 +45,6 @@ string destination_file_path = "/mnt/hostfs/team08/log_files/";
 // Loads an appropriate algorithm based on command line params.
 ConvexHullAlgorithm* load_algorithm(string arg) {
 	ConvexHullAlgorithm* algorithm;
-	// TODO(matalek): provide nicer way to create an appropriate algorithm.
 
 	int threads;
 	string name;
@@ -87,7 +86,7 @@ int main(int argc, char* argv[]) {
 			// Reading points.
 			vector<POINT> points;
 
-			// TODO call correct generator based on argv			
+			// TODO call correct generator based on argv
 			points = generator->generate_points(n);
 
 			vector<POINT*> points_pointers(n);

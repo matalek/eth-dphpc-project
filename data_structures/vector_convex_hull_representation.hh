@@ -17,7 +17,7 @@ class VectorConvexHullRepresentation : public ConvexHullRepresentation {
 public:
 
     VectorConvexHullRepresentation(shared_ptr<vector<POINT*>> hull, bool upper)
-            :  ConvexHullRepresentation(upper),hull(hull){};
+            :  ConvexHullRepresentation(upper), hull(hull) { }
 
 	void merge(shared_ptr<ConvexHullRepresentation> hull) {
 		shared_ptr<VectorConvexHullRepresentation> other_hull = std::static_pointer_cast<VectorConvexHullRepresentation>(hull);
@@ -102,7 +102,7 @@ private:
 
     public:
         VectorHullIterator(shared_ptr<vector<POINT*>> hull, int index):
-                hull(hull),index(index) { }
+                hull(hull), index(index) { }
 
         POINT* get_point() {
             return hull->at(index);
@@ -138,8 +138,8 @@ private:
             return (index + 1) % hull->size();
         }
 
-        int index;
         shared_ptr<vector<POINT*>> hull;
+        int index;
     };
 };
 
