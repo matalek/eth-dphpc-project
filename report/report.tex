@@ -128,9 +128,7 @@ The purpose of this section is to review the common tangent line algorithm and p
 \mypar{Common tangent line algorithm}
 Let us consider convex hulls $A$ and $B$ so that each point of $A$ has $x$-coordinate smaller than each point of $B$. 
 These convex hulls are disjoint and consequently there exist 2 outer common tangents between them. 
-The idea behind the algorithm for computing these tangents is to alternately search for tangent endpoints between the two polygons, until both ends of the line segment simultaneously satisfy the tangency condition.
-%TODO this makes no sense
-
+Pseudocode for the algorithm that computes the upper common tangent line is presented as algorithm \ref{alg:common-tangent}.
 
 \begin{algorithm}
 \label{alg:common-tangent}
