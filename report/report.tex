@@ -61,13 +61,13 @@
 %
 
 \begin{abstract}
-The problem of computing the 2D convex hull of a set of points finds practical applications in many different fields, like pattern recognition, image processing, statistics and many others.
-The main contribution of this paper is to review some available parallel algorithms for computing in the PRAM model the convex hull of a sorted set of points in the plane.
+The problem of computing the 2D convex hull of a set of points finds practical applications in many different fields, like pattern recognition, image processing and statistics.
+The main contribution of this paper is to review some available parallel algorithms for computing the convex hull of a sorted set of points in the plane in the PRAM shared memory model.
 We provide their implementation and evaluate their performance using high number of threads on a system mounting Intel Xeon Phi coprocessors.
 Experimental results show that speedup for our implementations increases up to 128 processors.
 For lower number of threads (up to 16) we also achieved superlinear speedup.
 
-\textbf{Keywords:} Parallel Convex Hull, Xeon Phi.
+\textbf{Keywords:} Parallel Convex Hull, Shared memory, Xeon Phi.
 
 \end{abstract}
 
@@ -75,7 +75,7 @@ For lower number of threads (up to 16) we also achieved superlinear speedup.
 
 In this paper, we study the two-dimensional convex hull problem, fundamental in computation geometry.
 
-We want to investigate parallel algorithms for sorted input in PRAM (Parallel Random Access Machine), implement them and compare them. It is important to distinguish between a convex hull problem with or without sorted input, because they have different sequential complexity: $O(n)$ and $O(n\log n)$ respectively.
+We want to investigate parallel algorithms for sorted input in PRAM (Parallel Random Access Machine), implement them and compare them. It is important to distinguish between a convex hull problem with sorted or unsorted input, because they have different sequential complexity: $O(n)$ and $O(n\log n)$ respectively.
 
 Our implementations are based on already existing algorithms.
 We want to explore the performance of the algorithms using up to 256 processors and different shapes for input data.
@@ -88,18 +88,18 @@ Our implementation is available online as an open-source project\footnote{\url{h
 We chose 3 algorithms that meet our requirements: work with sorted input and use shared memory.
 The number of processors that we used met the boundary for the second and third algorithms to be optimal. 
 
-The first algorithm we decided to implement is inspired by \cite{NaiveParallel}, further referred to as \textit{Naive} for the naivety of the concept behind it.
+The first algorithm we decided to implement is inspired by \cite{NaiveParallel} and it's further referred to as \textit{Naive} for the naivety of the concept behind it.
 It works in PRAM EREW model.
 
-The second one is derived from \cite{SimpleParallel}, further referred to as \textit{Simple} according to the title of the paper we derived it from.
+The second one is derived from \cite{SimpleParallel} and further referred to as \textit{Simple} according to the title of the paper we derived it from.
 It works in PRAM CREW model.
  
-The third one appears in \cite{HullTree}, further referred to as \textit{HullTree} in relation to the data structure it is based on.
+The third one appears in \cite{HullTree}, and it's further referred to as \textit{HullTree} in relation to the data structure it is based on.
 It works in PRAM CREW model.
      
 \section{Background: Convex hull problem}\label{sec:background}
 
-\mypar{Convex polygon} A convex polygon is defined as a polygon with all its interior angles less than $\pi$.\\
+\mypar{Convex polygon} A convex polygon is defined as a polygon with all its interior angles being less than $\pi$.\\
 \mypar{Convex hull}
 The convex hull of a finite point set S in the plane is the smallest convex polygon containing the set.\\
 \mypar{Convex hull problem}
@@ -112,17 +112,16 @@ Also, any algorithm to compute the upper hull can easily be adapted to compute t
 Set of input points ordered by $x$-coordinate. 
 For simplicity we assume that $x$-coordinates of the input set are unique.\\
 \mypar{Tangent} 
- A 2D line $L$ is tangent to a polygon $P$ when it touches $P$ without crossing $P'$ boundary.\\
+ A 2D line $L$ is tangent to a polygon $P$ iff it touches $P$ without crossing $P'$ boundary.\\
 \mypar{Common tangent} 
-A 2D line $L$ is common tangent to polygons $P1, P2$ when $L$ is tangent to both of them.\\
+A 2D line $L$ is common tangent to polygons $P1, P2$ iff $L$ is tangent to both of them.\\
 \mypar{Outer common tangent}
-A common tangent is an outer common tangent if polygons $P1$ and $P2$ are on the same side of the tangent.
+A common tangent is an outer common tangent iff polygons $P1$ and $P2$ are on the same side of the tangent.
 Otherwise the tangent is separating.
-There are exactly two outer common tangents if $P1$ and $P2$ are disjoint. \cite{DBLP:journals/corr/Abrahamsen15}  \\
-\mypar{Upper (lower) tangent}
-The upper (lower) tangent is a common tangent between upper (lower) hulls. \\
+There are exactly two outer common tangents if $P1$ and $P2$ are disjoint, one connecting upper hulls and the other one connecting lower hulls. \cite{DBLP:journals/corr/Abrahamsen15}
+We respectively call them upper and lower tangent\\
 \mypar{Sequential algorithm}
-Sequential algorithm represents \textit{Andrew's monotone chain convex hull algorithm}. It constructs upper and lower hulls of sorted input in $O(n)$ steps. \cite{DBLP:journals/ipl/Andrew79} 
+The considered sequential algorithm is \textit{Andrew's monotone chain convex hull algorithm}. It constructs upper and lower hulls of sorted input in $O(n)$ steps. \cite{DBLP:journals/ipl/Andrew79} 
 
 \section{Parallel Algorithms}
 
@@ -258,7 +257,7 @@ We have that for every $0 \leq j_1 < j_2 < j_3 < l$, if $q_{j_1}, q_{j_3} \in R$
 We will call a point $p$ {\it taken} if and only if $p \in C_i \land p \in R$ for some $i$. 
 The above observation means that the points taken from one convex hull form an interval (with regards to their indices).
 
-Computing these intervals can be done by computing the common tangent line of each pair $C_i$ and $C_j$, using the same approach as used in {\it Naive} algorithm. 
+Computing these intervals can be done by computing the common tangent line of each pair $C_i$ and $C_j$, using the same approach used in {\it Naive} algorithm. 
 For given $i$ we can then compute intersection of the intervals computed for $C_i$ and $C_j$ for every $j \neq i$.
 Let $[j_1, j_2]$ be the interval of indices corresponding to the calculated intersection.
 If $j_1 < j_2$ then this interval corresponds also to the interval of taken points.
@@ -289,7 +288,7 @@ Solution for this special case was not presented in $\cite{SimpleParallel}$ and 
 These computations are done in parallel.
 Processor $i$ computes all intervals for $C_i$ and $C_j$, where $j = 0, 1, ..., i -1, i+ 1, ..., k - 1$ and then computes their intersection.
 
-The last step consist of moving all taken points to one resulting array.
+The last step consists in moving all taken points to one resulting array.
 Firstly, we compute how many points from each convex hull $C_i$ are taken.
 Let the result of this computation be: $l_1, l_2, ..., l_{k-1}$.
 We can then compute starting positions in the resulting array for each taken points set from one convex hull.
@@ -365,13 +364,10 @@ first of all we fixed a shape and a number of points to be generated. Then we ra
 
 In order to have reliable experiments we repeated this process 100 times for each chosen combination of number of input points and shape.
 
-This whole process was done for 10$^4$, 10$^5$, 10$^6$ and 10$^7$ points with integral coordinates and different $x$-coordinates generated in a range $R$ of 10$^9$ and as shapes we used square, disk and circle in the following way:
-
-{\bf Square}: Randomly generated points with coordinates in the range [$-R$,$R$]
-
-{\bf Disk}: Randomly generated points with coordinates in the range [$-R$,$R$]. Points not included in the disk with radius R and center (0,0) were removed and regenerated.
-
-{\bf Circle}: Randomly generated angles $\theta_n$ and created the points ($\lfloor R \cos(\theta_n)\rfloor$, $\lfloor R \sin(\theta_n)\rfloor$).
+This whole process was done for 10$^4$, 10$^5$, 10$^6$ and 10$^7$ points with integral coordinates and different $x$-coordinates generated in a range $R$ of 10$^9$ and as shapes we used square, disk and circle in the following way:\\
+{\bf Square}: Randomly generated points with coordinates in the range [$-R$,$R$]\\
+{\bf Disk}: Randomly generated points with coordinates in the range [$-R$,$R$]. Points not included in the disk with radius R and center (0,0) were removed and regenerated.\\
+{\bf Circle}: Randomly generated angles $\theta_n$ and created the points ($\lfloor R \cos(\theta_n)\rfloor$, $\lfloor R \sin(\theta_n)\rfloor$). Please note that while points generated with square and disk constitute dense figures, with circle points lay only on the border of the shape.
 
 These shapes were chosen because of the difference in the resulting hulls.
 With square, in fact, resulting hulls are very small, while with the circle almost every input point is part of the final hull (some of the points will be excluded because of approximation of integers) and for disk resulting hulls have intermediate size.
@@ -390,7 +386,7 @@ We show performance with 8 processing threads to represent the trends of the alg
 
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/time_points.eps}
-  \caption{Comparison of the execution times three algorithms for 8 threads and the sequential version changing input size for square and circle\label{Input size time}}
+  \caption{Comparison of the execution times of the three parallel algorithms using 8 threads and the sequential version, changing input size for square and circle\label{Input size time}}
 \end{figure}
 
 For the sequential versions the growth in execution time when increasing the number of input points is linear for all the selected shapes.
@@ -404,7 +400,7 @@ This is due to the creation of the data structure that for a high number of resu
 
 Looking at the speedup plots [Plot \ref{Input size speedup}] the general trend is a growth in efficiency when increasing the size of the input set for the two shapes.
 
-We notice a superlinear speedup for 10$^6$ points (around 9 for \textit{Naive} and 8.5 for \textit{Simple}) and 10$^7$ points (slightly above 8 for both \textit{Simple} and \textit{HullTree}.
+We notice a superlinear speedup for 10$^6$ points (around 9 for \textit{Naive} and 8.5 for \textit{Simple}) and 10$^7$ points (slightly above 8 for both \textit{Simple} and \textit{HullTree}).
 We obtained superlinear speedup thanks to caching: splitting the input set into smaller subsets assigned to processors makes the subset fit better into cache, allowing faster accesses to the points.
 
 A good performance of \textit{Naive} algorithm can be attributed to the used vectorization.
