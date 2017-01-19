@@ -53,23 +53,6 @@ def chosen_width_type():
     return '-m'
 
 
-# Insert function check_output if not present
-if "check_output" not in dir(subprocess ):
-    def f(*popenargs, **kwargs):
-        if 'stdout' in kwargs:
-            raise ValueError('stdout argument not allowed, it will be overridden.')
-        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
-        output, unused_err = process.communicate()
-        retcode = process.poll()
-        if retcode:
-            cmd = kwargs.get("args")
-            if cmd is None:
-                cmd = popenargs[0]
-            raise subprocess.CalledProcessError(retcode, cmd)
-        return output
-    subprocess.check_output = f
-
-
 # Check user input correctness
 def check_input_correctness():
     if len(sys.argv) <= 15:
@@ -102,6 +85,22 @@ def check_input_correctness():
     return True
 
 
+# Insert function check_output if not present
+if "check_output" not in dir(subprocess ):
+    def f(*popenargs, **kwargs):
+        if 'stdout' in kwargs:
+            raise ValueError('stdout argument not allowed, it will be overridden.')
+        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
+        output, unused_err = process.communicate()
+        retcode = process.poll()
+        if retcode:
+            cmd = kwargs.get("args")
+            if cmd is None:
+                cmd = popenargs[0]
+            raise subprocess.CalledProcessError(retcode, cmd)
+        return output
+    subprocess.check_output = f
+
 # Start program
 if not check_input_correctness():
     exit
@@ -130,7 +129,7 @@ key_value = algorithms_map()
 points = []
 if chosen_width_type() == '-w':
     for n in range(CONST_STARTING_VALUE, CONST_STEP_WIDTH * CONST_COMB_NUMBER + CONST_STARTING_VALUE,
-                       CONST_STEP_WIDTH):
+                   CONST_STEP_WIDTH):
         points.append(n)
 else:
     for val in range(0, CONST_COMB_NUMBER):
@@ -178,8 +177,8 @@ for num_of_points in points:
                 sys.exit()
 
             # Update tmp store
-            key_value[algorithm][0].append(int(alg_result.split('\n')[0].split(' ')[1]) + 
-                                    int(alg_result.split('\n')[0].split(' ')[2]))
+            key_value[algorithm][0].append(int(alg_result.split('\n')[0].split(' ')[1]) +
+                                           int(alg_result.split('\n')[0].split(' ')[2]))
             for i in (1, 2):
                 key_value[algorithm][i].append(int(alg_result.split('\n')[0].split(' ')[i]))
 
@@ -198,3 +197,4 @@ for num_of_points in points:
 print('\n--------------------------------------\n| ----------------------------------- |\n'
       '| |COMPARISON COMPLETED SUCCESSFULLY| |'
       '\n| ----------------------------------- |\n--------------------------------------\n')
+
