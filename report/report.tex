@@ -137,17 +137,18 @@ The idea behind the algorithm for computing these tangents is to alternately sea
 \begin{program}
 \mbox{{\it Upper common tangent} algorithm:}
 \BEGIN \\ %
-  left\_point := A.rightmost\_point;
-  right\_point := B.leftmost\_point;
+  A\_point := A.rightmost\_point;
+  B\_point := B.leftmost\_point;
 \WHILE !(is\_tangent(A,A\_point, B\_point) \AND 
-\STATE{ (is\_tangent(B,A\_point, B\_point))} \DO
+ (is\_tangent(B,A\_point, B\_point)) \DO
 	  \WHILE !is\_tangent(A,A\_point, B\_point) \DO
 		A\_point := A\_point.counter\_clockwise()	    
 	  \OD 
 	  \WHILE !is\_tangent(B,A\_point, B\_point) \DO
-		A\_point := A\_point.\_clockwise()	    
+		B\_point := B\_point.\_clockwise()	    
 	  \OD  
- \OD	
+ \OD
+ print(A\_point,B\_point)	
 \END
 \end{program}
 \end{algorithm}
