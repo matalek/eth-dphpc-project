@@ -124,7 +124,7 @@ def build_algorithms(shape):
 def plot_execution_time():
     plt.figure(num=None, figsize=(10, 4), facecolor='w', edgecolor='k')
     plt.gcf().subplots_adjust(bottom=0.15)
-    plt.suptitle("Execution times")
+    plt.suptitle("Performance comparison")
 
     plt.subplot(121)
     plt.title('Square')
