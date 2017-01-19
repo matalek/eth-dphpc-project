@@ -142,13 +142,14 @@ The idea behind the algorithm for computing these tangents is to alternately sea
 \WHILE !(is\_tangent(A,A\_point, B\_point) \AND 
  (is\_tangent(B,A\_point, B\_point)) \DO
 	  \WHILE !is\_tangent(A,A\_point, B\_point) \DO
-		A\_point := A\_point.counter\_clockwise()	    
+		A\_point :=
+		\;\;\;\;A.get\_counter\_clockwise(A\_point);
 	  \OD 
 	  \WHILE !is\_tangent(B,A\_point, B\_point) \DO
-		B\_point := B\_point.\_clockwise()	    
+		B\_point := B.get\_clockwise(B\_point);
 	  \OD  
  \OD
- print(A\_point,B\_point)	
+ print(A\_point,B\_point);
 \END
 \end{program}
 \end{algorithm}
@@ -227,14 +228,14 @@ Pseudocode for this algorithm is presented as algorithm \ref{alg:naive-parallel}
   partial\_results := array(2 * k);
   \FOR i := 0 \TO level \STEP 1 \textrm{\bf{\;in parallel}} \DO
     partial\_results[k + i] := 
-    \;\;\;\; sequential\_algorithm(input, i)
+    \;\;\;\; sequential\_algorithm(input, i);
   \OD
   \WHILE level > 0 \DO
     \FOR i := 0 \TO level \STEP 1 \textrm{\bf{\;in parallel}} \DO
       pos = level + i;
       partial\_results[pos] := merge(
       \;\;\;\; partial\_results[2*pos],
-      \;\;\;\; partial\_results[2 * pos + 1])
+      \;\;\;\; partial\_results[2 * pos + 1]);
     \OD
     level /= 2;
   \OD
