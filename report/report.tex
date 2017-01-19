@@ -92,7 +92,7 @@ It works in PRAM EREW model.
 The second one is derived from \cite{SimpleParallel} and further referred to as \textit{Simple} according to the title of the paper we derived it from.
 It works in PRAM CREW model.
  
-The third one appears in \cite{HullTree}, and it's further referred to as \textit{HullTree} in relation to the data structure it is based on.
+The third one is taken from \cite{HullTree}, and further referred to as \textit{HullTree} in relation to the data structure it is based on.
 It works in PRAM CREW model.
      
 \section{Background: Convex hull problem}\label{sec:background}
@@ -154,8 +154,7 @@ Pseudocode for the algorithm that computes the upper common tangent line is pres
 
 This algorithm can be easily adapted to find lower hull.
 
-The whole algorithm has $O(n+m)$ time complexity, where $n,m$ are sizes of hulls. 
-%TODO algos have no complexity?
+The whole algorithm has $O(n+m)$ time complexity, where $n,m$ are sizes of hulls.
 
 For convex hulls consisting of a large number of points it is better to replace the linear iterative search in step 2 with a binary search, improving time complexity to $O(\log n*\log m)$.
 We implemented both approaches and the difference in performance was not notable in our tests.
@@ -464,7 +463,7 @@ For a number of threads that is not a power of 2, because of their implementatio
 We implemented three parallel algorithms for solving the convex hull problem and as a general remark we believe that all the considered algorithms are valid and allow good performance under different conditions (input size, shape and number of processing threads).
 One of the algorithms (\textit{HullTree}), however, doesn't work nicely with very large resulting hulls (like with circles as input sets).
 
-We were able to obtain superlinear speedup using randomly generated points in a squared interval %TODO more accurate world%
+We were able to obtain superlinear speedup using randomly generated points in a squared interval %TODO more accurate word%
 and close to linear with two of the three algorithms using a circle as input.
 
 Generally speaking, we could say the parallelization of the convex hull problem allows significant improvements in performance with larger input sets and with a not-too-large number of processing threads.
