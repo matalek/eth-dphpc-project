@@ -131,17 +131,29 @@ These convex hulls are disjoint and consequently there exist 2 outer common tang
 The idea behind the algorithm for computing these tangents is to alternately search for tangent endpoints between the two polygons, until both ends of the line segment simultaneously satisfy the tangency condition.
 %TODO this makes no sense
 
-Firstly, we find the upper tangent:
-	\begin{enumerate}
-		\item Start with the rightmost point of $A$ and the leftmost point of $B$ and consider the line connecting them as a candidate for the upper tangent line.
-		\item While the line is not tangent to both left and right hulls do:
-		\begin{enumerate}
-			\item If the line is not tangent to $A$ then move to the next counter-clockwise point from $A$ and check.
-			\item Else if the line is not tangent to $B$ then move to the next clockwise point on the $B$ and check.
-		\end{enumerate}
-	\end{enumerate}
-	
-We can find the lower tangent in the same way. 
+
+\begin{algorithm}
+\label{alg:common-tangent}
+\begin{program}
+\mbox{{\it Upper common tangent} algorithm:}
+\BEGIN \\ %
+  left\_point := A.rightmost\_point;
+  right\_point := B.leftmost\_point;
+\WHILE !(is\_tangent(A,A\_point, B\_point) \AND 
+\STATE{ (is\_tangent(B,A\_point, B\_point))} \DO
+	  \WHILE !is\_tangent(A,A\_point, B\_point) \DO
+		A\_point := A\_point.counter\_clockwise()	    
+	  \OD 
+	  \WHILE !is\_tangent(B,A\_point, B\_point) \DO
+		A\_point := A\_point.\_clockwise()	    
+	  \OD  
+ \OD	
+\END
+\end{program}
+\end{algorithm}
+
+This algorithm can be easily adapted to find lower hull.
+
 The whole algorithm has $O(n+m)$ time complexity, where $n,m$ are sizes of hulls. 
 %TODO algos have no complexity?
 
