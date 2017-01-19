@@ -365,11 +365,11 @@ first of all we fixed a shape and a number of points to be generated. Then we ra
 
 In order to have reliable experiments we repeated this process 100 times for each chosen combination of number of input points and shape.
 
-This whole process was done for 10$^4$, 10$^5$, 10$^6$ and 10$^7$ points with integral coordinates and different $x$-coordinates generated in a range R of 10$^9$ and as shapes we used square, disk and circle in the following way:
+This whole process was done for 10$^4$, 10$^5$, 10$^6$ and 10$^7$ points with integral coordinates and different $x$-coordinates generated in a range $R$ of 10$^9$ and as shapes we used square, disk and circle in the following way:
 
-{\bf Square}: Randomly generated points with coordinates in the range [-R,R]
+{\bf Square}: Randomly generated points with coordinates in the range [$-R$,$R$]
 
-{\bf Disk}: Randomly generated points with coordinates in the range [-R,R]. Points not included in the disk with radius R and center (0,0) were removed and regenerated.
+{\bf Disk}: Randomly generated points with coordinates in the range [$-R$,$R$]. Points not included in the disk with radius R and center (0,0) were removed and regenerated.
 
 {\bf Circle}: Randomly generated angles $\theta_n$ and created the points ($\lfloor R \cos(\theta_n)\rfloor$, $\lfloor R \sin(\theta_n)\rfloor$).
 
@@ -420,7 +420,7 @@ Here we analyze the performance of our algorithms with the different number of p
 
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/speedup_xeon_square_fixed_points.eps}
-  \caption{Speedup of the algorithms with the given number of threads with a square for 10$^6$ [sequential execution time: 0.3s] and 10$^7$ [sequential execution time: 3s] points\label{Threads speedup square}}
+  \caption{Speedup of the algorithms with the given number of threads with a square for 10$^6$ [avg. sequential execution time: 0.361s] and 10$^7$ [avg. sequential execution time: 3.1561s] points\label{Threads speedup square}}
 \end{figure}
 
 For square and disk we notice similar trends [Plot \ref{Threads speedup square}] speedup close to linear or even superlinear up to around 16 threads for 10$^6$ points and 32 for 10$^7$ points, then a general decrease in efficiency growth up to a point where our algorithms stop scaling and the speedup starts decreasing.
@@ -434,7 +434,7 @@ in fact for a high number of threads, while the first part of the algorithms (se
 
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/speedup_xeon_circle_fixed_points.eps}
-  \caption{Speedup of the algorithms with the given number of threads with a circle for 10$^6$ [sequential execution time: 0.3s] and 10$^7$ [sequential execution time: 3s] points\label{Threads speedup circle}}
+  \caption{Speedup of the algorithms with the given number of threads with a circle for 10$^6$ [avg. sequential execution time: 0.304s] and 10$^7$ [avg. sequential execution time: 3.085s] points\label{Threads speedup circle}}
 \end{figure}
 
 For circle [Plot \ref{Threads speedup circle}] the situation is again more complicated, since the \textit{HullTree} algorithm has a very bad performance, but the trend is very similar with a fast increase in efficiency followed by a close-to-steady state and a decrease in efficiency for a high number of threads.
