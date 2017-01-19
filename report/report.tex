@@ -75,17 +75,16 @@ For lower number of threads (up to 16) we also achieved superlinear speedup.
 
 In this paper, we study the two-dimensional convex hull problem, fundamental in computation geometry.
 
-We want to investigate parallel algorithms for sorted input in PRAM (Parallel Random Access Machine), implement them and compare them. It is important to distinguish between a convex hull problem with sorted or unsorted input, because they have different sequential complexity: $O(n)$ and $O(n\log n)$ respectively.
+We want to investigate parallel algorithms for sorted input in PRAM (Parallel Random Access Machine), implement them and compare them.
+It is important to distinguish between convex hull problems with sorted or unsorted input, because they have different sequential complexity: $O(n)$ and $O(n\log n)$ respectively.
 
-Our implementations are based on already existing algorithms.
-We want to explore the performance of the algorithms using up to 256 processors and different shapes for input data.
-We are interested in real performance including hidden constants and overhead caused by different data structures and structure of computations.
+Our implementations are based on already existing algorithms and we want to explore the performance of these algorithms using up to 256 processors and different shapes for input data.
 
 Our implementation is available online as an open-source project\footnote{\url{https://github.com/matalek/dphpc-project} (Retrieved: \formatdate{18}{1}{2017})}.
 
 \mypar{Related work} In order to build our algorithms we took inspiration from previously published papers.
 
-We chose 3 algorithms that meet our requirements: work with sorted input and use shared memory.
+We chose 3 algorithms meeting our requirements: work with sorted input and use shared memory.
 The number of processors that we used met the boundary for the second and third algorithms to be optimal. 
 
 The first algorithm we decided to implement is inspired by \cite{NaiveParallel} and it's further referred to as \textit{Naive} for the naivety of the concept behind it.
@@ -110,7 +109,7 @@ Clearly, by computing the upper hull and the lower hull and combining them, we c
 Also, any algorithm to compute the upper hull can easily be adapted to compute the lower hull.\\
 \mypar{Sorted input} 
 Set of input points ordered by $x$-coordinate. 
-For simplicity we assume that $x$-coordinates of the input set are unique.\\
+For simplicity we assume that $x$-coordinates of the points in the input set are unique.\\
 \mypar{Tangent} 
  A 2D line $L$ is tangent to a polygon $P$ iff it touches $P$ without crossing $P'$ boundary.\\
 \mypar{Common tangent} 
@@ -125,30 +124,31 @@ The considered sequential algorithm is \textit{Andrew's monotone chain convex hu
 
 \section{Parallel Algorithms}
 
-The purpose of this section is to review the common tangent line algorithm and present parallel algorithms for computing a convex hull of a sorted set of points.
+The purpose of this section is to review the common tangent line algorithm and present parallel algorithms for computing the convex hull of a sorted set of points.
 
 \mypar{Common tangent line algorithm}
-Let us consider convex hulls $A$ and $B$ so that every point from $A$ has $x$-coordinate lower than each point from $B$. 
-These convex hulls are disjoint and 2 outer common tangents exist. 
-The idea of the algorithm for computing them is to alternate searching for tangent endpoints between the two polygons, until both ends of the line segment simultaneously satisfy the tangency condition. 
+Let us consider convex hulls $A$ and $B$ so that each point of $A$ has $x$-coordinate smaller than each point of $B$. 
+These convex hulls are disjoint and consequently there exist 2 outer common tangents between them. 
+The idea behind the algorithm for computing these tangents is to alternately search for tangent endpoints between the two polygons, until both ends of the line segment simultaneously satisfy the tangency condition.
+%TODO this makes no sense
 
 Firstly, we find the upper tangent:
 	\begin{enumerate}
-		\item Start with the rightmost point of $A$ and the leftmost point of $B$ and consider a line passing through them as a candidate for the upper tangent line.
-		\item While the line is not tangent to both left and right halves do:
+		\item Start with the rightmost point of $A$ and the leftmost point of $B$ and consider the line connecting them as a candidate for the upper tangent line.
+		\item While the line is not tangent to both left and right hulls do:
 		\begin{enumerate}
 			\item If the line is not tangent to $A$ then move to the next counter-clockwise point from $A$ and check.
 			\item Else if the line is not tangent to $B$ then move to the next clockwise point on the $B$ and check.
 		\end{enumerate}
 	\end{enumerate}
 	
-We can find lower tangent in same way as the upper one. 
+We can find the lower tangent in the same way. 
 The whole algorithm has $O(n+m)$ time complexity, where $n,m$ are sizes of hulls. 
+%TODO algos have no complexity?
 
-For convex hulls consisting of big number of points it is better to replace the linear iterative search in step 2 with a binary search, improving time complexity to $O(\log n*\log m)$.
-Then we can find a candidate from possible range in a logarithmic number of steps.       
-We implemented both approaches and the difference in performance was not notable.
-Possible explanations are that the number of input points was too small or that the searched point was very close to the beginning to appreciate the benefits of binary search.
+For convex hulls consisting of a large number of points it is better to replace the linear iterative search in step 2 with a binary search, improving time complexity to $O(\log n*\log m)$.
+We implemented both approaches and the difference in performance was not notable in our tests.
+Some possible explanations are that the number of input points was too small or that the searched point was very close to the beginning to appreciate the benefits of binary search.
 
 \mypar{General schema}
 Algorithms presented here enable computing the upper hull of the input set. 
@@ -332,6 +332,7 @@ Finally, using parallel prefix computation we copy points from the resulting hul
 The time complexity for this algorithm, as shown in \cite{HullTree}, for $k \leq \frac{n}{\log n}$ is equal $O(\frac{n}{k})$ and is optimal.
 
 \section{Experimental results}\label{sec:exp}
+
 In order to evaluate the efficiency of our proposed algorithms, we tested them on sets of randomly generated points with different geometric shapes: square, disk and circle.
 
 Regarding scalability we tested both weak and strong scaling, changing the input size and the number of operating threads.
@@ -340,7 +341,7 @@ Concerning correctness we compared our results with the ones obtained using the 
 
 \mypar{Experimental setup}
 %TODO
-The platform we tested our algorithms with mounts Intel\textsuperscript{\textregistered} Xeon Phi processors. They are based on the Intel\textsuperscript{\textregistered} Many Integrated Core (MIC) architecture.
+The platform we tested our algorithms on mounts Intel\textsuperscript{\textregistered} Xeon Phi coprocessors. They are based on the Intel\textsuperscript{\textregistered} Many Integrated Core (MIC) architecture and have the following characteristics:
 
 \begin{table}[!ht]
 \begin{tabular}{|c|c|}
@@ -353,7 +354,7 @@ The platform we tested our algorithms with mounts Intel\textsuperscript{\textreg
 \hline Peak memory bandwidth [GB/s]		& 352\\
 \hline
 \end{tabular}
-\caption{Xeon Phi cluster specifications}
+\caption{Xeon Phi coprocessors specifications}
 \end{table}
 
 Our implementations are written in \textit{C++11} and make use of \textit{OpenMP} ver 4.0 \footnote{\url{http://www.openmp.org/}(Retrieved: \formatdate{18}{1}{2017})} for shared memory multithreading.
@@ -382,7 +383,7 @@ As a base case for speedup plots we used our implementation for \textit{Andrew's
 
 \mypar{Changing input size for fixed number of threads}
 Here we analyze the results of our algorithms when changing input size from 10$^4$ to 10$^7$ points. 
-We show performance with 8 processing threads to represent the trends of the algorithms, which is generally the same (with different speedups) for the tested number of threads.
+We show performance with 8 processing threads to represent the trends of the algorithms, which are generally the same (with different speedups) for the tested number of threads.
 
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/time_points.eps}
@@ -412,7 +413,7 @@ Hull tree nodes are dynamically allocated to not-continuous memory, which makes 
 It was necessary to allocate first some continuos memory by the thread creating this data structure, which provided some increase in the performance.
 
 \mypar{Changing number of threads for fixed input}
-Here we analyze the performance of our algorithms with the different number of processing threads under a fixed input size of 10$^6$ and 10$^7$ points.
+Here we analyze the performance of our algorithms with different numbers of processing threads under a fixed input of 10$^6$ and 10$^7$ points.
 
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/speedup_xeon_square_fixed_points.eps}
@@ -422,22 +423,22 @@ Here we analyze the performance of our algorithms with the different number of p
 For square and disk we notice similar trends [Plot \ref{Threads speedup square}] speedup close to linear or even superlinear up to around 16 threads for 10$^6$ points and 32 for 10$^7$ points, then a general decrease in efficiency growth up to a point where our algorithms stop scaling and the speedup starts decreasing.
 
 We can notice that that point is shifted to a higher number of threads when the input set is bigger.
-Clearly the higher the number of points, the higher the efficiency obtained by splitting the point set among threads.
+Clearly the larger the number of points, the higher the efficiency obtained by splitting the point set among threads.
 After that point, the overhead added by parallelism overweights the benefits introduced by having more processing units.
 
 This overhead is related both to the operating system, that has to create, allocate and manage a high number of threads, and to the algorithms themselves:
-in fact for a high number of threads, while the first part of the algorithms (separately compute convex hulls on split point sets) becomes very fast, the merging itself takes more time and the two processes start becoming unbalanced.
+in fact for a large number of threads, while the first part of the algorithms (separately compute convex hulls on split point sets) becomes very fast, the merging itself takes more time and the two processes start becoming unbalanced.
 
 \begin{figure}[!ht]\centering
   \includegraphics[scale=0.33]{./plots/speedup_xeon_circle_fixed_points.eps}
   \caption{Speedup of the algorithms with the given number of threads with a circle for 10$^6$ [avg. sequential execution time: 0.304s] and 10$^7$ [avg. sequential execution time: 3.085s] points\label{Threads speedup circle}}
 \end{figure}
 
-For circle [Plot \ref{Threads speedup circle}] the situation is again more complicated, since the \textit{HullTree} algorithm has a very bad performance, but the trend is very similar with a fast increase in efficiency followed by a close-to-steady state and a decrease in efficiency for a high number of threads.
+For circle [Plot \ref{Threads speedup circle}] the situation is again more complicated, since the \textit{HullTree} algorithm has a very bad performance, but the trend is very similar with a fast increase in efficiency followed by a close-to-steady state and a decrease in efficiency for a large number of threads.
 Quantitatively the overall efficiency of the parallel algorithms is lower than the one obtained with the square and that's probably because the more memory accesses needed and the parallel overhead make the algorithms behave worse.
 
 \mypar{Behavior with not optimal number of threads}
-% TODO(LorenzoMartini): what about Naive?
+%TODO (LorenzoMartini): what about Naive?
 For a number of threads that is not a power of 2, because of their implementations, \textit{Naive} and \textit{HullTree} algorithm behave like the closest lower power of two (i.e. with 35 threads they behave like they had 32).
 
 \textit{Simple} algorithm, instead, is not correlated to powers of two and the performance for any number of threads is consistent, as shown in plot \ref{SimpleParallel Total}.
@@ -455,7 +456,7 @@ One of the algorithms (\textit{HullTree}), however, doesn't work nicely with ver
 We were able to obtain superlinear speedup using randomly generated points in a squared interval %TODO more accurate world%
 and close to linear with two of the three algorithms using a circle as input.
 
-Generally speaking, we could say the parallelization of the convex hull problem allows significant improvements in performance with bigger input sets and with a not-too-large number of processing threads.
+Generally speaking, we could say the parallelization of the convex hull problem allows significant improvements in performance with larger input sets and with a not-too-large number of processing threads.
 
 Even though we only considered square, disk and circle as shapes for the input set, these algorithms can be used for any ordered input set with distinct $x$-coordinate and their performance should be similar to the one we had with the analyzed shapes (i.e. similar to circle's one if most of the points in the input set takes part to the final hull, else similar to disk and square's ones).
 
