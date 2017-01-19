@@ -437,7 +437,7 @@ in fact for a high number of threads, while the first part of the algorithms (se
 For circle [Plot \ref{Threads speedup circle}] the situation is again more complicated, since the \textit{HullTree} algorithm has a very bad performance, but the trend is very similar with a fast increase in efficiency followed by a close-to-steady state and a decrease in efficiency for a high number of threads.
 Quantitatively the overall efficiency of the parallel algorithms is lower than the one obtained with the square and that's probably because the more memory accesses needed and the parallel overhead make the algorithms behave worse.
 
-\mypar{Behavior with unoptimal number of threads}
+\mypar{Behavior with not optimal number of threads}
 % TODO(LorenzoMartini): what about Naive?
 For a number of threads that is not a power of 2, because of their implementations, \textit{Naive} and \textit{HullTree} algorithm behave like the closest lower power of two (i.e. with 35 threads they behave like they had 32).
 
