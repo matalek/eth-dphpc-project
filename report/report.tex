@@ -73,18 +73,16 @@ For lower number of threads (up to 16) we also achieved superlinear speedup.
 
 \section{Introduction}\label{sec:intro}
 
-In this paper, we study the two-dimensional convex hull problem, fundamental in computation geometry.
+In this paper, we analyze parallel algorithms for solving the two-dimensional convex hull problem, which is fundamental in computation geometry.
 
-We want to investigate parallel algorithms for sorted input in PRAM (Parallel Random Access Machine), implement them and compare them.
-It is important to distinguish between convex hull problems with sorted or unsorted input, because they have different sequential complexity: $O(n)$ and $O(n\log n)$ respectively.
-
-Our implementations are based on already existing algorithms and we want to explore the performance of these algorithms using up to 256 processors and different shapes for input data.
+More precisely, we study three already existing parallel algorithms for sorted input in PRAM (Parallel Random Access Machine) by implementing them and analyzing their performance under different inputs (different shapes and number of points) and using up to 256 threads for parallel processing.
+It is important to distinguish between convex hull problems with sorted and unsorted input, since they have different sequential complexity: $O(n)$ and $O(n\log n)$ respectively.
 
 Our implementation is available online as an open-source project\footnote{\url{https://github.com/matalek/dphpc-project} (Retrieved: \formatdate{18}{1}{2017})}.
 
 \mypar{Related work} In order to build our algorithms we took inspiration from previously published papers.
 
-We chose 3 algorithms meeting our requirements: work with sorted input and use shared memory.
+We chose 3 algorithms meeting our requirements work with sorted input and use shared memory.
 The number of processors that we used met the boundary for the second and third algorithms to be optimal. 
 
 The first algorithm we decided to implement is inspired by \cite{NaiveParallel} and it's further referred to as \textit{Naive} for the naivety of the concept behind it.
