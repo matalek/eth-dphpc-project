@@ -89,10 +89,13 @@ We chose 3 algorithms that meet our requirements: work with sorted input and use
 The number of processors that we used met the boundary for the second and third algorithms to be optimal. 
 
 The first algorithm we decided to implement is inspired by \cite{NaiveParallel}, further referred to as \textit{Naive} for the naivety of the concept behind it.
+It works in PRAM EREW model.
 
-The second one is derived from \cite{SimpleParallel}, further referred to as \textit{Simple} according to the title of the paper we derived it from.   
+The second one is derived from \cite{SimpleParallel}, further referred to as \textit{Simple} according to the title of the paper we derived it from.
+It works in PRAM CREW model.
  
 The third one appears in \cite{HullTree}, further referred to as \textit{HullTree} in relation to the data structure it is based on.
+It works in PRAM CREW model.
      
 \section{Background: Convex hull problem}\label{sec:background}
 
