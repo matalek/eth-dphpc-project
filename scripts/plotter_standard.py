@@ -2,10 +2,10 @@
 import Algorithm
 import operator
 import csv
-import sys
 import numpy as np
 import matplotlib.pyplot as plt
-import math
+import scipy as sp
+import scipy.stats
 
 # Usage ./plotter_benchmark.py
 # -a <algorithms to compare in the format <algo1:num_of_threads algo2:num_of_threads algo3:num_of_threads ...>>
@@ -22,6 +22,15 @@ CONST_MACHINE = 'xeon'
 
 CONST_SOURCE_FILE = ('./log_files/log_files_' + CONST_MACHINE + '/' + CONST_MACHINE + '_' + CONST_SHAPE + '/' +
                      CONST_MACHINE + '_' + CONST_SHAPE + '_')
+
+
+# calculate CI
+def mean_confidence_interval(data, confidence=0.95):
+    a = 1.0*np.array(data)
+    n = len(a)
+    m, se = np.mean(a), scipy.stats.sem(a)
+    h = se * sp.stats.t._ppf((1+confidence)/2., n-1)
+    return h
 
 
 # Create the mapping for algorithms {algorithms, execution_times}
@@ -150,7 +159,7 @@ def plot_execution_time():
             # Make axis start from 0
             num_of_input_points = [0]
             mean_execution_time = [0.0]
-            stdv = [0.0]
+            ci = [0.0]
 
             # Sort in increasing number of points
             sorted_num_of_points = sorted(curr_algorithm.execution_time.items(), key=operator.itemgetter(0))
@@ -162,7 +171,7 @@ def plot_execution_time():
                 measured_execution_time = curr_algorithm.execution_time[curr_num_of_points]
 
                 mean_execution_time.append(float(np.average(measured_execution_time) / (10 ** 6)))
-                stdv.append(float(np.std(measured_execution_time) / (10 ** 6)))
+                ci.append(float(mean_confidence_interval(measured_execution_time) / (10 ** 6)))
 
             if algorithm_name == 'Sequential:1':
                 my_label = 'Sequential'
@@ -170,7 +179,7 @@ def plot_execution_time():
                 my_label = algorithm_name.replace("_", " ").replace(":8", "")
 
             plt.loglog(num_of_input_points, mean_execution_time, CONST_COLORS[count] + '--', label=my_label)
-            plt.errorbar(num_of_input_points, mean_execution_time, stdv, ecolor='k', fmt='|')
+            plt.errorbar(num_of_input_points, mean_execution_time, ci, ecolor=CONST_COLORS[count + 4], fmt='|')
             count += 1
 
         subplot_index += 1
@@ -211,6 +220,7 @@ def plot_speedup():
 
                 curr_algorithm = algorithms[algorithm_name]
                 speedup = []
+                ci = []
                 num_of_input_points = []
 
                 # Sort in increasing number of points
@@ -221,22 +231,31 @@ def plot_speedup():
                     num_of_input_points.append(curr_num_of_points)
 
                     sequential_exec_time = sequential_algorithm.execution_time[curr_num_of_points]
-                    alg_execution_time = curr_algorithm.execution_time[curr_num_of_points]
+                    alg_execution_time = np.array(curr_algorithm.execution_time[curr_num_of_points])
 
-                    mean_sequential_exec_time = np.average(sequential_exec_time)
-                    stdv = np.std(alg_execution_time)
-                    mean_execution_time = np.average(alg_execution_time)
+                    # Append fake data if measurements are not equals in dimension
+                    alg_size = len(alg_execution_time)
+                    seq_size = len(sequential_exec_time)
 
-                    sp = mean_sequential_exec_time / mean_execution_time
+                    for i in range(0, alg_size - seq_size):
+                        sequential_exec_time.append(np.average(sequential_exec_time))
 
-                    if sp > maximum_sp:
-                        maximum_sp = sp
+                    sequential_exec_time = np.array(sequential_exec_time)
+                    curr_speedup = np.divide(sequential_exec_time, alg_execution_time)
 
-                    speedup.append(mean_sequential_exec_time / mean_execution_time)
+                    mean_speedup = sp.stats.hmean(curr_speedup)
+                    curr_ci = mean_confidence_interval(curr_speedup)
+
+                    if mean_speedup > maximum_sp:
+                        maximum_sp = mean_speedup
+
+                    speedup.append(mean_speedup)
+                    ci.append(curr_ci)
 
                 my_label = algorithm_name.replace("_", " ").replace(":8", "")
 
                 plt.semilogx(num_of_input_points, speedup, CONST_COLORS[count] + '--', label=my_label)
+                plt.errorbar(num_of_input_points, speedup, ci, fmt='|', ecolor=CONST_COLORS[count + 4])
                 count += 1
 
         subplot_index += 1

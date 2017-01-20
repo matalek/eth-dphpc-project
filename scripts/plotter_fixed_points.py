@@ -3,7 +3,8 @@ import Algorithm
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
-import math
+import scipy as sp
+import scipy.stats
 
 # Usage ./plotter_benchmark.py
 # -a <algorithms to compare in the format <algo1:num_of_threads algo2:num_of_threads algo3:num_of_threads ...>>
@@ -15,11 +16,20 @@ CONST_ALGORITHMS_NAMES = ['SimpleParallel', 'NaiveParallel', 'HullTree']
 CONST_POINTS = 10000000
 CONST_THREADS = [2, 4, 8, 16, 32, 64, 128, 256]
 CONST_X_AXIS = np.arange(1, len(CONST_THREADS) + 1)
-CONST_SHAPE = 'square'
+CONST_SHAPE = 'circle'
 CONST_MACHINE = 'xeon'
 
 CONST_SOURCE_FILE = ('./log_files/log_files_' + CONST_MACHINE + '/' + CONST_MACHINE + '_' + CONST_SHAPE + '/' +
                      CONST_MACHINE + '_' + CONST_SHAPE + '_')
+
+
+# calculate CI
+def mean_confidence_interval(data, confidence=0.95):
+    a = 1.0*np.array(data)
+    n = len(a)
+    m, se = np.mean(a), scipy.stats.sem(a)
+    h = se * sp.stats.t._ppf((1+confidence)/2., n-1)
+    return h
 
 
 # Create the mapping for algorithms {algorithms, execution_times}
@@ -148,7 +158,7 @@ def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
                 measured_execution_time = curr_algorithm.execution_time[points]
 
                 mean_execution_time.append(float(np.average(measured_execution_time) / (10 ** 6)))
-                stdv.append(float(np.std(measured_execution_time) / (10 ** 6)))
+                stdv.append(float(mean_confidence_interval(measured_execution_time) / (10 ** 6)))
 
             plt.plot(CONST_X_AXIS, mean_execution_time, CONST_COLORS[count] + '--', label=my_label)
             plt.errorbar(CONST_X_AXIS, mean_execution_time, stdv, fmt='|', ecolor='k')
@@ -170,7 +180,7 @@ def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
 # Plot speedup for fixed num of points, num of threads on x axis -------------------------------------------------------
 def plot_speedup_fixed_points(algorithms, sequential_algorithm):
     plt.figure(num=None, figsize=(10, 6), facecolor='w', edgecolor='k')
-    plt.suptitle("Speedup")
+    plt.suptitle("Speedup for circle")
     plt.subplot(121)
     plt.ylabel('Speedup')
     for i in [121, 122]:
@@ -182,42 +192,42 @@ def plot_speedup_fixed_points(algorithms, sequential_algorithm):
     subplot_index = 121
     for points in [1000000, 10000000]:
 
-        plt.subplot(subplot_index)
+        ax = plt.subplot(subplot_index)
+        ax.set_yscale("log", nonposy='clip')
         plt.title(str(points).replace('000000', '') + 'M points')
         sequential_exec_time = sequential_algorithm.execution_time[points]
-        mean_sequential_exec_time = float(np.average(sequential_exec_time) / (10 ** 6))
-        print(mean_sequential_exec_time)
-
+        mean_sequential_exec_time = float(np.average(sequential_exec_time))
+        plt.plot(CONST_X_AXIS, CONST_THREADS, 'k-', label='n_threads')
         count = 0
         for algorithm_name in CONST_ALGORITHMS_NAMES:
 
             speedup = []
-            stdv = []
+            ci = []
             my_label = algorithm_name
             for n_threads in CONST_THREADS:
                 curr_algorithm = algorithms[algorithm_name + ':' + str(n_threads)]
                 measured_execution_time = curr_algorithm.execution_time[points]
 
-                if algorithm_name == 'HullTree' and n_threads ==256 and points == 1000000:
-                    speedup.append(0.25)
-                else:
-                    speedup.append(mean_sequential_exec_time / float(np.average(measured_execution_time) / (10 ** 6)))
+                # if algorithm_name == 'HullTree' and n_threads ==256 and points == 1000000:
+                #     speedup.append(0.25)
+                # else:
+                speedup_array = np.divide(mean_sequential_exec_time, measured_execution_time)
 
-            plt.semilogy(CONST_X_AXIS, speedup, CONST_COLORS[count] + '--', label=my_label, basey=2)
-            #plt.plot(CONST_X_AXIS, speedup, CONST_COLORS[count] + '--', label=my_label)
+                speedup.append(sp.stats.hmean(speedup_array))
+                ci.append(2*mean_confidence_interval(speedup_array))
+
+            plt.plot(CONST_X_AXIS, speedup, CONST_COLORS[count] + '--', label=my_label)
+            plt.errorbar(CONST_X_AXIS, speedup, yerr=ci, ecolor=CONST_COLORS[count + 4], fmt='|')
             count += 1
 
-        #plt.plot(CONST_X_AXIS, CONST_THREADS, 'k-', label='n_threads')
-        plt.semilogy(CONST_X_AXIS, CONST_THREADS, 'k-', label='n_threads', basey=2)
         plt.xticks(CONST_X_AXIS, CONST_THREADS)
-        #plt.yticks(CONST_X_AXIS, CONST_THREADS)
         plt.yticks([0.25, 0.5, 1] + CONST_THREADS, [0.25, 0.5, 1] + CONST_THREADS)
         plt.ylim([0.25, 256])
         plt.grid(True)
         subplot_index += 1
 
     plt.legend(loc=4)
-    #plt.savefig('./logs_plots/speedup_' + CONST_MACHINE + '_' + CONST_SHAPE + '_' + str(CONST_POINTS) + '.eps', format='eps')
+    plt.savefig('./logs_plots/speedup_' + CONST_MACHINE + '_' + CONST_SHAPE + '_' + str(CONST_POINTS) + '.eps', format='eps')
     plt.show()
     plt.clf()
 
