@@ -32,7 +32,7 @@ def build_algorithms():
 
         for num_of_threads in CONST_THREADS:
             algorithm = Algorithm.Algorithm(algorithm_name + ':' + str(num_of_threads))
-            
+
             # Overall time
             with open(CONST_SOURCE_FILE + algorithm.name.replace("/", "_").replace(":", "_") + '.csv', 'rb') as f:
                 first_row = True
@@ -95,7 +95,7 @@ def build_algorithms():
     # Build Sequential algorithm
     algorithm = Algorithm.Algorithm('Sequential:1')
     first_row = True
-    
+
     with open(CONST_SOURCE_FILE + algorithm.name.replace("/", "_").replace(":", "_") + '.csv', 'rb') as f:
         reader = csv.reader(f)
         for row in reader:
@@ -336,9 +336,9 @@ def plot_box_time_fixed_points(algorithms):
 
 # Plot execution time for fixed num of points, num of threads on x axis BOXPLOTS all algos ------------------------------
 def plot_box_all(algorithms):
-    
+
     colors = ['b', 'r', 'g']
-    
+
     count = 0
     fig, ax = plt.subplots()
     plt.title('Performance comparison')

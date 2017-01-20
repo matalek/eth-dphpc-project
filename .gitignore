@@ -36,3 +36,13 @@ log*
 
 # Ignore Mac OS files
 .DS_Store
+
+# Ignore auxiliary latex files
+report/*.pdf
+report/*.log
+report/*.dvi
+report/*.synctex.gz
+report/*.aux
+report/*.bbl
+report/*.blg
+report/report.ps

@@ -86,7 +86,6 @@ int main(int argc, char* argv[]) {
 			// Reading points.
 			vector<POINT> points;
 
-			// TODO call correct generator based on argv
 			points = generator->generate_points(n);
 
 			vector<POINT*> points_pointers(n);

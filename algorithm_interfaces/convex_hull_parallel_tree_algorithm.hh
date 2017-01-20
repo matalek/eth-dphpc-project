@@ -50,7 +50,6 @@ public:
 			}
 		}
 
-
 		ConvexHullAlgorithm::sequential_time =  duration_cast<microseconds>( high_resolution_clock::now() - start_time).count();
 
 		int level = threads_rounded >> 1;

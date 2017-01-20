@@ -4,7 +4,7 @@ import csv
 import sys
 
 # Usage ./algorithm_comparator.py
-# -c <number of different combinations of number of points> 
+# -c <number of different combinations of number of points>
 # -w <width of steps> or -m <base of the magnitude comparison (ex 10 for 100, 1000, 10000 ...)>
 # -s <starting number of points>
 # -r <range of points coordinates>
@@ -52,7 +52,6 @@ def chosen_width_type():
     print 'no'
     return '-m'
 
-
 # Check user input correctness
 def check_input_correctness():
     if len(sys.argv) <= 15:
@@ -83,23 +82,6 @@ def check_input_correctness():
         print 'ERROR in usage, please provide algorithms at the end of arguments'
         return False
     return True
-
-
-# Insert function check_output if not present
-if "check_output" not in dir(subprocess ):
-    def f(*popenargs, **kwargs):
-        if 'stdout' in kwargs:
-            raise ValueError('stdout argument not allowed, it will be overridden.')
-        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
-        output, unused_err = process.communicate()
-        retcode = process.poll()
-        if retcode:
-            cmd = kwargs.get("args")
-            if cmd is None:
-                cmd = popenargs[0]
-            raise subprocess.CalledProcessError(retcode, cmd)
-        return output
-    subprocess.check_output = f
 
 # Start program
 if not check_input_correctness():
@@ -197,4 +179,3 @@ for num_of_points in points:
 print('\n--------------------------------------\n| ----------------------------------- |\n'
       '| |COMPARISON COMPLETED SUCCESSFULLY| |'
       '\n| ----------------------------------- |\n--------------------------------------\n')
-
