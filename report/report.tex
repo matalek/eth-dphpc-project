@@ -5,9 +5,12 @@
 
 \documentclass[letterpaper]{article}
 
-\usepackage{spconf,amsmath,amssymb,graphicx,amsthm,newlfont,program,caption,subcaption,hyperref}
+\usepackage{spconf,amsmath,amssymb,graphicx,amsthm,newlfont,program,caption,subcaption}
 \usepackage[nodayofweek,level]{datetime}
 \usepackage{textcomp}
+%\usepackage[hyphens]{url}
+\usepackage[hyphens]{url}
+\usepackage{hyperref}
 
 % Example definitions.
 % --------------------
@@ -23,6 +26,8 @@
 \newtheorem{observation}{Observation}
 
 \newtheorem{algorithm}{Algorithm}
+
+%\PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
 
 
 % Title.
@@ -78,7 +83,7 @@ In this paper, we analyze parallel algorithms for solving the two-dimensional co
 More precisely, we study three already existing parallel algorithms for sorted input in PRAM (Parallel Random Access Machine) by implementing them and analyzing their performance under different inputs (different shapes and number of points) and using up to 256 threads for parallel processing.
 It is important to distinguish between convex hull problems with sorted and unsorted input, since they have different sequential complexity: $O(n)$ and $O(n\log n)$ respectively.
 
-Our implementation is available online as an open-source project\footnote{\url{https://github.com/matalek/dphpc-project} (Retrieved: \formatdate{18}{1}{2017})}.
+Our implementation is available online as an open-source project \cite{GitHub}.
 
 \mypar{Related work}
 In order to build our algorithms we took inspiration from previously published papers.
@@ -344,11 +349,11 @@ In order to evaluate the efficiency of our proposed algorithms, we tested them o
 
 Regarding scalability we tested both weak and strong scaling, changing the input size and the number of operating threads.
 
-Concerning correctness we compared our results with the ones obtained using the Graham-Andrew's algorithm implementation available in the library \textit{CGAL}\footnote{\url{http://www.cgal.org/}(Retrieved: \formatdate{18}{1}{2017})}.
+Concerning correctness we compared our results with the ones obtained using the Graham-Andrew's algorithm implementation available in the library \textit{CGAL}\cite{CGAL}.
 
 \mypar{Experimental setup}
-The platform we tested our algorithms on mounts Intel\textsuperscript{\textregistered} Xeon Phi coprocessors.
-They are based on the Intel\textsuperscript{\textregistered} Many Integrated Core (MIC) architecture.
+The platform we tested our algorithms on mounts Intel Xeon Phi coprocessors.
+They are based on the Intel Many Integrated Core (MIC) architecture.
 The following characteristics have been retrieved by reading from \path{/proc/cpuinfo} file:
 
 \begin{table}[!ht]
@@ -362,11 +367,10 @@ The following characteristics have been retrieved by reading from \path{/proc/cp
 \hline Peak memory bandwidth [GB/s]		& 352\\
 \hline
 \end{tabular}
-\caption{Intel\textsuperscript{\textregistered} Xeon Phi coprocessors specifications\protect\footnotemark}
+\caption{Intel Xeon Phi coprocessors specifications \cite{XeonPhi}}
 \end{table}
-\footnotetext{\url{http://www.intel.com/content/www/us/en/high-performance-computing/high-performance-xeon-phi-coprocessor-brief.html}(Retrieved: \formatdate{18}{1}{2017}) }
 
-Our implementations are written in \textit{C++11} and make use of \textit{OpenMP} ver 4.0 \footnote{\url{http://www.openmp.org/}(Retrieved: \formatdate{18}{1}{2017})} for shared memory multithreading.
+Our implementations are written in \textit{C++11} and make use of \textit{OpenMP} ver 4.0 \cite{OpenMP} for shared memory multithreading.
 Our applications were compiled using \textit{icc} version 15.0.0 with the flag \textit{-O2} using also the -mmic flag to fit the architecture.
 
 This is roughly how our experiments worked:
