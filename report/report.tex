@@ -347,7 +347,9 @@ Regarding scalability we tested both weak and strong scaling, changing the input
 Concerning correctness we compared our results with the ones obtained using the Graham-Andrew's algorithm implementation available in the library \textit{CGAL}\footnote{\url{http://www.cgal.org/}(Retrieved: \formatdate{18}{1}{2017})}.
 
 \mypar{Experimental setup}
-The platform we tested our algorithms on mounts Intel\textsuperscript{\textregistered} Xeon Phi coprocessors. They are based on the Intel\textsuperscript{\textregistered} Many Integrated Core (MIC) architecture and have the following characteristics:
+The platform we tested our algorithms on mounts Intel\textsuperscript{\textregistered} Xeon Phi coprocessors.
+They are based on the Intel\textsuperscript{\textregistered} Many Integrated Core (MIC) architecture.
+The following characteristics have been retrieved by reading from \path{/proc/cpuinfo} file:
 
 \begin{table}[!ht]
 \begin{tabular}{|c|c|}
