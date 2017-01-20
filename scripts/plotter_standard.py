@@ -197,7 +197,7 @@ def plot_speedup():
     plt.suptitle("Speedup")
     plt.subplot(121)
     plt.title('Square')
-    plt.ylabel('speedup')
+    plt.ylabel('Speedup')
     plt.subplot(122)
     plt.title('Circle')
     for i in [121, 122]:
