@@ -424,7 +424,7 @@ Vectorization used on Xeon Phi speeds up this process significantly and therefor
 
 The bad performance of the \textit{HullTree} algorithm can be attributed to the necessity of dynamically allocating a lot of data connected with the underlying data structure.
 Hull tree nodes are dynamically allocated to not-continuous memory, which makes the algorithm slower.
-It was necessary to allocate first some continuos memory by the thread creating this data structure, which provided some increase in the performance.
+It was necessary to allocate first some continuous memory by the thread creating this data structure, which provided some increase in the performance.
 
 \mypar{Changing number of threads for fixed input}
 Here we analyze the performance of our algorithms with different numbers of processing threads under a fixed input of 10$^6$ and 10$^7$ points.
@@ -438,7 +438,7 @@ For square and disk we notice similar trends [Plot \ref{Threads speedup square}]
 
 We can notice that that point is shifted to a higher number of threads when the input set is bigger.
 Clearly the larger the number of points, the higher the efficiency obtained by splitting the point set among threads.
-After that point, the overhead added by parallelism overweights the benefits introduced by having more processing units.
+After that point, the overhead added by parallelism outbalances the benefits introduced by having more processing units.
 
 This overhead is related both to the operating system, that has to create, allocate and manage a high number of threads, and to the algorithms themselves:
 in fact for a large number of threads, while the first part of the algorithms (separately compute convex hulls on split point sets) becomes very fast, the merging itself takes more time and the two processes start becoming unbalanced.
