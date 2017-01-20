@@ -15,7 +15,7 @@ CONST_ALGORITHMS_NAMES = ['SimpleParallel', 'NaiveParallel', 'HullTree']
 CONST_POINTS = 10000000
 CONST_THREADS = [2, 4, 8, 16, 32, 64, 128, 256]
 CONST_X_AXIS = np.arange(1, len(CONST_THREADS) + 1)
-CONST_SHAPE = 'circle'
+CONST_SHAPE = 'square'
 CONST_MACHINE = 'xeon'
 
 CONST_SOURCE_FILE = ('./log_files/log_files_' + CONST_MACHINE + '/' + CONST_MACHINE + '_' + CONST_SHAPE + '/' +
@@ -116,29 +116,6 @@ def build_algorithms():
     return algorithms
 
 
-# Compute theoretical boundaries
-def calculate_boundary(algorithm_name):
-
-    # Uncomment appropriate line depending on input data shape
-    if CONST_SHAPE == 'square':
-        expected_size = lambda n: math.log(n, 2)
-    elif CONST_SHAPE == 'disk':
-        expected_size = lambda n: 100 * n**(1/3)
-    elif CONST_SHAPE == 'circle':
-        expected_size = lambda n: n
-
-    if algorithm_name == 'NaiveParallel':
-        overhead = lambda threads: 2 * math.log(threads) * expected_size(CONST_POINTS / threads)
-    elif algorithm_name == 'SimpleParallel':
-        overhead = lambda threads: 2 * threads * math.log(CONST_POINTS / threads, 2)**2
-    elif algorithm_name == 'HullTree':
-        overhead = lambda threads: 10 * math.log(threads, 2) + math.log(CONST_POINTS / threads, 2)
-
-    boundary = lambda threads : CONST_POINTS / (CONST_POINTS / threads + overhead(threads))
-
-    return map(boundary, CONST_THREADS)
-
-
 # Plot execution time for fixed num of points, num of threads on x axis ------------------------------------------------
 def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
     plt.figure(num=None, figsize=(10, 6), facecolor='w', edgecolor='k')
@@ -185,7 +162,7 @@ def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
 
     plt.legend(loc=1)
     #plt.ylim([0,3.5])
-    plt.savefig('./logs_plots/' + CONST_MACHINE + '_' + CONST_SHAPE + '_' + str(CONST_POINTS) + '.eps', format='eps')
+    #plt.savefig('./logs_plots/' + CONST_MACHINE + '_' + CONST_SHAPE + '_' + str(CONST_POINTS) + '.eps', format='eps')
     plt.show()
     plt.clf()
 
@@ -209,6 +186,7 @@ def plot_speedup_fixed_points(algorithms, sequential_algorithm):
         plt.title(str(points).replace('000000', '') + 'M points')
         sequential_exec_time = sequential_algorithm.execution_time[points]
         mean_sequential_exec_time = float(np.average(sequential_exec_time) / (10 ** 6))
+        print(mean_sequential_exec_time)
 
         count = 0
         for algorithm_name in CONST_ALGORITHMS_NAMES:
@@ -239,7 +217,7 @@ def plot_speedup_fixed_points(algorithms, sequential_algorithm):
         subplot_index += 1
 
     plt.legend(loc=4)
-    plt.savefig('./logs_plots/speedup_' + CONST_MACHINE + '_' + CONST_SHAPE + '_' + str(CONST_POINTS) + '.eps', format='eps')
+    #plt.savefig('./logs_plots/speedup_' + CONST_MACHINE + '_' + CONST_SHAPE + '_' + str(CONST_POINTS) + '.eps', format='eps')
     plt.show()
     plt.clf()
 

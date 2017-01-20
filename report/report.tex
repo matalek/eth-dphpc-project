@@ -347,8 +347,7 @@ Regarding scalability we tested both weak and strong scaling, changing the input
 Concerning correctness we compared our results with the ones obtained using the Graham-Andrew's algorithm implementation available in the library \textit{CGAL}\footnote{\url{http://www.cgal.org/}(Retrieved: \formatdate{18}{1}{2017})}.
 
 \mypar{Experimental setup}
-%TODO
-The platform we tested our algorithms on mounts Intel\textsuperscript{\textregistered} Xeon Phi coprocessors. They are based on the Intel\textsuperscript{\textregistered} Many Integrated Core (MIC) architecture and have the following characteristics:
+The platform we tested our algorithms on mounts Intel\textsuperscript{\textregistered} Xeon Phi coprocessors. They are based on the Intel\textsuperscript{\textregistered} Many Integrated Core (MIC) architecture and have the following characteristics \footnote{\url{http://www.intel.com/content/www/us/en/high-performance-computing/high-performance-xeon-phi-coprocessor-brief.html}(Retrieved: \formatdate{18}{1}{2017}) }
 
 \begin{table}[!ht]
 \begin{tabular}{|c|c|}
@@ -361,7 +360,7 @@ The platform we tested our algorithms on mounts Intel\textsuperscript{\textregis
 \hline Peak memory bandwidth [GB/s]		& 352\\
 \hline
 \end{tabular}
-\caption{Xeon Phi coprocessors specifications}
+\caption{Intel\textsuperscript{\textregistered} Xeon Phi coprocessors specifications}
 \end{table}
 
 Our implementations are written in \textit{C++11} and make use of \textit{OpenMP} ver 4.0 \footnote{\url{http://www.openmp.org/}(Retrieved: \formatdate{18}{1}{2017})} for shared memory multithreading.
@@ -445,14 +444,13 @@ For circle [Plot \ref{Threads speedup circle}] the situation is again more compl
 Quantitatively the overall efficiency of the parallel algorithms is lower than the one obtained with the square and that's probably because the more memory accesses needed and the parallel overhead make the algorithms behave worse.
 
 \mypar{Behavior with not optimal number of threads}
-%TODO (LorenzoMartini): what about Naive?
-For a number of threads that is not a power of 2, because of their implementations, \textit{Naive} and \textit{HullTree} algorithm behave like the closest lower power of two (i.e. with 35 threads they behave like they had 32).
+For a number of threads that is not a power of 2, because of its implementation, \textit{HullTree} algorithm behaves like the closest lower power of two (i.e. with 35 threads it behaves like if it had 32).
 
-\textit{Simple} algorithm, instead, is not correlated to powers of two and the performance for any number of threads is consistent, as shown in plot \ref{SimpleParallel Total}.
+\textit{Simple} and \textit{Naive} algorithms, instead, still work well: the former because it's not related to powers of 2 in any one and the latter thanks to the creation of dummy nodes. Their performance is consistent, as shown in plot \ref{Speedup Total}, having little drops around multiples of 61 threads, where we start having hyperthreading.
 
 \begin{figure}[!ht]\centering
-  \includegraphics[scale=0.33]{./plots/total.eps}
-  \caption{Execution time of Simple algorithm for a square of 10$^7$ points\label{SimpleParallel Total}}
+  \includegraphics[scale=0.33]{./plots/total_speed.eps}
+  \caption{Speedup of Simple and Naive algorithms for a square of 10$^7$ points [avg sequential execution time: 3.1561s]\label{Speedup Total}}
 \end{figure}
 
 \section{Conclusions}
@@ -460,8 +458,7 @@ For a number of threads that is not a power of 2, because of their implementatio
 We implemented three parallel algorithms for solving the convex hull problem and as a general remark we believe that all the considered algorithms are valid and allow good performance under different conditions (input size, shape and number of processing threads).
 One of the algorithms (\textit{HullTree}), however, doesn't work nicely with very large resulting hulls (like with circles as input sets).
 
-We were able to obtain superlinear speedup using randomly generated points in a squared interval %TODO more accurate word%
-and close to linear with two of the three algorithms using a circle as input.
+We were able to obtain superlinear speedup using randomly generated points in a square and close to linear with two of the three algorithms using a circle as input.
 
 Generally speaking, we could say the parallelization of the convex hull problem allows significant improvements in performance with larger input sets and with a not-too-large number of processing threads.
 

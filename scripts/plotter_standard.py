@@ -170,7 +170,7 @@ def plot_execution_time():
                 my_label = algorithm_name.replace("_", " ").replace(":8", "")
 
             plt.loglog(num_of_input_points, mean_execution_time, CONST_COLORS[count] + '--', label=my_label)
-            # plt.errorbar(num_of_input_points, mean_execution_time, stdv, ecolor=colors[count], fmt='|')
+            plt.errorbar(num_of_input_points, mean_execution_time, stdv, ecolor='k', fmt='|')
             count += 1
 
         subplot_index += 1
@@ -224,6 +224,7 @@ def plot_speedup():
                     alg_execution_time = curr_algorithm.execution_time[curr_num_of_points]
 
                     mean_sequential_exec_time = np.average(sequential_exec_time)
+                    stdv = np.std(alg_execution_time)
                     mean_execution_time = np.average(alg_execution_time)
 
                     sp = mean_sequential_exec_time / mean_execution_time
