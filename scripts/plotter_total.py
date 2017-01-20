@@ -3,6 +3,8 @@ import Algorithm
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy as sp
+import scipy.stats
 
 # Usage ./plotter_benchmark.py
 # -a <algorithms to compare in the format <algo1:num_of_threads algo2:num_of_threads algo3:num_of_threads ...>>
@@ -22,6 +24,15 @@ CONST_MACHINE = 'xeon'
 
 CONST_SOURCE_FILE = ('./log_files/log_files_' + CONST_MACHINE + '/' + CONST_MACHINE + '_' + CONST_SHAPE + '_complete/' +
                      CONST_MACHINE + '_' + CONST_SHAPE + '_')
+
+
+# calculate CI
+def mean_confidence_interval(data, confidence=0.95):
+    a = 1.0*np.array(data)
+    n = len(a)
+    m, se = np.mean(a), scipy.stats.sem(a)
+    h = se * sp.stats.t._ppf((1+confidence)/2., n-1)
+    return h
 
 
 # Create the mapping for algorithms {algorithms, execution_times}
@@ -179,37 +190,35 @@ def plot_speedup_fixed_points(algorithms, sequential_algorithm):
     plt.figure(num=None, figsize=(10, 6), facecolor='w', edgecolor='k')
 
     sequential_exec_time = sequential_algorithm.execution_time[CONST_POINTS]
-    mean_sequential_exec_time = float(np.average(sequential_exec_time) / (10 ** 6))
+    mean_sequential_exec_time = float(np.average(sequential_exec_time))
 
     plt.title("Speedup")
     plt.ylabel('Speedup')
     plt.xlabel('Number of threads')
 
+    plt.plot(CONST_X_AXIS, CONST_THREADS, 'k-', label='n_threads')
+
     count = 0
     for algorithm_name in CONST_ALGORITHMS_NAMES:
 
         speedup = []
-        stdv = []
+        ci = []
         my_label = algorithm_name
         for n_threads in CONST_THREADS:
             curr_algorithm = algorithms[algorithm_name + ':' + str(n_threads)]
             measured_execution_time = curr_algorithm.execution_time[CONST_POINTS]
+            speedup_array = np.divide(mean_sequential_exec_time, measured_execution_time)
+            speedup.append(sp.stats.hmean(speedup_array))
 
-            speedup.append(mean_sequential_exec_time / float(np.average(measured_execution_time) / (10 ** 6)))
+            ci.append(mean_confidence_interval(speedup_array))
 
-        # plt.semilogy(CONST_X_AXIS, speedup, CONST_COLORS[count] + '--', label=my_label, basey=2)
         plt.plot(CONST_X_AXIS, speedup, CONST_COLORS[count] + '--', label=my_label)
-        # plt.loglog(CONST_X_AXIS, speedup, CONST_COLORS[count] + '--', label=my_label)
+        plt.errorbar(CONST_X_AXIS, speedup, ci, ecolor=CONST_COLORS[count + 4], fmt='|')
         count += 1
 
-    plt.plot(CONST_X_AXIS, CONST_THREADS, 'k-', label='n_threads')
-    # plt.semilogy(CONST_X_AXIS, CONST_THREADS, 'k-', label='n_threads', basey=2)
-    # plt.loglog(CONST_X_AXIS, CONST_THREADS, 'k-', label='n_threads')
     ticks = np.arange(0,257,32)
     plt.xlim([0, 256])
     plt.xticks(ticks, ticks, rotation='vertical')
-    #plt.yticks(CONST_X_AXIS, CONST_THREADS)
-    #plt.yticks(ticks, ticks)
     plt.ylim(ymax=80)
     plt.grid(True)
     plt.legend(loc=4)
