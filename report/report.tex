@@ -347,7 +347,7 @@ Regarding scalability we tested both weak and strong scaling, changing the input
 Concerning correctness we compared our results with the ones obtained using the Graham-Andrew's algorithm implementation available in the library \textit{CGAL}\footnote{\url{http://www.cgal.org/}(Retrieved: \formatdate{18}{1}{2017})}.
 
 \mypar{Experimental setup}
-The platform we tested our algorithms on mounts Intel\textsuperscript{\textregistered} Xeon Phi coprocessors. They are based on the Intel\textsuperscript{\textregistered} Many Integrated Core (MIC) architecture and have the following characteristics \footnote{\url{http://www.intel.com/content/www/us/en/high-performance-computing/high-performance-xeon-phi-coprocessor-brief.html}(Retrieved: \formatdate{18}{1}{2017}) }
+The platform we tested our algorithms on mounts Intel\textsuperscript{\textregistered} Xeon Phi coprocessors. They are based on the Intel\textsuperscript{\textregistered} Many Integrated Core (MIC) architecture and have the following characteristics:
 
 \begin{table}[!ht]
 \begin{tabular}{|c|c|}
@@ -360,8 +360,9 @@ The platform we tested our algorithms on mounts Intel\textsuperscript{\textregis
 \hline Peak memory bandwidth [GB/s]		& 352\\
 \hline
 \end{tabular}
-\caption{Intel\textsuperscript{\textregistered} Xeon Phi coprocessors specifications}
+\caption{Intel\textsuperscript{\textregistered} Xeon Phi coprocessors specifications\protect\footnotemark}
 \end{table}
+\footnotetext{\url{http://www.intel.com/content/www/us/en/high-performance-computing/high-performance-xeon-phi-coprocessor-brief.html}(Retrieved: \formatdate{18}{1}{2017}) }
 
 Our implementations are written in \textit{C++11} and make use of \textit{OpenMP} ver 4.0 \footnote{\url{http://www.openmp.org/}(Retrieved: \formatdate{18}{1}{2017})} for shared memory multithreading.
 Our applications were compiled using \textit{icc} version 15.0.0 with the flag \textit{-O2} using also the -mmic flag to fit the architecture.
@@ -449,7 +450,7 @@ For a number of threads that is not a power of 2, because of its implementation,
 \textit{Simple} and \textit{Naive} algorithms, instead, still work well: the former because it's not related to powers of 2 in any one and the latter thanks to the creation of dummy nodes. Their performance is consistent, as shown in plot \ref{Speedup Total}, having little drops around multiples of 61 threads, where we start having hyperthreading.
 
 \begin{figure}[!ht]\centering
-  \includegraphics[scale=0.33]{./plots/total_speed.eps}
+  \includegraphics[scale=0.25]{./plots/total_speed.eps}
   \caption{Speedup of Simple and Naive algorithms for a square of 10$^7$ points [avg sequential execution time: 3.1561s]\label{Speedup Total}}
 \end{figure}
 
