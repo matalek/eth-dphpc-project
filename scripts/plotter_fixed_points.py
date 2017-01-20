@@ -129,7 +129,7 @@ def build_algorithms():
 # Plot execution time for fixed num of points, num of threads on x axis ------------------------------------------------
 def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
     plt.figure(num=None, figsize=(10, 6), facecolor='w', edgecolor='k')
-    plt.suptitle("Execution times")
+    plt.suptitle("Execution times of the algorithms for a fixed number of points")
 
 
     plt.subplot(121)
@@ -152,7 +152,7 @@ def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
 
             mean_execution_time = []
             stdv = []
-            my_label = algorithm_name
+            my_label = algorithm_name.replace('Parallel','')
             for n_threads in CONST_THREADS:
                 curr_algorithm = algorithms[algorithm_name + ':' + str(n_threads)]
                 measured_execution_time = curr_algorithm.execution_time[points]
@@ -180,7 +180,8 @@ def plot_execution_time_fixed_points(algorithms, sequential_algorithm):
 # Plot speedup for fixed num of points, num of threads on x axis -------------------------------------------------------
 def plot_speedup_fixed_points(algorithms, sequential_algorithm):
     plt.figure(num=None, figsize=(10, 6), facecolor='w', edgecolor='k')
-    plt.suptitle("Speedup for circle")
+    plt.gcf().subplots_adjust(top=0.88)
+    plt.suptitle("Speedup of the algorithms for fixed input: " + CONST_SHAPE, fontsize=16)
     plt.subplot(121)
     plt.ylabel('Speedup')
     for i in [121, 122]:
@@ -203,7 +204,7 @@ def plot_speedup_fixed_points(algorithms, sequential_algorithm):
 
             speedup = []
             ci = []
-            my_label = algorithm_name
+            my_label = algorithm_name.replace('Parallel','')
             for n_threads in CONST_THREADS:
                 curr_algorithm = algorithms[algorithm_name + ':' + str(n_threads)]
                 measured_execution_time = curr_algorithm.execution_time[points]

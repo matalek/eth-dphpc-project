@@ -132,8 +132,8 @@ def build_algorithms(shape):
 # Standard execution Time plotter --------------------------------------------------------------------------------------
 def plot_execution_time():
     plt.figure(num=None, figsize=(10, 4), facecolor='w', edgecolor='k')
-    plt.gcf().subplots_adjust(bottom=0.15)
-    plt.suptitle("Performance comparison")
+    plt.gcf().subplots_adjust(bottom=0.15, top=0.82)
+    plt.suptitle("Performance of the algorithms changing input size", fontsize = 16)
 
     plt.subplot(121)
     plt.title('Square')
@@ -153,7 +153,7 @@ def plot_execution_time():
 
         plt.subplot(subplot_index)
 
-        for algorithm_name in ['SimpleParallel:8', 'NaiveParallel:8', 'HullTree:8', 'Sequential:1']:
+        for algorithm_name in ['Sequential:1', 'SimpleParallel:8', 'NaiveParallel:8', 'HullTree:8']:
             curr_algorithm = algorithms[algorithm_name]
 
             # Make axis start from 0
@@ -175,10 +175,11 @@ def plot_execution_time():
 
             if algorithm_name == 'Sequential:1':
                 my_label = 'Sequential'
+                plt.loglog(num_of_input_points, mean_execution_time, 'ks--', label=my_label)
             else:
-                my_label = algorithm_name.replace("_", " ").replace(":8", "")
+                my_label = algorithm_name.replace("_", " ").replace(":8", "").replace('Parallel','')
 
-            plt.loglog(num_of_input_points, mean_execution_time, CONST_COLORS[count] + '--', label=my_label)
+                plt.loglog(num_of_input_points, mean_execution_time, CONST_COLORS[count -1] + '--', label=my_label)
             plt.errorbar(num_of_input_points, mean_execution_time, ci, ecolor=CONST_COLORS[count + 4], fmt='|')
             count += 1
 
@@ -193,8 +194,8 @@ def plot_execution_time():
 # Standard speedup plotter ---------------------------------------------------------------------------------------------
 def plot_speedup():
     plt.figure(num=None, figsize=(10, 4), facecolor='w', edgecolor='k')
-    plt.gcf().subplots_adjust(bottom=0.15)
-    plt.suptitle("Speedup")
+    plt.gcf().subplots_adjust(bottom=0.15, top=0.82)
+    plt.suptitle("Speedup of the algorithms changing input size", fontsize = 16)
     plt.subplot(121)
     plt.title('Square')
     plt.ylabel('Speedup')
@@ -252,7 +253,7 @@ def plot_speedup():
                     speedup.append(mean_speedup)
                     ci.append(curr_ci)
 
-                my_label = algorithm_name.replace("_", " ").replace(":8", "")
+                my_label = algorithm_name.replace("_", " ").replace(":8", "").replace('Parallel','')
 
                 plt.semilogx(num_of_input_points, speedup, CONST_COLORS[count] + '--', label=my_label)
                 plt.errorbar(num_of_input_points, speedup, ci, fmt='|', ecolor=CONST_COLORS[count + 4])
